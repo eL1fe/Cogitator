@@ -1,0 +1,11 @@
+# Cogitator - AI Agent Orchestration Platform
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://cogitator.dev/sitemap.xml
+
+# Disallow API routes and auth
+Disallow: /api/
+Disallow: /auth/
+Disallow: /dashboard/

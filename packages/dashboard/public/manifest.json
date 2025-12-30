@@ -1,0 +1,19 @@
+{
+  "name": "Cogitator - Kubernetes for AI Agents",
+  "short_name": "Cogitator",
+  "description": "Self-hosted, production-grade AI agent orchestration platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#00ff88",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["developer tools", "productivity", "utilities"]
+}
