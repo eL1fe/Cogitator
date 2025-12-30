@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/Card';
@@ -15,10 +15,12 @@ import {
   XCircle,
   Clock,
   Loader2,
-  Filter,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
+import { useEvents } from '@/hooks/useEvents';
 
 interface Run {
   id: string;
@@ -33,6 +35,19 @@ interface Run {
   duration?: number;
   totalTokens: number;
   cost: number;
+}
+
+interface RunEvent {
+  runId: string;
+  agentId: string;
+  type?: 'started' | 'completed' | 'failed' | 'toolCall';
+  status?: string;
+  input?: string;
+  output?: string;
+  threadId?: string;
+  usage?: { totalTokens: number; cost: number; duration: number };
+  toolCalls?: number;
+  timestamp: number;
 }
 
 const statusConfig = {
@@ -67,29 +82,90 @@ export default function RunsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  
+  const { connected, subscribe } = useEvents({ autoConnect: true });
 
-  useEffect(() => {
-    async function fetchRuns() {
-      try {
-        let url = '/api/runs?limit=100';
-        if (statusFilter) url += `&status=${statusFilter}`;
-        
-        const response = await fetch(url);
-        if (response.ok) {
-          const data = await response.json();
-          setRuns(data.runs || []);
-        }
-      } catch (error) {
-        console.error('Failed to fetch runs:', error);
-      } finally {
-        setLoading(false);
+  const fetchRuns = useCallback(async () => {
+    try {
+      let url = '/api/runs?limit=100';
+      if (statusFilter) url += `&status=${statusFilter}`;
+      
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        setRuns(data.runs || []);
       }
+    } catch (error) {
+      console.error('Failed to fetch runs:', error);
+    } finally {
+      setLoading(false);
     }
-
-    fetchRuns();
-    const interval = setInterval(fetchRuns, 10000);
-    return () => clearInterval(interval);
   }, [statusFilter]);
+
+  // Initial fetch and polling
+  useEffect(() => {
+    fetchRuns();
+    const interval = setInterval(fetchRuns, 30000); // Poll every 30s as backup
+    return () => clearInterval(interval);
+  }, [fetchRuns]);
+
+  // Subscribe to real-time events
+  useEffect(() => {
+    const unsubscribe = subscribe('run', (data: unknown) => {
+      const event = data as RunEvent;
+      
+      if (event.type === 'started') {
+        // Add new run to the list
+        const newRun: Run = {
+          id: event.runId,
+          agentId: event.agentId,
+          status: 'running',
+          input: event.input || '',
+          startedAt: new Date(event.timestamp).toISOString(),
+          totalTokens: 0,
+          cost: 0,
+        };
+        
+        setRuns((prev) => {
+          // Don't add if already exists
+          if (prev.some((r) => r.id === newRun.id)) return prev;
+          return [newRun, ...prev];
+        });
+      } else if (event.type === 'completed') {
+        // Update existing run
+        setRuns((prev) =>
+          prev.map((run) =>
+            run.id === event.runId
+              ? {
+                  ...run,
+                  status: 'completed' as const,
+                  output: event.output,
+                  completedAt: new Date(event.timestamp).toISOString(),
+                  totalTokens: event.usage?.totalTokens ?? run.totalTokens,
+                  cost: event.usage?.cost ?? run.cost,
+                  duration: event.usage?.duration ?? run.duration,
+                }
+              : run
+          )
+        );
+      } else if (event.type === 'failed') {
+        // Update existing run as failed
+        setRuns((prev) =>
+          prev.map((run) =>
+            run.id === event.runId
+              ? {
+                  ...run,
+                  status: 'failed' as const,
+                  completedAt: new Date(event.timestamp).toISOString(),
+                }
+              : run
+          )
+        );
+      }
+    });
+
+    return unsubscribe;
+  }, [subscribe]);
 
   const filteredRuns = runs.filter(
     (run) =>
@@ -106,13 +182,28 @@ export default function RunsPage() {
         <main className="flex-1 overflow-auto p-6 bg-bg-primary bg-noise">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
-            <div className="animate-fade-in">
-              <h1 className="text-2xl font-semibold text-text-primary">
-                Runs
-              </h1>
-              <p className="text-text-secondary mt-1">
-                View execution history and details
-              </p>
+            <div className="flex items-center justify-between animate-fade-in">
+              <div>
+                <h1 className="text-2xl font-semibold text-text-primary">
+                  Runs
+                </h1>
+                <p className="text-text-secondary mt-1">
+                  View execution history and details
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {connected ? (
+                  <Badge variant="success" size="sm" className="gap-1">
+                    <Wifi className="w-3 h-3" />
+                    Live
+                  </Badge>
+                ) : (
+                  <Badge variant="warning" size="sm" className="gap-1">
+                    <WifiOff className="w-3 h-3" />
+                    Offline
+                  </Badge>
+                )}
+              </div>
             </div>
 
             {/* Filters */}

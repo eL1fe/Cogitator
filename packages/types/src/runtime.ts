@@ -45,6 +45,15 @@ export interface RunOptions {
   loadHistory?: boolean;
   /** Save messages to memory after each turn. Default: true */
   saveHistory?: boolean;
+
+  /** Callback when run starts */
+  onRunStart?: (data: { runId: string; agentId: string; input: string; threadId: string }) => void;
+  /** Callback when run completes */
+  onRunComplete?: (result: RunResult) => void;
+  /** Callback when run fails */
+  onRunError?: (error: Error, runId: string) => void;
+  /** Callback when a span is created */
+  onSpan?: (span: Span) => void;
 }
 
 export interface RunResult {
@@ -69,9 +78,15 @@ export interface RunResult {
 }
 
 export interface Span {
+  id: string;
+  traceId: string;
+  parentId?: string;
   name: string;
+  kind: 'internal' | 'client' | 'server' | 'producer' | 'consumer';
+  status: 'ok' | 'error' | 'unset';
   startTime: number;
   endTime: number;
   duration: number;
   attributes: Record<string, unknown>;
+  events?: Array<{ name: string; timestamp: number; attributes?: Record<string, unknown> }>;
 }

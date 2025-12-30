@@ -4,6 +4,15 @@ import { getSubscriber, CHANNELS } from '@/lib/redis';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+const CHANNEL_TO_EVENT: Record<string, string> = {
+  [CHANNELS.RUN_STARTED]: 'run',
+  [CHANNELS.RUN_COMPLETED]: 'run',
+  [CHANNELS.RUN_FAILED]: 'run',
+  [CHANNELS.TOOL_CALL]: 'run',
+  [CHANNELS.LOG_ENTRY]: 'log',
+  [CHANNELS.AGENT_STATUS]: 'agent',
+};
+
 export async function GET(request: NextRequest) {
   const encoder = new TextEncoder();
   
@@ -30,15 +39,30 @@ export async function GET(request: NextRequest) {
         subscriber.on('message', (channel, message) => {
           try {
             const data = JSON.parse(message);
-            const eventName = channel.split(':').pop() || 'message';
-            sendEvent(eventName, data);
+            const eventName = CHANNEL_TO_EVENT[channel] || channel.split(':').pop() || 'message';
+            
+            // Add event type based on channel
+            let eventType: string | undefined;
+            if (channel === CHANNELS.RUN_STARTED) eventType = 'started';
+            else if (channel === CHANNELS.RUN_COMPLETED) eventType = 'completed';
+            else if (channel === CHANNELS.RUN_FAILED) eventType = 'failed';
+            else if (channel === CHANNELS.TOOL_CALL) eventType = 'toolCall';
+            
+            sendEvent(eventName, {
+              ...data,
+              type: eventType,
+              channel,
+            });
           } catch {
-            sendEvent('message', { raw: message });
+            sendEvent('message', { raw: message, channel });
           }
         });
 
         // Send initial connection event
-        sendEvent('connected', { channels });
+        sendEvent('connected', { 
+          channels,
+          timestamp: Date.now(),
+        });
 
         // Handle client disconnect
         request.signal.addEventListener('abort', () => {
@@ -62,4 +86,3 @@ export async function GET(request: NextRequest) {
     },
   });
 }
-

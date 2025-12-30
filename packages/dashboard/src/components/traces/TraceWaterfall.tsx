@@ -4,84 +4,12 @@ import { useState } from 'react';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/cn';
-
-interface Span {
-  id: string;
-  parentId: string | null;
-  name: string;
-  startTime: number;
-  endTime: number;
-  duration: number;
-  status: 'ok' | 'error';
-  attributes: Record<string, unknown>;
-}
+import { Activity } from 'lucide-react';
+import type { TraceSpan } from '@/types';
 
 interface TraceWaterfallProps {
-  runId: string;
+  spans: TraceSpan[];
 }
-
-const mockSpans: Span[] = [
-  {
-    id: 'span_1',
-    parentId: null,
-    name: 'agent.run',
-    startTime: 0,
-    endTime: 4200,
-    duration: 4200,
-    status: 'ok',
-    attributes: { 'agent.name': 'Research Agent', 'agent.model': 'gpt-4o' },
-  },
-  {
-    id: 'span_2',
-    parentId: 'span_1',
-    name: 'llm.chat',
-    startTime: 50,
-    endTime: 1200,
-    duration: 1150,
-    status: 'ok',
-    attributes: { model: 'gpt-4o', tokens: 1234 },
-  },
-  {
-    id: 'span_3',
-    parentId: 'span_1',
-    name: 'tool.web_search',
-    startTime: 1250,
-    endTime: 2450,
-    duration: 1200,
-    status: 'ok',
-    attributes: { query: 'WebGPU performance benchmarks' },
-  },
-  {
-    id: 'span_4',
-    parentId: 'span_3',
-    name: 'http.request',
-    startTime: 1300,
-    endTime: 2400,
-    duration: 1100,
-    status: 'ok',
-    attributes: { url: 'https://api.search.com/query' },
-  },
-  {
-    id: 'span_5',
-    parentId: 'span_1',
-    name: 'tool.read_url',
-    startTime: 2500,
-    endTime: 3300,
-    duration: 800,
-    status: 'ok',
-    attributes: { url: 'https://gpuweb.github.io/gpuweb/' },
-  },
-  {
-    id: 'span_6',
-    parentId: 'span_1',
-    name: 'llm.chat',
-    startTime: 3350,
-    endTime: 4150,
-    duration: 800,
-    status: 'ok',
-    attributes: { model: 'gpt-4o', tokens: 2187 },
-  },
-];
 
 const COLORS = [
   'bg-accent',
@@ -91,18 +19,34 @@ const COLORS = [
   'bg-chart-5',
 ];
 
-export function TraceWaterfall({ runId }: TraceWaterfallProps) {
-  const [selectedSpan, setSelectedSpan] = useState<Span | null>(null);
-  
-  const spans = mockSpans;
-  const totalDuration = Math.max(...spans.map((s) => s.endTime));
-  const minTime = Math.min(...spans.map((s) => s.startTime));
+export function TraceWaterfall({ spans }: TraceWaterfallProps) {
+  const [selectedSpan, setSelectedSpan] = useState<TraceSpan | null>(null);
 
-  const getSpanDepth = (span: Span): number => {
-    if (!span.parentId) return 0;
-    const parent = spans.find((s) => s.id === span.parentId);
-    return parent ? getSpanDepth(parent) + 1 : 0;
-  };
+  // Empty state
+  if (!spans || spans.length === 0) {
+    return (
+      <Card className="text-center py-12">
+        <Activity className="w-12 h-12 mx-auto mb-4 text-text-muted opacity-50" />
+        <h3 className="text-lg font-medium text-text-primary mb-2">
+          No trace data available
+        </h3>
+        <p className="text-text-secondary">
+          Spans will appear here once the agent execution is traced.
+        </p>
+      </Card>
+    );
+  }
+
+  // Flatten spans for display (if they have children)
+  const flattenedSpans = flattenSpanTree(spans);
+  
+  // Calculate timing boundaries
+  const minTime = Math.min(...flattenedSpans.map((s) => s.startTime));
+  const maxTime = Math.max(...flattenedSpans.map((s) => s.endTime || s.startTime + (s.duration || 0)));
+  const totalDuration = maxTime - minTime;
+
+  // Build depth map for indentation
+  const depthMap = buildDepthMap(spans);
 
   const getSpanColor = (depth: number) => COLORS[depth % COLORS.length];
 
@@ -113,7 +57,7 @@ export function TraceWaterfall({ runId }: TraceWaterfallProps) {
         <CardHeader className="px-4 pt-4">
           <CardTitle>Trace Timeline</CardTitle>
           <span className="text-xs text-text-tertiary">
-            Total: {(totalDuration / 1000).toFixed(2)}s
+            Total: {(totalDuration / 1000).toFixed(2)}s • {flattenedSpans.length} spans
           </span>
         </CardHeader>
 
@@ -129,11 +73,16 @@ export function TraceWaterfall({ runId }: TraceWaterfallProps) {
         </div>
 
         {/* Spans */}
-        <div className="divide-y divide-border-subtle">
-          {spans.map((span) => {
-            const depth = getSpanDepth(span);
-            const left = ((span.startTime - minTime) / totalDuration) * 100;
-            const width = (span.duration / totalDuration) * 100;
+        <div className="divide-y divide-border-subtle max-h-[500px] overflow-y-auto">
+          {flattenedSpans.map((span) => {
+            const depth = depthMap.get(span.id) || 0;
+            const left = totalDuration > 0 
+              ? ((span.startTime - minTime) / totalDuration) * 100 
+              : 0;
+            const duration = span.duration || (span.endTime ? span.endTime - span.startTime : 0);
+            const width = totalDuration > 0 
+              ? (duration / totalDuration) * 100 
+              : 1;
             const isSelected = selectedSpan?.id === span.id;
 
             return (
@@ -154,11 +103,12 @@ export function TraceWaterfall({ runId }: TraceWaterfallProps) {
                 </div>
 
                 {/* Timeline bar */}
-                <div className="flex-1 h-6 relative">
+                <div className="flex-1 h-6 relative bg-bg-tertiary/30 rounded">
                   <div
                     className={cn(
                       'absolute h-full rounded-sm transition-all',
                       getSpanColor(depth),
+                      span.status === 'error' && 'bg-error',
                       isSelected && 'ring-2 ring-accent ring-offset-2 ring-offset-bg-secondary'
                     )}
                     style={{
@@ -170,7 +120,7 @@ export function TraceWaterfall({ runId }: TraceWaterfallProps) {
 
                 {/* Duration */}
                 <span className="w-16 text-xs text-text-tertiary text-right">
-                  {span.duration}ms
+                  {duration.toFixed(0)}ms
                 </span>
               </button>
             );
@@ -197,13 +147,13 @@ export function TraceWaterfall({ runId }: TraceWaterfallProps) {
               <div>
                 <p className="text-xs text-text-tertiary mb-1">Duration</p>
                 <p className="text-sm text-text-primary">
-                  {selectedSpan.duration}ms
+                  {(selectedSpan.duration || 0).toFixed(0)}ms
                 </p>
               </div>
               <div>
                 <p className="text-xs text-text-tertiary mb-1">Status</p>
                 <Badge
-                  variant={selectedSpan.status === 'ok' ? 'success' : 'error'}
+                  variant={selectedSpan.status === 'ok' ? 'success' : selectedSpan.status === 'error' ? 'error' : 'warning'}
                   size="sm"
                 >
                   {selectedSpan.status}
@@ -211,26 +161,77 @@ export function TraceWaterfall({ runId }: TraceWaterfallProps) {
               </div>
             </div>
 
-            <div>
-              <p className="text-xs text-text-tertiary mb-1">Start Time</p>
-              <p className="text-sm text-text-primary">
-                {selectedSpan.startTime}ms
-              </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-text-tertiary mb-1">Start Time</p>
+                <p className="text-sm text-text-primary">
+                  {selectedSpan.startTime}ms
+                </p>
+              </div>
+              {selectedSpan.endTime && (
+                <div>
+                  <p className="text-xs text-text-tertiary mb-1">End Time</p>
+                  <p className="text-sm text-text-primary">
+                    {selectedSpan.endTime}ms
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>
-              <p className="text-xs text-text-tertiary mb-2">Attributes</p>
-              <div className="bg-bg-elevated rounded-lg p-3 space-y-2">
-                {Object.entries(selectedSpan.attributes).map(([key, value]) => (
-                  <div key={key} className="flex justify-between text-xs">
-                    <span className="text-text-tertiary">{key}</span>
-                    <span className="text-text-primary font-mono truncate ml-4">
-                      {String(value)}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <p className="text-xs text-text-tertiary mb-1">Kind</p>
+              <p className="text-sm text-text-primary">{selectedSpan.kind}</p>
             </div>
+
+            {selectedSpan.traceId && (
+              <div>
+                <p className="text-xs text-text-tertiary mb-1">Trace ID</p>
+                <p className="text-xs text-text-primary font-mono truncate">
+                  {selectedSpan.traceId}
+                </p>
+              </div>
+            )}
+
+            {selectedSpan.parentId && (
+              <div>
+                <p className="text-xs text-text-tertiary mb-1">Parent ID</p>
+                <p className="text-xs text-text-primary font-mono truncate">
+                  {selectedSpan.parentId}
+                </p>
+              </div>
+            )}
+
+            {Object.keys(selectedSpan.attributes || {}).length > 0 && (
+              <div>
+                <p className="text-xs text-text-tertiary mb-2">Attributes</p>
+                <div className="bg-bg-elevated rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto">
+                  {Object.entries(selectedSpan.attributes).map(([key, value]) => (
+                    <div key={key} className="flex justify-between text-xs gap-2">
+                      <span className="text-text-tertiary truncate">{key}</span>
+                      <span className="text-text-primary font-mono truncate max-w-[60%]">
+                        {formatAttributeValue(value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedSpan.events && selectedSpan.events.length > 0 && (
+              <div>
+                <p className="text-xs text-text-tertiary mb-2">Events ({selectedSpan.events.length})</p>
+                <div className="bg-bg-elevated rounded-lg p-3 space-y-2 max-h-32 overflow-y-auto">
+                  {selectedSpan.events.map((event, i) => (
+                    <div key={i} className="text-xs">
+                      <span className="text-text-primary">{event.name}</span>
+                      <span className="text-text-muted ml-2">
+                        @{event.timestamp}ms
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <p className="text-sm text-text-tertiary">
@@ -242,3 +243,30 @@ export function TraceWaterfall({ runId }: TraceWaterfallProps) {
   );
 }
 
+function flattenSpanTree(spans: TraceSpan[], result: TraceSpan[] = []): TraceSpan[] {
+  for (const span of spans) {
+    result.push(span);
+    if (span.children && span.children.length > 0) {
+      flattenSpanTree(span.children, result);
+    }
+  }
+  return result;
+}
+
+function buildDepthMap(spans: TraceSpan[], depth = 0, map = new Map<string, number>()): Map<string, number> {
+  for (const span of spans) {
+    map.set(span.id, depth);
+    if (span.children && span.children.length > 0) {
+      buildDepthMap(span.children, depth + 1, map);
+    }
+  }
+  return map;
+}
+
+function formatAttributeValue(value: unknown): string {
+  if (value === null || value === undefined) return '-';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return value.toString();
+  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  return JSON.stringify(value);
+}
