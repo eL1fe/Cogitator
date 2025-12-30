@@ -7,6 +7,13 @@ settings:
 importers:
 
   .:
+    dependencies:
+      turbo:
+        specifier: ^1.11.0
+        version: 1.13.4
+      typescript:
+        specifier: ^5.3.0
+        version: 5.9.3
     devDependencies:
       '@changesets/cli':
         specifier: ^2.27.0
@@ -35,12 +42,6 @@ importers:
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
-      turbo:
-        specifier: ^1.11.0
-        version: 1.13.4
-      typescript:
-        specifier: ^5.3.0
-        version: 5.9.3
       typescript-eslint:
         specifier: ^8.51.0
         version: 8.51.0(eslint@9.39.2)(typescript@5.9.3)
@@ -6578,7 +6579,7 @@ packages:
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
-    dev: true
+    dev: false
     optional: true
 
   /turbo-darwin-arm64@1.13.4:
@@ -6586,7 +6587,7 @@ packages:
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
-    dev: true
+    dev: false
     optional: true
 
   /turbo-linux-64@1.13.4:
@@ -6594,7 +6595,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
-    dev: true
+    dev: false
     optional: true
 
   /turbo-linux-arm64@1.13.4:
@@ -6602,7 +6603,7 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
-    dev: true
+    dev: false
     optional: true
 
   /turbo-windows-64@1.13.4:
@@ -6610,7 +6611,7 @@ packages:
     cpu: [x64]
     os: [win32]
     requiresBuild: true
-    dev: true
+    dev: false
     optional: true
 
   /turbo-windows-arm64@1.13.4:
@@ -6618,7 +6619,7 @@ packages:
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
-    dev: true
+    dev: false
     optional: true
 
   /turbo@1.13.4:
@@ -6631,7 +6632,7 @@ packages:
       turbo-linux-arm64: 1.13.4
       turbo-windows-64: 1.13.4
       turbo-windows-arm64: 1.13.4
-    dev: true
+    dev: false
 
   /tweetnacl@0.14.5:
     resolution: {integrity: sha512-KXXFFdAbFXY4geFIwoyNK+f5Z1b7swfXABfL7HXCmoIWMKU3dmS26672A4EeQtDzLKy7SXmfBu51JolvEKwtGA==}
