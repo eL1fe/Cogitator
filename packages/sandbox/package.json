@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@cogitator/types": "workspace:*",
+    "@types/dockerode": "^3.3.31",
     "nanoid": "^5.0.4"
   },
   "optionalDependencies": {
@@ -31,7 +32,6 @@
     "dockerode": "^4.0.2"
   },
   "devDependencies": {
-    "@types/dockerode": "^3.3.31",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0"
   },
