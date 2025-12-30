@@ -1,0 +1,43 @@
+{
+  "name": "@cogitator/dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cogitator Dashboard - Real-time monitoring for AI agents",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@cogitator/core": "workspace:*",
+    "@cogitator/types": "workspace:*",
+    "@cogitator/models": "workspace:*",
+    "next": "^16.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zustand": "^5.0.3",
+    "framer-motion": "^12.0.0",
+    "recharts": "^2.15.0",
+    "@monaco-editor/react": "^4.7.0",
+    "lucide-react": "^0.468.0",
+    "date-fns": "^4.1.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.6.0",
+    "pg": "^8.13.1",
+    "nanoid": "^5.0.9",
+    "ioredis": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/pg": "^8.11.10",
+    "typescript": "^5.7.2",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "postcss": "^8.5.0"
+  }
+}
+

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "functions": {
+    "/api/events": {},
+    "/api/models/pull": {},
+    "/api/playground": {}
+  }
+}

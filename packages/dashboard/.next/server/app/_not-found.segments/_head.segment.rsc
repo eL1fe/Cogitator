@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[71727,["/_next/static/chunks/5b6a6d6f3909580f.js","/_next/static/chunks/dbd069e33abb8e20.js"],"ViewportBoundary"]
+3:I[71727,["/_next/static/chunks/5b6a6d6f3909580f.js","/_next/static/chunks/dbd069e33abb8e20.js"],"MetadataBoundary"]
+4:"$Sreact.suspense"
+5:I[65106,["/_next/static/chunks/5b6a6d6f3909580f.js","/_next/static/chunks/dbd069e33abb8e20.js"],"IconMark"]
+0:{"buildId":"xPNm42eKeoBLucBxYz3lL","rsc":["$","$1","h",{"children":[["$","meta",null,{"name":"robots","content":"noindex"}],["$","$L2",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","2",{"name":"theme-color","content":"#0a0a0a"}],["$","meta","3",{"name":"color-scheme","content":"dark"}]]}],["$","div",null,{"hidden":true,"children":["$","$L3",null,{"children":["$","$4",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"Cogitator Dashboard"}],["$","meta","1",{"name":"description","content":"Real-time monitoring and management for AI agents"}],["$","link","2",{"rel":"icon","href":"/favicon.ico"}],["$","$L5","3",{}]]}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"loading":null,"isPartial":false}

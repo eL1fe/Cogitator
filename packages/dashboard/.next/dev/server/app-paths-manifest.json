@@ -1,0 +1,13 @@
+{
+  "/agents/[id]/page": "app/agents/[id]/page.js",
+  "/agents/page": "app/agents/page.js",
+  "/api/agents/route": "app/api/agents/route.js",
+  "/api/analytics/route": "app/api/analytics/route.js",
+  "/api/health/route": "app/api/health/route.js",
+  "/api/models/pull/route": "app/api/models/pull/route.js",
+  "/api/models/route": "app/api/models/route.js",
+  "/api/runs/route": "app/api/runs/route.js",
+  "/models/page": "app/models/page.js",
+  "/page": "app/page.js",
+  "/runs/page": "app/runs/page.js"
+}
