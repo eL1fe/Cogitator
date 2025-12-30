@@ -23,6 +23,33 @@ export {
   parseModel,
 } from './llm/index.js';
 
+export {
+  withRetry,
+  retryable,
+  CircuitBreaker,
+  CircuitBreakerRegistry,
+  withFallback,
+  withGracefulDegradation,
+  createLLMFallbackExecutor,
+} from './utils/index.js';
+export type {
+  RetryOptions,
+  CircuitBreakerOptions,
+  CircuitBreakerStats,
+  CircuitState,
+  FallbackConfig,
+  LLMFallbackConfig,
+} from './utils/index.js';
+
+export {
+  CogitatorError,
+  ErrorCode,
+  ERROR_STATUS_CODES,
+  isRetryableError,
+  getRetryDelay,
+} from '@cogitator/types';
+export type { ErrorDetails, CogitatorErrorOptions } from '@cogitator/types';
+
 export type {
   AgentConfig,
   ResponseFormat,

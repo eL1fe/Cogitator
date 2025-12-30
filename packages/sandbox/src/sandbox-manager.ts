@@ -13,6 +13,7 @@ import type {
 import { BaseSandboxExecutor } from './executors/base.js';
 import { DockerSandboxExecutor } from './executors/docker.js';
 import { NativeSandboxExecutor } from './executors/native.js';
+import { WasmSandboxExecutor } from './executors/wasm.js';
 
 export class SandboxManager {
   private executors = new Map<SandboxType, BaseSandboxExecutor>();
@@ -42,6 +43,17 @@ export class SandboxManager {
     } catch {
     }
 
+    try {
+      const wasm = new WasmSandboxExecutor({
+        wasm: this.config.wasm,
+      });
+      const result = await wasm.connect();
+      if (result.success) {
+        this.executors.set('wasm', wasm);
+      }
+    } catch {
+    }
+
     this.initialized = true;
   }
 
@@ -55,6 +67,22 @@ export class SandboxManager {
     const executor = this.executors.get(type);
 
     if (!executor) {
+      if (type === 'wasm') {
+        console.warn(
+          '[sandbox] WASM unavailable, falling back to Docker'
+        );
+        const dockerExecutor = this.executors.get('docker');
+        if (dockerExecutor) {
+          return dockerExecutor.execute(request, { ...config, type: 'docker' });
+        }
+        console.warn(
+          '[sandbox] Docker also unavailable, falling back to native execution'
+        );
+        const nativeExecutor = this.executors.get('native');
+        if (nativeExecutor) {
+          return nativeExecutor.execute(request, { ...config, type: 'native' });
+        }
+      }
       if (type === 'docker') {
         console.warn(
           '[sandbox] Docker unavailable, falling back to native execution'
@@ -82,6 +110,12 @@ export class SandboxManager {
     await this.initialize();
     const docker = this.executors.get('docker');
     return docker ? docker.isAvailable() : false;
+  }
+
+  async isWasmAvailable(): Promise<boolean> {
+    await this.initialize();
+    const wasm = this.executors.get('wasm');
+    return wasm ? wasm.isAvailable() : false;
   }
 
   async shutdown(): Promise<void> {

@@ -1,7 +1,7 @@
 {
   "name": "@cogitator/sandbox",
   "version": "0.1.0",
-  "description": "Docker-based sandbox execution for Cogitator agents",
+  "description": "Sandbox execution for Cogitator agents (Docker and WASM)",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -27,6 +27,7 @@
     "nanoid": "^5.0.4"
   },
   "optionalDependencies": {
+    "@extism/extism": "^1.0.3",
     "dockerode": "^4.0.2"
   },
   "devDependencies": {
@@ -35,9 +36,13 @@
     "vitest": "^1.0.0"
   },
   "peerDependencies": {
+    "@extism/extism": "^1.0.0",
     "dockerode": "^4.0.0"
   },
   "peerDependenciesMeta": {
+    "@extism/extism": {
+      "optional": true
+    },
     "dockerode": {
       "optional": true
     }

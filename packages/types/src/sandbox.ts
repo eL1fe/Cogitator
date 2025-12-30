@@ -3,7 +3,7 @@
  */
 
 
-export type SandboxType = 'docker' | 'native';
+export type SandboxType = 'docker' | 'native' | 'wasm';
 
 export interface SandboxResourceLimits {
   /** Memory limit (e.g., '256MB', '1GB') */
@@ -52,6 +52,12 @@ export interface SandboxConfig {
   env?: Record<string, string>;
   /** User to run as (e.g., 'sandbox', '1000:1000') */
   user?: string;
+  /** WASM module path or URL (for wasm type) */
+  wasmModule?: string;
+  /** WASM function to call (for wasm type, default: 'run') */
+  wasmFunction?: string;
+  /** Enable WASI (for wasm type, default: false) */
+  wasi?: boolean;
 }
 
 
@@ -95,6 +101,19 @@ export interface SandboxDockerConfig {
   port?: number;
 }
 
+export interface SandboxWasmConfig {
+  /** Path or URL to WASM module */
+  wasmModule?: string;
+  /** WASM memory limit in 64KB pages (default: 256 = 16MB) */
+  memoryPages?: number;
+  /** Function name to call in WASM module (default: 'run') */
+  functionName?: string;
+  /** Enable WASI for filesystem/env access (default: false) */
+  wasi?: boolean;
+  /** Max cached plugins (default: 10) */
+  cacheSize?: number;
+}
+
 export interface SandboxManagerConfig {
   /** Default sandbox configuration */
   defaults?: Partial<SandboxConfig>;
@@ -102,6 +121,8 @@ export interface SandboxManagerConfig {
   pool?: SandboxPoolConfig;
   /** Docker connection options */
   docker?: SandboxDockerConfig;
+  /** WASM sandbox options */
+  wasm?: SandboxWasmConfig;
 }
 
 export type SandboxResult<T> =

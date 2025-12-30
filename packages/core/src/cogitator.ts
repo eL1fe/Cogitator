@@ -550,7 +550,7 @@ export class Cogitator {
       };
     }
 
-    if (tool.sandbox?.type === 'docker') {
+    if (tool.sandbox?.type === 'docker' || tool.sandbox?.type === 'wasm') {
       return this.executeInSandbox(tool, toolCall, runId, agentId);
     }
 
@@ -578,7 +578,7 @@ export class Cogitator {
   }
 
   /**
-   * Execute a tool in Docker sandbox
+   * Execute a tool in sandbox (Docker or WASM)
    */
   private async executeInSandbox(
     tool: Tool,
@@ -611,15 +611,21 @@ export class Cogitator {
     const args = toolCall.arguments as Record<string, unknown>;
     const sandboxConfig = tool.sandbox!;
 
-    const result = await this.sandboxManager.execute(
-      {
-        command: ['sh', '-c', String(args.command ?? '')],
-        cwd: args.cwd as string | undefined,
-        env: args.env as Record<string, string> | undefined,
-        timeout: tool.timeout,
-      },
-      sandboxConfig
-    );
+    const isWasm = sandboxConfig.type === 'wasm';
+    const request = isWasm
+      ? {
+          command: [],
+          stdin: JSON.stringify(args),
+          timeout: tool.timeout,
+        }
+      : {
+          command: ['sh', '-c', String(args.command ?? '')],
+          cwd: args.cwd as string | undefined,
+          env: args.env as Record<string, string> | undefined,
+          timeout: tool.timeout,
+        };
+
+    const result = await this.sandboxManager.execute(request, sandboxConfig);
 
     if (!result.success) {
       return {
@@ -628,6 +634,23 @@ export class Cogitator {
         result: null,
         error: result.error,
       };
+    }
+
+    if (isWasm) {
+      try {
+        const parsed = JSON.parse(result.data!.stdout);
+        return {
+          callId: toolCall.id,
+          name: toolCall.name,
+          result: parsed,
+        };
+      } catch {
+        return {
+          callId: toolCall.id,
+          name: toolCall.name,
+          result: result.data!.stdout,
+        };
+      }
     }
 
     return {

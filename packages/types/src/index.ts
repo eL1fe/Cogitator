@@ -13,3 +13,4 @@ export * from './memory.js';
 export * from './sandbox.js';
 export * from './workflow.js';
 export * from './swarm.js';
+export * from './errors.js';

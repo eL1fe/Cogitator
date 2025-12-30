@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/cogitator-banner.svg" alt="Cogitator" width="100%">
+  <img src="logo.png" alt="Cogitator" width="200">
 </p>
 
 <div align="center">

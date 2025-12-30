@@ -2,22 +2,52 @@ import { NextResponse } from 'next/server';
 import { getPool } from '@/lib/db';
 import { getRedis } from '@/lib/redis';
 
+type ServiceStatus = 'up' | 'down';
+type CircuitState = 'closed' | 'open' | 'half-open' | 'unknown';
+
+interface HealthResponse {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  services: {
+    database: { status: ServiceStatus; latency?: number };
+    redis: { status: ServiceStatus; latency?: number };
+    ollama: { status: ServiceStatus; models?: string[] };
+    wasm: { status: ServiceStatus; available: boolean };
+  };
+  circuitBreakers: {
+    ollama: CircuitState;
+    openai: CircuitState;
+    anthropic: CircuitState;
+  };
+  uptime: number;
+  timestamp: string;
+}
+
+async function checkWasmAvailable(): Promise<boolean> {
+  try {
+    // Check if extism module is available without importing it directly
+    // This avoids build-time dependency issues
+    const module = await import('module');
+    const require = module.createRequire(import.meta.url);
+    require.resolve('@extism/extism');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET() {
-  const health: {
-    status: 'healthy' | 'degraded' | 'unhealthy';
-    services: {
-      database: { status: 'up' | 'down'; latency?: number };
-      redis: { status: 'up' | 'down'; latency?: number };
-      ollama: { status: 'up' | 'down'; models?: string[] };
-    };
-    uptime: number;
-    timestamp: string;
-  } = {
+  const health: HealthResponse = {
     status: 'healthy',
     services: {
       database: { status: 'down' },
       redis: { status: 'down' },
       ollama: { status: 'down' },
+      wasm: { status: 'down', available: false },
+    },
+    circuitBreakers: {
+      ollama: 'unknown',
+      openai: 'unknown',
+      anthropic: 'unknown',
     },
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
@@ -63,6 +93,17 @@ export async function GET() {
     }
   } catch {
     health.services.ollama = { status: 'down' };
+  }
+
+  // Check WASM availability
+  try {
+    const wasmAvailable = await checkWasmAvailable();
+    health.services.wasm = {
+      status: wasmAvailable ? 'up' : 'down',
+      available: wasmAvailable,
+    };
+  } catch {
+    health.services.wasm = { status: 'down', available: false };
   }
 
   if (health.services.database.status === 'down') {
