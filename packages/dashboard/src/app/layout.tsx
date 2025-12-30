@@ -13,10 +13,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Cogitator Dashboard',
-  description: 'Real-time monitoring and management for AI agents',
+  title: 'Cogitator - Kubernetes for AI Agents',
+  description: 'Self-hosted, production-grade AI agent orchestration platform. Multi-model support, workflows, swarms, memory/RAG, sandboxed execution.',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon.svg',
+  },
+  openGraph: {
+    title: 'Cogitator - Kubernetes for AI Agents',
+    description: 'Self-hosted, production-grade AI agent orchestration platform',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cogitator - Kubernetes for AI Agents',
+    description: 'Self-hosted, production-grade AI agent orchestration platform',
   },
 };
 

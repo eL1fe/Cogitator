@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ff88">
+        <animate attributeName="stop-color" values="#00ff88;#00ffaa;#00ff88" dur="2s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" style="stop-color:#00aa55">
+        <animate attributeName="stop-color" values="#00aa55;#00ff88;#00aa55" dur="2s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    <filter id="neon" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="32" height="32" rx="8" fill="#0a0a0a"/>
+
+  <g filter="url(#neon)">
+    <!-- Brain/Circuit pattern -->
+    <path d="M16 6 L16 10" stroke="url(#glow)" stroke-width="1.5" stroke-linecap="round">
+      <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M16 22 L16 26" stroke="url(#glow)" stroke-width="1.5" stroke-linecap="round">
+      <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite" begin="0.2s"/>
+    </path>
+    <path d="M6 16 L10 16" stroke="url(#glow)" stroke-width="1.5" stroke-linecap="round">
+      <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite" begin="0.4s"/>
+    </path>
+    <path d="M22 16 L26 16" stroke="url(#glow)" stroke-width="1.5" stroke-linecap="round">
+      <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite" begin="0.6s"/>
+    </path>
+
+    <!-- Center C -->
+    <text x="16" y="21" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="bold" fill="url(#glow)" text-anchor="middle">
+      C
+      <animate attributeName="opacity" values="1;0.8;1" dur="2s" repeatCount="indefinite"/>
+    </text>
+
+    <!-- Orbiting dots -->
+    <circle r="1.5" fill="#00ff88">
+      <animateMotion dur="3s" repeatCount="indefinite">
+        <mpath href="#orbit"/>
+      </animateMotion>
+      <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+    </circle>
+
+    <circle r="1" fill="#00aaff">
+      <animateMotion dur="3s" repeatCount="indefinite" begin="-1.5s">
+        <mpath href="#orbit"/>
+      </animateMotion>
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Orbit path (invisible) -->
+    <path id="orbit" d="M16 8 A8 8 0 1 1 15.99 8" fill="none"/>
+  </g>
+
+  <!-- Corner accents -->
+  <rect x="2" y="2" width="4" height="1" rx="0.5" fill="#00ff88" opacity="0.6">
+    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="2" y="2" width="1" height="4" rx="0.5" fill="#00ff88" opacity="0.6">
+    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="26" y="29" width="4" height="1" rx="0.5" fill="#00ff88" opacity="0.6">
+    <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="29" y="26" width="1" height="4" rx="0.5" fill="#00ff88" opacity="0.6">
+    <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2s" repeatCount="indefinite"/>
+  </rect>
+</svg>
