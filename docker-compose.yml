@@ -60,6 +60,28 @@ services:
       timeout: 10s
       retries: 3
 
+  # Sandbox images (use profile: cogitator --profile sandbox up)
+  sandbox-base:
+    build:
+      context: ./docker/sandbox
+      dockerfile: Dockerfile.base
+    image: cogitator/sandbox:base
+    profiles: ["sandbox"]
+
+  sandbox-node:
+    build:
+      context: ./docker/sandbox
+      dockerfile: Dockerfile.node
+    image: cogitator/sandbox:node20
+    profiles: ["sandbox"]
+
+  sandbox-python:
+    build:
+      context: ./docker/sandbox
+      dockerfile: Dockerfile.python
+    image: cogitator/sandbox:python
+    profiles: ["sandbox"]
+
 volumes:
   redis-data:
   postgres-data:

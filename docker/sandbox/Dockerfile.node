@@ -1,0 +1,13 @@
+# cogitator/sandbox:node20
+# Node.js sandbox for JavaScript/TypeScript execution
+FROM node:20-alpine
+
+# Install common global packages
+RUN npm install -g typescript tsx esbuild
+
+# Security: Run as node user (already exists in node image)
+USER node
+WORKDIR /workspace
+
+# Keep container running for exec
+CMD ["sleep", "infinity"]

@@ -1,0 +1,23 @@
+# cogitator/sandbox:base
+# Minimal sandbox with shell utilities
+FROM alpine:3.19
+
+RUN apk add --no-cache \
+    bash \
+    coreutils \
+    curl \
+    jq \
+    grep \
+    sed \
+    awk
+
+# Security: Create non-root user
+RUN adduser -D -s /bin/bash sandbox && \
+    mkdir -p /workspace && \
+    chown sandbox:sandbox /workspace
+
+USER sandbox
+WORKDIR /workspace
+
+# Keep container running for exec
+CMD ["sleep", "infinity"]

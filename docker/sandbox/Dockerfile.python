@@ -1,0 +1,24 @@
+# cogitator/sandbox:python
+# Python sandbox for data science and scripting
+FROM python:3.11-slim
+
+# Install common packages
+RUN pip install --no-cache-dir \
+    numpy \
+    pandas \
+    scipy \
+    matplotlib \
+    requests \
+    beautifulsoup4 \
+    pyyaml
+
+# Security: Create non-root user
+RUN useradd -m -s /bin/bash sandbox && \
+    mkdir -p /workspace && \
+    chown sandbox:sandbox /workspace
+
+USER sandbox
+WORKDIR /workspace
+
+# Keep container running for exec
+CMD ["sleep", "infinity"]

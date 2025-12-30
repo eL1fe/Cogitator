@@ -84,13 +84,53 @@
     - Total: **254 tests passing** (251 → 254)
     - Usage: `pnpm cli run "Hello"` or `pnpm cli run -m ollama/gemma3:4b "Hello"`
 
+14. **@cogitator/sandbox Package**
+    - New package: `packages/sandbox/` with Docker-based sandboxing
+    - **Core Types** (`packages/types/src/sandbox.ts`):
+      - `SandboxType` - 'docker' | 'native'
+      - `SandboxConfig` - type, image, resources, network, mounts, timeout
+      - `SandboxResourceLimits` - memory, cpus, pidsLimit
+      - `SandboxNetworkConfig` - mode (none/bridge), allowedHosts
+      - `SandboxExecutionRequest/Result` - command, stdin, stdout, exitCode
+      - `SandboxManagerConfig` - pool settings, docker connection
+      - `SandboxResult<T>` - discriminated union for error handling
+    - **Executors**:
+      - `NativeSandboxExecutor` - fallback using child_process.exec()
+      - `DockerSandboxExecutor` - container isolation with security opts:
+        - `NetworkMode: 'none'` (network isolation)
+        - `CapDrop: ['ALL']` (drop all capabilities)
+        - `SecurityOpt: ['no-new-privileges']`
+        - Non-root user execution
+    - **Container Pool**:
+      - Container reuse to avoid ~100ms startup overhead
+      - Configurable idle timeout (60s default)
+      - Max pool size (5 containers default)
+      - Cleanup interval for idle containers
+    - **SandboxManager**:
+      - Lazy initialization
+      - Auto-fallback to native if Docker unavailable
+      - Config merging (defaults + tool config)
+    - **Docker Images** (`docker/sandbox/`):
+      - `Dockerfile.base` - Alpine 3.19 with bash, coreutils, curl, jq
+      - `Dockerfile.node` - Node 20 Alpine with typescript, tsx
+      - `Dockerfile.python` - Python 3.11 slim with numpy, pandas, requests
+    - Updated `docker-compose.yml` with `sandbox` profile for building images
+    - **Tool Integration**:
+      - Added `sandbox` property to `ToolConfig` interface
+      - Updated `exec` tool with default sandbox config
+      - Modified `Cogitator.executeTool()` to route sandbox-enabled tools
+    - **Tests**:
+      - `native-executor.test.ts` - 15 tests (execution, timeout, env vars)
+      - `sandbox-manager.test.ts` - 10 tests (init, execution, fallback)
+      - `container-pool.test.ts` - 7 tests (6 skipped if Docker unavailable)
+    - Total: **286 tests passing** (254 → 286)
+
 ### 🔄 In Progress
 
 - None
 
 ### ⏳ Roadmap (Next)
 
-- **Agent Sandboxing** - Docker-based isolation for code execution tools
 - **Workflow Engine** - DAG-based multi-step pipelines
 - **Multi-agent Swarms** - Coordination between multiple agents
 - **Getting Started Docs** - README, examples, tutorials

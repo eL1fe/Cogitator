@@ -32,6 +32,18 @@ export const exec = tool({
   parameters: execParams,
   sideEffects: ['process', 'filesystem', 'network'],
   requiresApproval: true,
+  sandbox: {
+    type: 'docker',
+    image: 'cogitator/sandbox:base',
+    resources: {
+      memory: '256MB',
+      pidsLimit: 100,
+    },
+    network: {
+      mode: 'none',
+    },
+    timeout: 30_000,
+  },
   execute: async ({ command, cwd, timeout = 30000, env = {} }) => {
     try {
       const { stdout, stderr } = await execPromise(command, {

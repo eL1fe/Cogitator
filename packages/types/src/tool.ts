@@ -3,6 +3,7 @@
  */
 
 import type { ZodType } from 'zod';
+import type { SandboxConfig } from './sandbox.js';
 
 export interface ToolConfig<TParams = unknown, TResult = unknown> {
   name: string;
@@ -12,6 +13,8 @@ export interface ToolConfig<TParams = unknown, TResult = unknown> {
   sideEffects?: ('filesystem' | 'network' | 'database' | 'process')[];
   requiresApproval?: boolean | ((params: TParams) => boolean);
   timeout?: number;
+  /** Sandbox configuration for isolated execution */
+  sandbox?: SandboxConfig;
 }
 
 export interface Tool<TParams = unknown, TResult = unknown> {
@@ -22,6 +25,8 @@ export interface Tool<TParams = unknown, TResult = unknown> {
   sideEffects?: ('filesystem' | 'network' | 'database' | 'process')[];
   requiresApproval?: boolean | ((params: TParams) => boolean);
   timeout?: number;
+  /** Sandbox configuration for isolated execution */
+  sandbox?: SandboxConfig;
   toJSON: () => ToolSchema;
 }
 

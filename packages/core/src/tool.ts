@@ -20,6 +20,7 @@ export function tool<TParams, TResult>(
     sideEffects: config.sideEffects,
     requiresApproval: config.requiresApproval,
     timeout: config.timeout,
+    sandbox: config.sandbox,
     toJSON(): ToolSchema {
       return toolToSchema(this);
     },

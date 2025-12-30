@@ -15,6 +15,7 @@ import type {
   Span,
   ToolContext,
   MemoryAdapter,
+  Tool,
 } from '@cogitator/types';
 import {
   InMemoryAdapter,
@@ -28,6 +29,17 @@ import { type Agent } from './agent.js';
 import { ToolRegistry } from './registry.js';
 import { createLLMBackend, parseModel } from './llm/index.js';
 
+// Dynamic import type for sandbox
+type SandboxManager = {
+  initialize(): Promise<void>;
+  execute(
+    request: { command: string[]; cwd?: string; env?: Record<string, string>; timeout?: number },
+    config: { type: string; image?: string; resources?: unknown; network?: unknown; timeout?: number }
+  ): Promise<{ success: boolean; data?: { stdout: string; stderr: string; exitCode: number; timedOut: boolean; duration: number }; error?: string }>;
+  isDockerAvailable(): Promise<boolean>;
+  shutdown(): Promise<void>;
+};
+
 export class Cogitator {
   private config: CogitatorConfig;
   private backends = new Map<LLMProvider, LLMBackend>();
@@ -36,6 +48,9 @@ export class Cogitator {
   private memoryAdapter?: MemoryAdapter;
   private contextBuilder?: ContextBuilder;
   private memoryInitialized = false;
+
+  private sandboxManager?: SandboxManager;
+  private sandboxInitialized = false;
 
   constructor(config: CogitatorConfig = {}) {
     this.config = config;
@@ -104,6 +119,23 @@ export class Cogitator {
     }
 
     this.memoryInitialized = true;
+  }
+
+  /**
+   * Initialize sandbox manager (lazy, on first sandboxed tool execution)
+   */
+  private async initializeSandbox(): Promise<void> {
+    if (this.sandboxInitialized) return;
+
+    try {
+      const { SandboxManager } = await import('@cogitator/sandbox');
+      this.sandboxManager = new SandboxManager(this.config.sandbox) as SandboxManager;
+      await this.sandboxManager.initialize();
+      this.sandboxInitialized = true;
+    } catch {
+      // Sandbox package not installed or Docker not available
+      this.sandboxInitialized = true; // Mark as initialized to avoid retrying
+    }
   }
 
   /**
@@ -416,6 +448,12 @@ export class Cogitator {
       };
     }
 
+    // Check if tool has sandbox config and should use Docker
+    if (tool.sandbox?.type === 'docker') {
+      return this.executeInSandbox(tool, toolCall, runId, agentId);
+    }
+
+    // Execute normally (native)
     const context: ToolContext = {
       agentId,
       runId,
@@ -437,6 +475,77 @@ export class Cogitator {
         error: error instanceof Error ? error.message : String(error),
       };
     }
+  }
+
+  /**
+   * Execute a tool in Docker sandbox
+   */
+  private async executeInSandbox(
+    tool: Tool,
+    toolCall: ToolCall,
+    runId: string,
+    agentId: string
+  ): Promise<ToolResult> {
+    await this.initializeSandbox();
+
+    // If sandbox not available, fall back to native execution with warning
+    if (!this.sandboxManager) {
+      console.warn(
+        `[cogitator] Sandbox unavailable for tool ${tool.name}, executing natively`
+      );
+      const context: ToolContext = {
+        agentId,
+        runId,
+        signal: new AbortController().signal,
+      };
+      try {
+        const result = await tool.execute(toolCall.arguments, context);
+        return { callId: toolCall.id, name: toolCall.name, result };
+      } catch (error) {
+        return {
+          callId: toolCall.id,
+          name: toolCall.name,
+          result: null,
+          error: error instanceof Error ? error.message : String(error),
+        };
+      }
+    }
+
+    // Execute in sandbox
+    const args = toolCall.arguments as Record<string, unknown>;
+    const sandboxConfig = tool.sandbox!;
+
+    const result = await this.sandboxManager.execute(
+      {
+        command: ['sh', '-c', String(args.command ?? '')],
+        cwd: args.cwd as string | undefined,
+        env: args.env as Record<string, string> | undefined,
+        timeout: tool.timeout,
+      },
+      sandboxConfig
+    );
+
+    if (!result.success) {
+      return {
+        callId: toolCall.id,
+        name: toolCall.name,
+        result: null,
+        error: result.error,
+      };
+    }
+
+    return {
+      callId: toolCall.id,
+      name: toolCall.name,
+      result: {
+        stdout: result.data!.stdout,
+        stderr: result.data!.stderr,
+        exitCode: result.data!.exitCode,
+        timedOut: result.data!.timedOut,
+        duration: result.data!.duration,
+        command: args.command,
+      },
+    };
   }
 
   /**
@@ -489,6 +598,11 @@ export class Cogitator {
       this.memoryAdapter = undefined;
       this.contextBuilder = undefined;
       this.memoryInitialized = false;
+    }
+    if (this.sandboxManager) {
+      await this.sandboxManager.shutdown();
+      this.sandboxManager = undefined;
+      this.sandboxInitialized = false;
     }
     this.backends.clear();
   }

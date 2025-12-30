@@ -5,6 +5,7 @@
 import type { Message, ToolCall, ToolResult } from './message.js';
 import type { LLMProvider } from './llm.js';
 import type { MemoryConfig } from './memory.js';
+import type { SandboxManagerConfig } from './sandbox.js';
 
 export interface CogitatorConfig {
   llm?: {
@@ -24,6 +25,8 @@ export interface CogitatorConfig {
     maxTokensPerRun?: number;
   };
   memory?: MemoryConfig;
+  /** Sandbox configuration for isolated tool execution */
+  sandbox?: SandboxManagerConfig;
 }
 
 export interface RunOptions {
