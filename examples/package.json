@@ -4,10 +4,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "basic-agent": "tsx basic-agent.ts"
+    "basic-agent": "tsx basic-agent.ts",
+    "research": "tsx research-agent.ts",
+    "code-assistant": "tsx code-assistant.ts",
+    "dev-team": "tsx dev-team-swarm.ts",
+    "code-review": "tsx workflow-code-review.ts",
+    "swarm": "tsx swarm-local.ts",
+    "workflow": "tsx workflow-local.ts",
+    "debate": "tsx debate-swarm.ts",
+    "pipeline": "tsx pipeline-swarm.ts"
   },
   "dependencies": {
     "@cogitator/core": "workspace:*",
+    "@cogitator/swarms": "workspace:*",
+    "@cogitator/workflows": "workspace:*",
     "zod": "^3.22.4"
   },
   "devDependencies": {
