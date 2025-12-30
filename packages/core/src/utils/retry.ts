@@ -60,10 +60,8 @@ function calculateDelay(
       break;
   }
 
-  // Apply max delay cap
   delay = Math.min(delay, maxDelay);
 
-  // Apply jitter
   if (jitter > 0) {
     const jitterAmount = delay * jitter;
     delay = delay + (Math.random() * 2 - 1) * jitterAmount;
@@ -128,7 +126,6 @@ export async function withRetry<T>(
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
-      // Check if we should retry
       const isLastAttempt = attempt > opts.maxRetries;
       const shouldRetry = opts.retryIf
         ? opts.retryIf(lastError, attempt)
@@ -138,7 +135,6 @@ export async function withRetry<T>(
         throw lastError;
       }
 
-      // Get delay (from error or calculated)
       const errorDelay = getRetryDelay(lastError, 0);
       const calculatedDelay = calculateDelay(
         attempt,
@@ -149,15 +145,12 @@ export async function withRetry<T>(
       );
       const delay = errorDelay > 0 ? errorDelay : calculatedDelay;
 
-      // Notify callback
       opts.onRetry?.(lastError, attempt, delay);
 
-      // Wait before retry
       await sleep(delay, opts.signal);
     }
   }
 
-  // Should not reach here, but just in case
   throw lastError ?? new CogitatorError({
     message: 'Retry exhausted',
     code: ErrorCode.INTERNAL_ERROR,

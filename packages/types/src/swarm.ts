@@ -5,7 +5,6 @@
 import type { Agent } from './agent.js';
 import type { RunResult, Span } from './runtime.js';
 
-
 export type SwarmStrategy =
   | 'hierarchical'
   | 'round-robin'
@@ -13,7 +12,6 @@ export type SwarmStrategy =
   | 'auction'
   | 'pipeline'
   | 'debate';
-
 
 export interface SwarmAgentMetadata {
   /** Agent's areas of expertise */
@@ -38,7 +36,6 @@ export interface SwarmAgent {
   messageCount: number;
   tokenCount: number;
 }
-
 
 export interface HierarchicalConfig {
   /** Maximum delegation depth (default: 3) */
@@ -125,7 +122,6 @@ export interface DebateConfig {
   format?: 'structured' | 'freeform';
 }
 
-
 export type SwarmMessageType = 'request' | 'response' | 'notification' | 'error';
 
 export interface SwarmMessage {
@@ -163,7 +159,6 @@ export interface MessageBus {
   getAllMessages(): SwarmMessage[];
   clear(): void;
 }
-
 
 export interface BlackboardSection<T = unknown> {
   name: string;
@@ -212,7 +207,6 @@ export interface Blackboard {
   clear(): void;
 }
 
-
 export type SwarmEventType =
   | 'swarm:start'
   | 'swarm:complete'
@@ -251,7 +245,6 @@ export interface SwarmEventEmitter {
   getEvents(): SwarmEvent[];
 }
 
-
 export interface SwarmResourceConfig {
   /** Max concurrent agent runs (default: 4) */
   maxConcurrency?: number;
@@ -275,7 +268,6 @@ export interface SwarmResourceUsage {
   elapsedTime: number;
   agentUsage: Map<string, { tokens: number; cost: number; runs: number; duration: number }>;
 }
-
 
 export type SwarmErrorAction = 'retry' | 'skip' | 'failover' | 'abort';
 
@@ -302,7 +294,6 @@ export interface SwarmErrorConfig {
   /** Allow returning partial results on failure */
   partialResults?: boolean;
 }
-
 
 export interface SwarmConfig {
   name: string;
@@ -343,7 +334,6 @@ export interface SwarmConfig {
     blackboardLogging?: boolean;
   };
 }
-
 
 export interface SwarmRunOptions {
   /** Input to the swarm */
@@ -394,7 +384,6 @@ export interface SwarmResult {
   error?: Error;
 }
 
-
 export interface ISwarm {
   readonly name: string;
   readonly config: SwarmConfig;
@@ -412,7 +401,6 @@ export interface ISwarm {
   abort(): void;
 }
 
-
 export interface StrategyResult {
   output: unknown;
   structured?: unknown;
@@ -427,7 +415,7 @@ export interface StrategyResult {
 export interface SwarmCoordinatorInterface {
   runAgent(agentName: string, input: string, context?: Record<string, unknown>): Promise<RunResult>;
   runAgentsParallel(
-    agents: Array<{ name: string; input: string; context?: Record<string, unknown> }>,
+    agents: { name: string; input: string; context?: Record<string, unknown> }[],
     maxConcurrency?: number
   ): Promise<Map<string, RunResult>>;
   getAgent(name: string): SwarmAgent | undefined;

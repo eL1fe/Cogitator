@@ -1,13 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   InMemoryApprovalStore,
-  FileApprovalStore,
   withDelegation,
   ConsoleNotifier,
   WebhookNotifier,
   CompositeNotifier,
   executeHumanNode,
-  humanNode,
   approvalNode,
   choiceNode,
   inputNode,
@@ -258,7 +256,7 @@ describe('Human-in-the-Loop', () => {
       });
 
       expect(onDelegation).toHaveBeenCalled();
-      const [request, from, to] = onDelegation.mock.calls[0];
+      const [_request, from, to] = onDelegation.mock.calls[0];
       expect(from).toBe('alice@example.com');
       expect(to).toBe('bob@example.com');
 

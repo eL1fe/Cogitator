@@ -204,7 +204,7 @@ Be honest in your assessment. Only bid high if you're truly well-suited for the 
   }
 
   private parseBidResponse(agentName: string, output: string, agent: SwarmAgent): Bid {
-    const scoreMatch = output.match(/SCORE:\s*([\d.]+)/i);
+    const scoreMatch = /SCORE:\s*([\d.]+)/i.exec(output);
     let score = 0.5;
 
     if (scoreMatch) {
@@ -212,14 +212,14 @@ Be honest in your assessment. Only bid high if you're truly well-suited for the 
       if (isNaN(score)) score = 0.5;
     }
 
-    const capMatch = output.match(/CAPABILITIES:\s*([^\n]+)/i);
+    const capMatch = /CAPABILITIES:\s*([^\n]+)/i.exec(output);
     let capabilities = agent.metadata.expertise ?? [];
 
     if (capMatch) {
       capabilities = capMatch[1].split(',').map(c => c.trim()).filter(Boolean);
     }
 
-    const reasonMatch = output.match(/REASONING:\s*(.+)/is);
+    const reasonMatch = /REASONING:\s*(.+)/is.exec(output);
     const reasoning = reasonMatch ? reasonMatch[1].trim() : undefined;
 
     return {

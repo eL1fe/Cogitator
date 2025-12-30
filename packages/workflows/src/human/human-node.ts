@@ -204,14 +204,14 @@ async function waitForResponse(
 ): Promise<ApprovalResponse> {
   return new Promise<ApprovalResponse>((resolve) => {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    let unsubscribe: (() => void) | undefined;
+    let unsubscribeFn: (() => void) | undefined;
 
     const cleanup = () => {
       if (timeoutId) clearTimeout(timeoutId);
-      unsubscribe?.();
+      unsubscribeFn?.();
     };
 
-    unsubscribe = store.onResponse(request.id, (response) => {
+    unsubscribeFn = store.onResponse(request.id, (response) => {
       cleanup();
       resolve(response);
     });

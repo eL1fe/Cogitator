@@ -216,9 +216,9 @@ export async function executeSubworkflow<
               config.timeout
             )
           ),
-        ]) as WorkflowResult<CS>;
+        ]);
       } else {
-        childResult = await executePromise as WorkflowResult<CS>;
+        childResult = await executePromise;
       }
 
       config.onComplete?.(childResult, context);

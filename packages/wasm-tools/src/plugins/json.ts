@@ -31,7 +31,7 @@ function getByPath(obj: unknown, path: string): unknown {
       return undefined;
     }
 
-    const arrayMatch = part.match(/^(\w+)\[(\d+)\]$/);
+    const arrayMatch = /^(\w+)\[(\d+)\]$/.exec(part);
     if (arrayMatch) {
       const [, key, indexStr] = arrayMatch;
       const index = parseInt(indexStr, 10);

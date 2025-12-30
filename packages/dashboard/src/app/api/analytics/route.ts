@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import {
   getHourlyStats,
   getModelStats,
@@ -7,6 +7,7 @@ import {
 } from '@/lib/db/analytics';
 import { getAnalytics, initializeExtendedSchema } from '@/lib/cogitator/db';
 import { initializeSchema } from '@/lib/db';
+import { withAuth } from '@/lib/auth/middleware';
 
 let initialized = false;
 
@@ -22,7 +23,7 @@ async function ensureInitialized() {
   }
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request) => {
   try {
     await ensureInitialized();
 
@@ -64,4 +65,4 @@ export async function GET(request: NextRequest) {
     console.error('[api/analytics] Failed to fetch analytics:', error);
     return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 });
   }
-}
+});

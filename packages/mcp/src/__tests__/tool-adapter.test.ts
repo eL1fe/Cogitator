@@ -12,7 +12,7 @@ import {
   resultToMCPContent,
   mcpContentToResult,
 } from '../adapter/tool-adapter.js';
-import type { Tool, ToolContext, ToolSchema } from '@cogitator/types';
+import type { Tool, ToolContext } from '@cogitator/types';
 import type { MCPClient } from '../client/mcp-client.js';
 
 describe('zodToJsonSchema', () => {
@@ -25,7 +25,7 @@ describe('zodToJsonSchema', () => {
 
     expect(result.type).toBe('object');
     expect(result.properties).toBeDefined();
-    expect(result.properties!.name).toBeDefined();
+    expect(result.properties.name).toBeDefined();
   });
 
   it('should convert complex schema with required fields', () => {
@@ -54,7 +54,7 @@ describe('zodToJsonSchema', () => {
 
     const result = zodToJsonSchema(schema);
 
-    expect(result.properties!.nested).toBeDefined();
+    expect(result.properties.nested).toBeDefined();
   });
 
   it('should convert arrays', () => {
@@ -64,7 +64,7 @@ describe('zodToJsonSchema', () => {
 
     const result = zodToJsonSchema(schema);
 
-    expect(result.properties!.items).toBeDefined();
+    expect(result.properties.items).toBeDefined();
   });
 
   it('should convert enums', () => {
@@ -74,7 +74,7 @@ describe('zodToJsonSchema', () => {
 
     const result = zodToJsonSchema(schema);
 
-    expect(result.properties!.status).toBeDefined();
+    expect(result.properties.status).toBeDefined();
   });
 });
 
@@ -360,4 +360,3 @@ describe('mcpContentToResult', () => {
     expect(result).toEqual([{ a: 1 }, 'plain text']);
   });
 });
-

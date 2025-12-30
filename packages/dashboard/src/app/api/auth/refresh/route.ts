@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyToken, createAccessToken } from '@/lib/auth/jwt';
 import { getUserById } from '@/lib/auth/users';
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const payload = await verifyToken(refreshToken);
 
-    if (!payload || payload.type !== 'refresh') {
+    if (payload?.type !== 'refresh') {
       return NextResponse.json(
         { error: 'Invalid refresh token' },
         { status: 401 }
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     const user = await getUserById(payload.sub);
 
-    if (!user || !user.isActive) {
+    if (!user?.isActive) {
       return NextResponse.json(
         { error: 'User not found or inactive' },
         { status: 401 }

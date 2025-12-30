@@ -18,23 +18,24 @@
  * ```
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getCogitator } from '@/lib/cogitator';
 import { Agent } from '@cogitator/core';
 import { nanoid } from 'nanoid';
+import { withAuth } from '@/lib/auth/middleware';
 
 interface ChatMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
   content: string | null;
   name?: string;
-  tool_calls?: Array<{
+  tool_calls?: {
     id: string;
     type: 'function';
     function: {
       name: string;
       arguments: string;
     };
-  }>;
+  }[];
   tool_call_id?: string;
 }
 
@@ -45,21 +46,29 @@ interface ChatCompletionRequest {
   max_tokens?: number;
   top_p?: number;
   stream?: boolean;
-  tools?: Array<{
+  tools?: {
     type: 'function';
     function: {
       name: string;
       description?: string;
       parameters?: Record<string, unknown>;
     };
-  }>;
+  }[];
   tool_choice?: 'auto' | 'none' | { type: 'function'; function: { name: string } };
 }
 
-export async function POST(request: NextRequest) {
+function splitIntoChunks(text: string, maxChunkSize: number): string[] {
+  const chunks: string[] = [];
+  for (let i = 0; i < text.length; i += maxChunkSize) {
+    chunks.push(text.slice(i, i + maxChunkSize));
+  }
+  return chunks;
+}
+
+export const POST = withAuth(async (request) => {
   try {
     const body: ChatCompletionRequest = await request.json();
-    const { model, messages, temperature = 0.7, max_tokens, stream = false, tools } = body;
+    const { model, messages, temperature = 0.7, max_tokens, stream = false} = body;
 
     if (!model) {
       return NextResponse.json(
@@ -99,7 +108,7 @@ export async function POST(request: NextRequest) {
         async start(controller) {
           try {
             const result = await cogitator.run(agent, {
-              input: input as string,
+              input: input,
             });
 
             const completionId = `chatcmpl-${nanoid(24)}`;
@@ -151,7 +160,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      return new Response(streamResponse, {
+      return new NextResponse(streamResponse, {
         headers: {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
@@ -160,7 +169,7 @@ export async function POST(request: NextRequest) {
       });
     } else {
       const result = await cogitator.run(agent, {
-        input: input as string,
+        input: input,
       });
 
       const completionId = `chatcmpl-${nanoid(24)}`;
@@ -200,13 +209,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function splitIntoChunks(text: string, maxChunkSize: number): string[] {
-  const chunks: string[] = [];
-  for (let i = 0; i < text.length; i += maxChunkSize) {
-    chunks.push(text.slice(i, i + maxChunkSize));
-  }
-  return chunks;
-}
-
+});

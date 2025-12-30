@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
-  InMemoryRunStore,
+  type InMemoryRunStore,
   createInMemoryRunStore,
   PriorityQueue,
-  JobScheduler,
+  type JobScheduler,
   createJobScheduler,
-  DefaultWorkflowManager,
+  type DefaultWorkflowManager,
   createWorkflowManager,
 } from '../manager/index.js';
 import { WorkflowBuilder } from '../builder.js';
@@ -457,7 +457,7 @@ describe('Workflow Manager', () => {
         }))
         .build();
 
-      const result = await manager.execute(workflow);
+      await manager.execute(workflow);
 
       const runs = await manager.listRuns({ workflowName: 'tracked' });
       expect(runs).toHaveLength(1);

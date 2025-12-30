@@ -2,14 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   executeWithRetry,
   withRetry,
-  CircuitBreaker,
+  type CircuitBreaker,
   createCircuitBreaker,
   CircuitBreakerOpenError,
-  CompensationManager,
   createCompensationManager,
-  CompensationBuilder,
   compensationBuilder,
-  InMemoryDLQ,
+  type InMemoryDLQ,
   createInMemoryDLQ,
   createDLQEntry,
   InMemoryIdempotencyStore,
@@ -378,7 +376,7 @@ describe('Saga Pattern', () => {
         { input: { test: true } }
       );
 
-      const id = await dlq.add(entry);
+      await dlq.add(entry);
 
       const entries = await dlq.list();
       expect(entries).toHaveLength(1);

@@ -59,13 +59,13 @@ function percentile(sortedValues: number[], p: number): number {
  */
 export class WorkflowMetricsCollector {
   private config: MetricsConfig;
-  private counters: Map<string, CounterData> = new Map();
-  private gauges: Map<string, GaugeData> = new Map();
-  private histograms: Map<string, HistogramData> = new Map();
-  private latencySamples: Map<string, LatencySample[]> = new Map();
-  private nodeMetrics: Map<string, Map<string, NodeMetricsData>> = new Map();
-  private tokenUsage: Map<string, TokenUsageData> = new Map();
-  private costTracking: Map<string, number> = new Map();
+  private counters = new Map<string, CounterData>();
+  private gauges = new Map<string, GaugeData>();
+  private histograms = new Map<string, HistogramData>();
+  private latencySamples = new Map<string, LatencySample[]>();
+  private nodeMetrics = new Map<string, Map<string, NodeMetricsData>>();
+  private tokenUsage = new Map<string, TokenUsageData>();
+  private costTracking = new Map<string, number>();
   private lastUpdated: number = Date.now();
 
   constructor(config: Partial<MetricsConfig> = {}) {
@@ -130,7 +130,7 @@ export class WorkflowMetricsCollector {
     nodeType: string,
     durationMs: number,
     success: boolean,
-    retries: number = 0
+    retries = 0
   ): void {
     if (!this.nodeMetrics.has(workflowName)) {
       this.nodeMetrics.set(workflowName, new Map());
@@ -294,7 +294,7 @@ export class WorkflowMetricsCollector {
   private incrementCounter(
     name: string,
     labels?: Record<string, string>,
-    value: number = 1
+    value = 1
   ): void {
     const key = this.labeledKey(name, labels);
     const current = this.counters.get(key);
@@ -526,7 +526,7 @@ export class WorkflowMetricsCollector {
     const names = new Set<string>();
 
     for (const [key] of this.counters) {
-      const match = key.match(/workflow=([^,}]+)/);
+      const match = /workflow=([^,}]+)/.exec(key);
       if (match) {
         names.add(match[1]);
       }

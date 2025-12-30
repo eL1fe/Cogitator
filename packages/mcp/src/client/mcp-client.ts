@@ -146,7 +146,6 @@ export class MCPClient {
     return { ...this.serverCapabilities };
   }
 
-
   /**
    * List available tools from the MCP server
    */
@@ -199,7 +198,6 @@ export class MCPClient {
     return result;
   }
 
-
   /**
    * List available resources from the MCP server
    */
@@ -236,7 +234,6 @@ export class MCPClient {
 
     return { uri };
   }
-
 
   /**
    * List available prompts from the MCP server
@@ -292,7 +289,6 @@ export class MCPClient {
       };
     });
   }
-
 
   /**
    * Close the connection to the MCP server

@@ -363,7 +363,7 @@ export async function executeMapReduce<S, T, R>(
 
     const originalOnProgress = mapConfig.onProgress;
     mapConfig.onProgress = (progress) => {
-      if (progress.currentItem && progress.currentItem.success) {
+      if (progress.currentItem?.success) {
         const reduceConfig = {
           name: `${config.name}:reduce`,
           ...config.reduce,

@@ -4,7 +4,6 @@
 
 import type { Message, ToolCall, ToolResult } from './message.js';
 
-
 export type MemoryType = 'conversation' | 'fact' | 'embedding';
 
 /**
@@ -61,11 +60,9 @@ export interface Embedding {
   metadata?: Record<string, unknown>;
 }
 
-
 export type MemoryResult<T> =
   | { success: true; data: T }
   | { success: false; error: string };
-
 
 export type MemoryProvider = 'memory' | 'redis' | 'postgres';
 
@@ -88,7 +85,7 @@ export interface RedisAdapterConfig extends MemoryAdapterConfig {
   port?: number;
   /** Cluster nodes for Redis Cluster mode */
   cluster?: {
-    nodes: Array<{ host: string; port: number }>;
+    nodes: { host: string; port: number }[];
     scaleReads?: 'master' | 'slave' | 'all';
   };
   /** Key prefix (default: 'cogitator:' or '{cogitator}:' for cluster) */
@@ -105,7 +102,6 @@ export interface PostgresAdapterConfig extends MemoryAdapterConfig {
   schema?: string;
   poolSize?: number;
 }
-
 
 export interface MemoryQueryOptions {
   threadId: string;
@@ -126,7 +122,6 @@ export interface SemanticSearchOptions {
     agentId?: string;
   };
 }
-
 
 /**
  * Core memory adapter - all adapters implement this
@@ -182,11 +177,10 @@ export interface EmbeddingAdapter {
   ): Promise<MemoryResult<Embedding>>;
   search(
     options: SemanticSearchOptions
-  ): Promise<MemoryResult<Array<Embedding & { score: number }>>>;
+  ): Promise<MemoryResult<(Embedding & { score: number })[]>>;
   deleteEmbedding(embeddingId: string): Promise<MemoryResult<void>>;
   deleteBySource(sourceId: string): Promise<MemoryResult<void>>;
 }
-
 
 export interface EmbeddingService {
   embed(text: string): Promise<number[]>;
@@ -212,7 +206,6 @@ export interface OllamaEmbeddingConfig {
 
 export type EmbeddingServiceConfig = OpenAIEmbeddingConfig | OllamaEmbeddingConfig;
 
-
 export type ContextStrategy = 'recent' | 'relevant' | 'hybrid';
 
 export interface ContextBuilderConfig {
@@ -227,7 +220,7 @@ export interface ContextBuilderConfig {
 export interface BuiltContext {
   messages: Message[];
   facts: Fact[];
-  semanticResults: Array<Embedding & { score: number }>;
+  semanticResults: (Embedding & { score: number })[];
   tokenCount: number;
   truncated: boolean;
   metadata: {
@@ -237,7 +230,6 @@ export interface BuiltContext {
     semanticResultsIncluded: number;
   };
 }
-
 
 export interface MemoryConfig {
   adapter?: MemoryProvider;

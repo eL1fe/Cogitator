@@ -13,7 +13,7 @@ import type { OpenAIError } from '../../types/openai-types.js';
 export function formatOpenAIError(
   code: string,
   message: string,
-  type: string = 'invalid_request_error',
+  type = 'invalid_request_error',
   param?: string
 ): OpenAIError {
   return {
@@ -36,7 +36,7 @@ export function errorHandler(
 ) {
   request.log.error(error);
 
-  let statusCode = error.statusCode ?? 500;
+  const statusCode = error.statusCode ?? 500;
 
   let errorType = 'server_error';
   let errorCode = 'internal_error';
@@ -82,4 +82,3 @@ export function notFoundHandler(
     )
   );
 }
-

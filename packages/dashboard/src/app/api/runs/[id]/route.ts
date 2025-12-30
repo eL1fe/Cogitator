@@ -1,12 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getRunById, getRunToolCalls, getRunMessages } from '@/lib/db/runs';
 import { getSpansByRunId } from '@/lib/db/spans';
 import { initializeSchema } from '@/lib/db';
 import { initializeExtendedSchema } from '@/lib/cogitator/db';
-
-interface RouteParams {
-  params: Promise<{ id: string }>;
-}
+import { withAuth } from '@/lib/auth/middleware';
 
 let initialized = false;
 
@@ -22,11 +19,11 @@ async function ensureInitialized() {
   }
 }
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export const GET = withAuth(async (_request, context) => {
   try {
     await ensureInitialized();
 
-    const { id } = await params;
+    const { id } = await context!.params!;
     const run = await getRunById(id);
 
     if (!run) {
@@ -49,4 +46,4 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     console.error('[api/runs/[id]] Failed to fetch run:', error);
     return NextResponse.json({ error: 'Failed to fetch run' }, { status: 500 });
   }
-}
+});

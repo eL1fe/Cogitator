@@ -8,7 +8,7 @@
  * - Rate limiting
  */
 
-import { Queue, Job } from 'bullmq';
+import { Queue, type Job } from 'bullmq';
 import { nanoid } from 'nanoid';
 import type {
   QueueConfig,

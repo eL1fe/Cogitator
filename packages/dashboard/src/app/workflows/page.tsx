@@ -101,7 +101,7 @@ export default function WorkflowsPage() {
       const response = await fetch('/api/workflows');
       if (response.ok) {
         const data = await response.json();
-        setWorkflows(data);
+        setWorkflows(data.workflows || []);
       }
     } catch (error) {
       console.error('Failed to fetch workflows:', error);
@@ -406,4 +406,3 @@ export default function WorkflowsPage() {
     </div>
   );
 }
-

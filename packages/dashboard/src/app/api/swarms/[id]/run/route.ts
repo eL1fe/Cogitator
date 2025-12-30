@@ -1,23 +1,32 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getSwarm, getAgent, createSwarmRun, updateSwarmRun } from '@/lib/cogitator/db';
 import { getCogitator } from '@/lib/cogitator';
 import { Swarm } from '@cogitator/swarms';
 import { Agent } from '@cogitator/core';
 import type { SwarmConfig, SwarmStrategy, DebateConfig, RoundRobinConfig, ConsensusConfig } from '@cogitator/types';
+import { withAuth } from '@/lib/auth/middleware';
+import { swarmRunSchema } from '@/lib/validation';
 
-interface RouteParams {
-  params: Promise<{ id: string }>;
-}
-
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export const POST = withAuth(async (request, context) => {
   try {
-    const { id } = await params;
+    const { id } = await context!.params!;
     const body = await request.json();
-    const { input } = body;
 
-    if (!input || typeof input !== 'string') {
-      return NextResponse.json({ error: 'Input is required' }, { status: 400 });
+    const parsed = swarmRunSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          details: parsed.error.errors.map(e => ({
+            path: e.path.join('.'),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
     }
+
+    const { input } = parsed.data;
 
     const swarmData = await getSwarm(id);
     if (!swarmData) {
@@ -62,7 +71,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         );
 
       const strategy = swarmData.strategy as SwarmStrategy;
-      
+
       const swarmConfig: SwarmConfig = {
         name: swarmData.name,
         strategy,
@@ -76,7 +85,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           }
           swarmConfig.agents = agents.map((agent, i) => {
             const newAgent = agent.clone({
-              instructions: i === 0 
+              instructions: i === 0
                 ? `${agent.instructions}\n\nYou are an ADVOCATE. Argue IN FAVOR of propositions.`
                 : i === 1
                 ? `${agent.instructions}\n\nYou are a CRITIC. Argue AGAINST propositions and find weaknesses.`
@@ -152,7 +161,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       });
       const swarm = new Swarm(cogitator, swarmConfig);
       console.log('[swarm-run] Swarm created, id:', swarm.id);
-      
+
       const eventLog: string[] = [];
       swarm.on('*', (event) => {
         console.log('[swarm-event]', event.type, event.data);
@@ -177,8 +186,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         totalTokens += agentResult.usage?.totalTokens || 0;
       }
 
-      const output = typeof result.output === 'string' 
-        ? result.output 
+      const output = typeof result.output === 'string'
+        ? result.output
         : JSON.stringify(result.output, null, 2);
 
       await updateSwarmRun(run.id, {
@@ -226,4 +235,4 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     );
   }
-}
+});

@@ -35,14 +35,14 @@ export function createDelegationTools(
         };
       }
 
-      const tasks = blackboard.read<Array<{
+      const tasks = blackboard.read<{
         id: string;
         worker: string;
         task: string;
         status: string;
         delegatedBy: string;
         timestamp: number;
-      }>>('tasks') ?? [];
+      }[]>('tasks') ?? [];
 
       const taskId = `task_${Date.now()}_${worker}`;
       tasks.push({
@@ -158,13 +158,13 @@ export function createDelegationTools(
         };
       }
 
-      const tasks = blackboard.read<Array<{
+      const tasks = blackboard.read<{
         id: string;
         worker: string;
         task: string;
         status: string;
         timestamp: number;
-      }>>('tasks') ?? [];
+      }[]>('tasks') ?? [];
 
       const workerTasks = tasks.filter(t => t.worker === worker);
       const lastTask = workerTasks[workerTasks.length - 1];
@@ -211,12 +211,12 @@ export function createDelegationTools(
         };
       }
 
-      const tasks = blackboard.read<Array<{
+      const tasks = blackboard.read<{
         id: string;
         worker: string;
         task: string;
         status: string;
-      }>>('tasks') ?? [];
+      }[]>('tasks') ?? [];
 
       const workerTasks = tasks.filter(t => t.worker === worker);
       const targetTask = taskId

@@ -2,7 +2,6 @@
  * Sandbox types for isolated tool execution
  */
 
-
 export type SandboxType = 'docker' | 'native' | 'wasm';
 
 export interface SandboxResourceLimits {
@@ -60,7 +59,6 @@ export interface SandboxConfig {
   wasi?: boolean;
 }
 
-
 export interface SandboxExecutionRequest {
   /** Command to execute */
   command: string[];
@@ -83,7 +81,6 @@ export interface SandboxExecutionResult {
   /** Execution duration in milliseconds */
   duration: number;
 }
-
 
 export interface SandboxPoolConfig {
   /** Max containers to keep warm */

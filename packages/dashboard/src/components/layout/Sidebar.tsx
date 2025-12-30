@@ -17,6 +17,7 @@ import {
   GitBranch,
   Users,
   Brain,
+  Briefcase,
 } from 'lucide-react';
 
 const navigation = [
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'Agents', href: '/agents', icon: Bot },
   { name: 'Workflows', href: '/workflows', icon: GitBranch },
   { name: 'Swarms', href: '/swarms', icon: Users },
+  { name: 'Jobs', href: '/jobs', icon: Briefcase },
   { name: 'Runs', href: '/runs', icon: Play },
   { name: 'Memory', href: '/memory', icon: Brain },
   { name: 'Models', href: '/models', icon: Box },

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import {
   getAgents,
   createAgent,
@@ -6,6 +6,8 @@ import {
 } from '@/lib/cogitator/db';
 import { initializeSchema } from '@/lib/db';
 import { getAvailableTools } from '@/lib/cogitator';
+import { withAuth } from '@/lib/auth/middleware';
+import { createAgentSchema } from '@/lib/validation';
 
 let initialized = false;
 
@@ -22,7 +24,7 @@ async function ensureInitialized() {
   }
 }
 
-export async function GET() {
+export const GET = withAuth(async () => {
   try {
     await ensureInitialized();
     const agents = await getAgents();
@@ -31,22 +33,29 @@ export async function GET() {
     console.error('[api/agents] Failed to fetch agents:', error);
     return NextResponse.json({ error: 'Failed to fetch agents' }, { status: 500 });
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
     await ensureInitialized();
     const body = await request.json();
 
-    if (!body.name || !body.model || !body.instructions) {
+    const parsed = createAgentSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Name, model, and instructions are required' },
+        {
+          error: 'Validation failed',
+          details: parsed.error.errors.map(e => ({
+            path: e.path.join('.'),
+            message: e.message,
+          })),
+        },
         { status: 400 }
       );
     }
 
     const availableToolNames = getAvailableTools().map((t) => t.name);
-    const invalidTools = (body.tools || []).filter(
+    const invalidTools = (parsed.data.tools || []).filter(
       (t: string) => !availableToolNames.includes(t)
     );
     if (invalidTools.length > 0) {
@@ -57,14 +66,14 @@ export async function POST(request: NextRequest) {
     }
 
     const agent = await createAgent({
-      name: body.name,
-      model: body.model,
-      instructions: body.instructions,
+      name: parsed.data.name,
+      model: parsed.data.model,
+      instructions: parsed.data.instructions,
       description: body.description,
-      temperature: body.temperature,
+      temperature: parsed.data.temperature,
       topP: body.topP,
-      maxTokens: body.maxTokens,
-      tools: body.tools,
+      maxTokens: parsed.data.maxTokens,
+      tools: parsed.data.tools,
       memoryEnabled: body.memoryEnabled,
       maxIterations: body.maxIterations,
       timeout: body.timeout,
@@ -76,4 +85,4 @@ export async function POST(request: NextRequest) {
     console.error('[api/agents] Failed to create agent:', error);
     return NextResponse.json({ error: 'Failed to create agent' }, { status: 500 });
   }
-}
+});

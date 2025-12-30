@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createEmbeddingService } from '@cogitator/memory';
 import { query, queryOne } from '@/lib/db';
+import { withAuth } from '@/lib/auth/middleware';
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request) => {
   try {
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get('action');
@@ -11,7 +12,7 @@ export async function GET(request: NextRequest) {
       case 'threads': {
         const agentId = searchParams.get('agentId');
         let sql = `
-          SELECT 
+          SELECT
             thread_id as id,
             agent_id,
             title,
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
           total_threads: string;
           total_tokens: string;
         }>(`
-          SELECT 
+          SELECT
             COUNT(*) as total_entries,
             COUNT(DISTINCT thread_id) as total_threads,
             COALESCE(SUM(tokens), 0) as total_tokens
@@ -73,9 +74,9 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
     const body = await request.json();
     const { action } = body;
@@ -83,14 +84,14 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'semantic-search': {
         const { query: searchQuery, threadId, limit = 10 } = body;
-        
+
         if (!searchQuery || typeof searchQuery !== 'string') {
           return NextResponse.json({ error: 'query is required' }, { status: 400 });
         }
 
         let embeddingService;
         const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-        
+
         if (process.env.OPENAI_API_KEY) {
           embeddingService = createEmbeddingService({
             provider: 'openai',
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
           created_at: Date;
           similarity: number;
         }>(`
-          SELECT 
+          SELECT
             id,
             thread_id,
             role,
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
           ${threadId ? 'AND thread_id = $3' : ''}
           ORDER BY embedding <=> $1::vector
           LIMIT $2
-        `, threadId 
+        `, threadId
           ? [`[${queryEmbedding.join(',')}]`, limit, threadId]
           : [`[${queryEmbedding.join(',')}]`, limit]
         );
@@ -148,22 +149,22 @@ export async function POST(request: NextRequest) {
 
       case 'build-context': {
         const { threadId, maxTokens = 8000, strategy = 'recent' } = body;
-        
+
         if (!threadId) {
           return NextResponse.json({ error: 'threadId is required' }, { status: 400 });
         }
-        
+
         const messages = await query<{
           role: string;
           content: string;
           created_at: Date;
         }>(`
-          SELECT role, content, created_at 
-          FROM dashboard_messages 
-          WHERE thread_id = $1 
+          SELECT role, content, created_at
+          FROM dashboard_messages
+          WHERE thread_id = $1
           ORDER BY created_at ${strategy === 'recent' ? 'DESC' : 'ASC'}
           LIMIT $2
-        `, [threadId, Math.floor(maxTokens / 100)]); // Rough estimate: ~100 tokens per message
+        `, [threadId, Math.floor(maxTokens / 100)]);
 
         const orderedMessages = strategy === 'recent' ? messages.reverse() : messages;
 
@@ -194,14 +195,14 @@ export async function POST(request: NextRequest) {
 
       case 'add-embedding': {
         const { messageId, content } = body;
-        
+
         if (!messageId || !content) {
           return NextResponse.json({ error: 'messageId and content required' }, { status: 400 });
         }
 
         let embeddingService;
         const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-        
+
         if (process.env.OPENAI_API_KEY) {
           embeddingService = createEmbeddingService({
             provider: 'openai',
@@ -236,5 +237,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
+});

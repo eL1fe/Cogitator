@@ -42,4 +42,3 @@ export function useRealtime() {
 
   return { isConnected };
 }
-

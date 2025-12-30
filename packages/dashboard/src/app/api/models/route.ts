@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getOllamaModels, checkOllamaHealth, POPULAR_MODELS } from '@/lib/ollama';
 import { getApiKeysStatus, setApiKeys, type ApiKeysConfig } from '@/lib/db/config';
 import {
@@ -11,6 +11,7 @@ import {
   ANTHROPIC_MODELS,
   GOOGLE_MODELS,
 } from '@cogitator/models';
+import { withAuth } from '@/lib/auth/middleware';
 
 let modelsInitialized = false;
 
@@ -26,7 +27,7 @@ async function ensureModelsInitialized() {
   }
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request) => {
   try {
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get('action');
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
     if (action === 'pricing') {
       await ensureModelsInitialized();
       const modelName = searchParams.get('model');
-      
+
       if (modelName) {
         const price = getPrice(modelName);
         const model = getModel(modelName);
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
 
       const allModels = listModels();
       return NextResponse.json({
-        models: allModels.map(m => ({
+        models: allModels.map((m) => ({
           ...m,
           pricing: getPrice(m.id),
         })),
@@ -63,25 +64,24 @@ export async function GET(request: NextRequest) {
 
     const ollamaHealth = await checkOllamaHealth();
     const ollamaModels = ollamaHealth.available ? await getOllamaModels() : [];
-    
+
     const apiKeysStatus = await getApiKeysStatus();
-    
+
     const downloadedFullNames = new Set(ollamaModels.map((m) => m.name));
-    
+
     const availableModels = POPULAR_MODELS.map((m) => {
       const [baseName, tag] = m.name.split(':');
-      
+
       if (downloadedFullNames.has(m.name)) {
         return { ...m, isDownloaded: true };
       }
-      
+
       if (!tag) {
         if (downloadedFullNames.has(`${baseName}:latest`)) {
           return { ...m, isDownloaded: true };
         }
       }
-      
-      
+
       return { ...m, isDownloaded: false };
     });
 
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
       {
         id: 'openai',
         name: 'OpenAI',
-        models: OPENAI_MODELS.map(m => ({
+        models: OPENAI_MODELS.map((m) => ({
           id: m.id,
           name: m.displayName,
           contextLength: m.contextWindow,
@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
       {
         id: 'anthropic',
         name: 'Anthropic',
-        models: ANTHROPIC_MODELS.map(m => ({
+        models: ANTHROPIC_MODELS.map((m) => ({
           id: m.id,
           name: m.displayName,
           contextLength: m.contextWindow,
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
       {
         id: 'google',
         name: 'Google',
-        models: GOOGLE_MODELS.map(m => ({
+        models: GOOGLE_MODELS.map((m) => ({
           id: m.id,
           name: m.displayName,
           contextLength: m.contextWindow,
@@ -141,14 +141,11 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Failed to fetch models:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch models' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch models' }, { status: 500 });
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
     const body = await request.json();
     const { action } = body;
@@ -166,15 +163,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    return NextResponse.json(
-      { error: 'Unknown action' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
   } catch (error) {
     console.error('Failed to process request:', error);
-    return NextResponse.json(
-      { error: 'Failed to process request' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
   }
-}
+});

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAvailableTools } from '@/lib/cogitator';
+import { withAuth } from '@/lib/auth/middleware';
 
-export async function GET() {
+export const GET = withAuth(async () => {
   try {
     const tools = getAvailableTools();
 
@@ -22,4 +23,4 @@ export async function GET() {
     console.error('[api/tools] Failed to fetch tools:', error);
     return NextResponse.json({ error: 'Failed to fetch tools' }, { status: 500 });
   }
-}
+});

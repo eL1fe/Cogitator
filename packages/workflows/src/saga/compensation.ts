@@ -57,8 +57,8 @@ export interface CompensationReport {
  * Compensation Manager class
  */
 export class CompensationManager<S = WorkflowState> {
-  private steps: Map<string, CompensationStep<S>> = new Map();
-  private completedNodes: Map<string, unknown> = new Map();
+  private steps = new Map<string, CompensationStep<S>>();
+  private completedNodes = new Map<string, unknown>();
   private executionOrder: string[] = [];
 
   /**
@@ -230,7 +230,6 @@ export class CompensationManager<S = WorkflowState> {
       }
     }
 
-
     result.push(...parallel);
 
     const reverseOrder = [...this.executionOrder]
@@ -301,11 +300,11 @@ export function createCompensationManager<S = WorkflowState>(): CompensationMana
  * Compensation builder for fluent API
  */
 export class CompensationBuilder<S = WorkflowState> {
-  private steps: Array<{
+  private steps: {
     nodeId: string;
     fn: (state: S, result: unknown) => Promise<void>;
     options: Partial<CompensationStep<S>>;
-  }> = [];
+  }[] = [];
 
   /**
    * Add a compensation step

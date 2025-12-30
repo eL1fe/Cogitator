@@ -38,7 +38,6 @@ export class ThreadManager {
   private assistants = new Map<string, StoredAssistant>();
   private files = new Map<string, { id: string; content: Buffer; filename: string; created_at: number }>();
 
-
   createAssistant(params: {
     model: string;
     name?: string;
@@ -83,7 +82,6 @@ export class ThreadManager {
     return Array.from(this.assistants.values());
   }
 
-
   createThread(metadata?: Record<string, string>): Thread {
     const id = `thread_${nanoid()}`;
     const thread: Thread = {
@@ -104,7 +102,6 @@ export class ThreadManager {
   deleteThread(id: string): boolean {
     return this.threads.delete(id);
   }
-
 
   addMessage(threadId: string, request: CreateMessageRequest): Message | undefined {
     const stored = this.threads.get(threadId);
@@ -186,9 +183,9 @@ export class ThreadManager {
   /**
    * Get messages in Cogitator format for LLM calls
    */
-  getMessagesForLLM(threadId: string): Array<{ role: 'user' | 'assistant'; content: string }> {
+  getMessagesForLLM(threadId: string): { role: 'user' | 'assistant'; content: string }[] {
     const messages = this.listMessages(threadId, { order: 'asc' });
-    
+
     return messages.map((msg) => ({
       role: msg.role,
       content: this.extractTextContent(msg.content),
@@ -238,13 +235,12 @@ export class ThreadManager {
     return message;
   }
 
-
   addFile(content: Buffer, filename: string): { id: string; filename: string; created_at: number } {
     const id = `file_${nanoid()}`;
     const created_at = Math.floor(Date.now() / 1000);
-    
+
     this.files.set(id, { id, content, filename, created_at });
-    
+
     return { id, filename, created_at };
   }
 
@@ -255,7 +251,6 @@ export class ThreadManager {
   deleteFile(id: string): boolean {
     return this.files.delete(id);
   }
-
 
   private normalizeContent(content: string | unknown[]): MessageContent[] {
     if (typeof content === 'string') {
@@ -270,7 +265,7 @@ export class ThreadManager {
       ];
     }
 
-    return (content as Array<{ type: string; text?: string }>).map((part) => {
+    return (content as { type: string; text?: string }[]).map((part) => {
       if (part.type === 'text' && typeof part.text === 'string') {
         return {
           type: 'text' as const,
@@ -291,4 +286,3 @@ export class ThreadManager {
       .join('\n');
   }
 }
-

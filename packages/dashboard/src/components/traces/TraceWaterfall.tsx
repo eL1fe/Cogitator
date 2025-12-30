@@ -37,7 +37,7 @@ export function TraceWaterfall({ spans }: TraceWaterfallProps) {
   }
 
   const flattenedSpans = flattenSpanTree(spans);
-  
+
   const minTime = Math.min(...flattenedSpans.map((s) => s.startTime));
   const maxTime = Math.max(...flattenedSpans.map((s) => s.endTime || s.startTime + (s.duration || 0)));
   const totalDuration = maxTime - minTime;
@@ -72,12 +72,12 @@ export function TraceWaterfall({ spans }: TraceWaterfallProps) {
         <div className="divide-y divide-border-subtle max-h-[500px] overflow-y-auto">
           {flattenedSpans.map((span) => {
             const depth = depthMap.get(span.id) || 0;
-            const left = totalDuration > 0 
-              ? ((span.startTime - minTime) / totalDuration) * 100 
+            const left = totalDuration > 0
+              ? ((span.startTime - minTime) / totalDuration) * 100
               : 0;
             const duration = span.duration || (span.endTime ? span.endTime - span.startTime : 0);
-            const width = totalDuration > 0 
-              ? (duration / totalDuration) * 100 
+            const width = totalDuration > 0
+              ? (duration / totalDuration) * 100
               : 1;
             const isSelected = selectedSpan?.id === span.id;
 

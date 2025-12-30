@@ -1,5 +1,6 @@
-import { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getSubscriber, CHANNELS } from '@/lib/redis';
+import { withAuth } from '@/lib/auth/middleware';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,13 +14,13 @@ const CHANNEL_TO_EVENT: Record<string, string> = {
   [CHANNELS.AGENT_STATUS]: 'agent',
 };
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request) => {
   const encoder = new TextEncoder();
-  
+
   const stream = new ReadableStream({
     async start(controller) {
       const subscriber = await getSubscriber();
-      
+
       const sendEvent = (event: string, data: unknown) => {
         const message = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
         controller.enqueue(encoder.encode(message));
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
       }, 30000);
 
       const channels = Object.values(CHANNELS);
-      
+
       try {
         for (const channel of channels) {
           await subscriber.subscribe(channel);
@@ -40,13 +41,13 @@ export async function GET(request: NextRequest) {
           try {
             const data = JSON.parse(message);
             const eventName = CHANNEL_TO_EVENT[channel] || channel.split(':').pop() || 'message';
-            
+
             let eventType: string | undefined;
             if (channel === CHANNELS.RUN_STARTED) eventType = 'started';
             else if (channel === CHANNELS.RUN_COMPLETED) eventType = 'completed';
             else if (channel === CHANNELS.RUN_FAILED) eventType = 'failed';
             else if (channel === CHANNELS.TOOL_CALL) eventType = 'toolCall';
-            
+
             sendEvent(eventName, {
               ...data,
               type: eventType,
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
           }
         });
 
-        sendEvent('connected', { 
+        sendEvent('connected', {
           channels,
           timestamp: Date.now(),
         });
@@ -77,11 +78,11 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  return new Response(stream, {
+  return new NextResponse(stream, {
     headers: {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
     },
   });
-}
+});

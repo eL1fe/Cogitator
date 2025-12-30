@@ -192,9 +192,9 @@ export class ConsensusStrategy extends BaseStrategy {
   }
 
   private extractVote(output: string, agent: SwarmAgent, round: number): Vote | null {
-    const voteMatch = output.match(/VOTE:\s*([^\n]+)/i);
+    const voteMatch = /VOTE:\s*([^\n]+)/i.exec(output);
     if (!voteMatch) {
-      const decisionMatch = output.match(/(?:decision|vote|choose|select):\s*([^\n]+)/i);
+      const decisionMatch = /(?:decision|vote|choose|select):\s*([^\n]+)/i.exec(output);
       if (!decisionMatch) return null;
 
       return {

@@ -16,8 +16,8 @@ import type {
   Workflow,
   WorkflowState,
 } from '@cogitator/types';
-import { CronTriggerExecutor, createCronTrigger } from './cron-trigger.js';
-import { WebhookTriggerExecutor, createWebhookTrigger, type WebhookRequest } from './webhook-trigger.js';
+import { type CronTriggerExecutor, createCronTrigger } from './cron-trigger.js';
+import { type WebhookTriggerExecutor, createWebhookTrigger, type WebhookRequest } from './webhook-trigger.js';
 
 /**
  * Trigger store interface
@@ -396,10 +396,10 @@ export class DefaultTriggerManager implements ITriggerManager {
    */
   async registerWorkflow<S extends WorkflowState>(
     workflow: Workflow<S>,
-    triggers: Array<{
+    triggers: {
       type: 'cron' | 'webhook' | 'event';
       config: CronTriggerConfig | WebhookTriggerConfig | EventTriggerConfig;
-    }>
+    }[]
   ): Promise<string[]> {
     const ids: string[] = [];
 
@@ -490,7 +490,7 @@ export class DefaultTriggerManager implements ITriggerManager {
         : payload;
 
       const trigger = await this.store.get(id);
-      if (!trigger || !trigger.enabled) return;
+      if (!trigger?.enabled) return;
 
       const context: TriggerContext = {
         triggerId: id,

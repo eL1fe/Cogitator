@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getRuns, initializeExtendedSchema } from '@/lib/cogitator/db';
 import { initializeSchema } from '@/lib/db';
+import { withAuth } from '@/lib/auth/middleware';
 
 let initialized = false;
 
@@ -16,7 +17,7 @@ async function ensureInitialized() {
   }
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request) => {
   try {
     await ensureInitialized();
 
@@ -32,4 +33,4 @@ export async function GET(request: NextRequest) {
     console.error('[api/runs] Failed to fetch runs:', error);
     return NextResponse.json({ error: 'Failed to fetch runs' }, { status: 500 });
   }
-}
+});

@@ -30,4 +30,3 @@ export const BUILTIN_PROVIDERS = [
   { id: 'replicate', name: 'Replicate', website: 'https://replicate.com' },
   { id: 'xai', name: 'xAI', website: 'https://x.ai' },
 ];
-

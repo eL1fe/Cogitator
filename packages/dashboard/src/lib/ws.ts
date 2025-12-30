@@ -7,9 +7,9 @@ export class WebSocketClient {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
-  private messageHandlers: Map<string, Set<MessageHandler>> = new Map();
-  private onConnectHandlers: Set<ConnectionHandler> = new Set();
-  private onDisconnectHandlers: Set<ConnectionHandler> = new Set();
+  private messageHandlers = new Map<string, Set<MessageHandler>>();
+  private onConnectHandlers = new Set<ConnectionHandler>();
+  private onDisconnectHandlers = new Set<ConnectionHandler>();
 
   constructor(url: string) {
     this.url = url;
@@ -119,4 +119,3 @@ export function getWebSocketClient(): WebSocketClient {
   }
   return wsClient;
 }
-

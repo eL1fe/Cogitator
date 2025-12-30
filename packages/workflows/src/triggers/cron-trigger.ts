@@ -251,7 +251,7 @@ export class CronTriggerExecutor {
    */
   async catchUp(triggerId: string, since: number): Promise<CronTriggerResult[]> {
     const state = this.triggers.get(triggerId);
-    if (!state || !state.config.catchUp) {
+    if (!state?.config.catchUp) {
       return [];
     }
 
@@ -298,7 +298,7 @@ export class CronTriggerExecutor {
 
   private scheduleNext(triggerId: string): void {
     const state = this.triggers.get(triggerId);
-    if (!state || !state.enabled) return;
+    if (!state?.enabled) return;
 
     const existingInterval = this.intervals.get(triggerId);
     if (existingInterval) {
@@ -320,7 +320,7 @@ export class CronTriggerExecutor {
       const checkInterval = this.calculateCheckInterval(state.config);
       const interval = setInterval(async () => {
         const currentState = this.triggers.get(triggerId);
-        if (!currentState || !currentState.enabled) {
+        if (!currentState?.enabled) {
           clearInterval(interval);
           return;
         }

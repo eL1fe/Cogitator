@@ -82,14 +82,14 @@ export default function RunsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  
+
   const { connected, subscribe } = useEvents({ autoConnect: true });
 
   const fetchRuns = useCallback(async () => {
     try {
       let url = '/api/runs?limit=100';
       if (statusFilter) url += `&status=${statusFilter}`;
-      
+
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
@@ -111,7 +111,7 @@ export default function RunsPage() {
   useEffect(() => {
     const unsubscribe = subscribe('run', (data: unknown) => {
       const event = data as RunEvent;
-      
+
       if (event.type === 'started') {
         const newRun: Run = {
           id: event.runId,
@@ -122,7 +122,7 @@ export default function RunsPage() {
           totalTokens: 0,
           cost: 0,
         };
-        
+
         setRuns((prev) => {
           if (prev.some((r) => r.id === newRun.id)) return prev;
           return [newRun, ...prev];

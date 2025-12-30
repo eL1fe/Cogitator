@@ -3,8 +3,8 @@
  */
 
 import { CogitatorError, ErrorCode } from '@cogitator/types';
-import { CircuitBreakerRegistry } from './circuit-breaker.js';
-import { withRetry, RetryOptions } from './retry.js';
+import { type CircuitBreakerRegistry } from './circuit-breaker.js';
+import { withRetry, type RetryOptions } from './retry.js';
 
 /**
  * Fallback chain configuration
@@ -13,10 +13,10 @@ export interface FallbackConfig<T> {
   /** Primary operation */
   primary: () => Promise<T>;
   /** Fallback operations in order of preference */
-  fallbacks: Array<{
+  fallbacks: {
     name: string;
     fn: () => Promise<T>;
-  }>;
+  }[];
   /** Retry options for each operation */
   retry?: RetryOptions;
   /** Circuit breaker registry for tracking failures */
@@ -72,7 +72,6 @@ export async function withFallback<T>(config: FallbackConfig<T>): Promise<T> {
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
-      // If not the last operation, try fallback
       if (i < operations.length - 1) {
         const nextOp = operations[i + 1];
         onFallback?.(op.name, nextOp.name, lastError);
@@ -80,7 +79,6 @@ export async function withFallback<T>(config: FallbackConfig<T>): Promise<T> {
     }
   }
 
-  // All operations failed
   throw new CogitatorError({
     message: `All fallback options exhausted: ${lastError?.message}`,
     code: ErrorCode.INTERNAL_ERROR,
@@ -95,10 +93,10 @@ export async function withFallback<T>(config: FallbackConfig<T>): Promise<T> {
  * LLM fallback chain configuration
  */
 export interface LLMFallbackConfig {
-  providers: Array<{
+  providers: {
     provider: string;
     model: string;
-  }>;
+  }[];
 }
 
 /**

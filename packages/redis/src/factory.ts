@@ -60,7 +60,7 @@ export async function createRedisClient(config: RedisConfig): Promise<RedisClien
   const ioredis = (ioredisModule.default ?? ioredisModule) as unknown as {
     new (url: string, options?: Record<string, unknown>): RawRedisClient;
     Cluster: new (
-      nodes: Array<{ host: string; port: number }>,
+      nodes: { host: string; port: number }[],
       options?: Record<string, unknown>
     ) => RawRedisClient;
   };
@@ -75,7 +75,7 @@ export async function createRedisClient(config: RedisConfig): Promise<RedisClien
 interface IoRedis {
   new (url: string, options?: Record<string, unknown>): RawRedisClient;
   Cluster: new (
-    nodes: Array<{ host: string; port: number }>,
+    nodes: { host: string; port: number }[],
     options?: Record<string, unknown>
   ) => RawRedisClient;
 }

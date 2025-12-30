@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import {
   getWorkflows,
   createWorkflow,
   initializeExtendedSchema,
 } from '@/lib/cogitator/db';
 import { initializeSchema } from '@/lib/db';
+import { withAuth } from '@/lib/auth/middleware';
 
 let initialized = false;
 
@@ -20,7 +21,7 @@ async function ensureInitialized() {
   }
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request) => {
   try {
     await ensureInitialized();
 
@@ -44,9 +45,9 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
     await ensureInitialized();
     const body = await request.json();
@@ -74,5 +75,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
+});

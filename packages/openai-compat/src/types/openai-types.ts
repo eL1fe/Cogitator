@@ -4,7 +4,6 @@
  * Type definitions that mirror the OpenAI Assistants API
  */
 
-
 export interface OpenAIError {
   error: {
     message: string;
@@ -21,7 +20,6 @@ export interface ListResponse<T> {
   last_id?: string;
   has_more: boolean;
 }
-
 
 export interface Assistant {
   id: string;
@@ -87,7 +85,6 @@ export interface UpdateAssistantRequest {
   response_format?: ResponseFormat;
 }
 
-
 export interface Thread {
   id: string;
   object: 'thread';
@@ -110,7 +107,6 @@ export interface CreateThreadRequest {
   metadata?: Record<string, string>;
   tool_resources?: ToolResources;
 }
-
 
 export interface Message {
   id: string;
@@ -157,7 +153,7 @@ export interface ImageUrlContent {
 
 export interface Attachment {
   file_id: string;
-  tools: Array<{ type: 'code_interpreter' } | { type: 'file_search' }>;
+  tools: ({ type: 'code_interpreter' } | { type: 'file_search' })[];
 }
 
 export interface CreateMessageRequest {
@@ -171,7 +167,6 @@ export type MessageContentPart =
   | { type: 'text'; text: string }
   | { type: 'image_url'; image_url: { url: string; detail?: 'auto' | 'low' | 'high' } }
   | { type: 'image_file'; image_file: { file_id: string; detail?: 'auto' | 'low' | 'high' } };
-
 
 export interface Run {
   id: string;
@@ -285,7 +280,6 @@ export interface ToolOutput {
   output: string;
 }
 
-
 export interface RunStep {
   id: string;
   object: 'thread.run.step';
@@ -344,7 +338,6 @@ export interface FunctionCall {
   output: string | null;
 }
 
-
 export interface FileObject {
   id: string;
   object: 'file';
@@ -370,7 +363,6 @@ export interface UploadFileRequest {
   purpose: FilePurpose;
   filename?: string;
 }
-
 
 export type StreamEvent =
   | { event: 'thread.created'; data: Thread }
@@ -420,4 +412,3 @@ export type MessageContentDelta =
   | { index: number; type: 'text'; text?: { value?: string; annotations?: TextAnnotation[] } }
   | { index: number; type: 'image_file'; image_file?: { file_id?: string } }
   | { index: number; type: 'image_url'; image_url?: { url?: string } };
-

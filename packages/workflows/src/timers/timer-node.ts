@@ -367,7 +367,7 @@ export const Duration = {
  * Supports: "1s", "5m", "2h", "1d", "1w"
  */
 export function parseDuration(duration: string): number {
-  const match = duration.match(/^(\d+(?:\.\d+)?)\s*(ms|s|m|h|d|w)$/i);
+  const match = /^(\d+(?:\.\d+)?)\s*(ms|s|m|h|d|w)$/i.exec(duration);
   if (!match) {
     throw new Error(`Invalid duration format: ${duration}`);
   }

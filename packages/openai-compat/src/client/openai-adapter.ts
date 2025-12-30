@@ -5,7 +5,7 @@
  * Creates an in-process adapter that can be used with the SDK's baseURL.
  */
 
-import { Cogitator, Agent } from '@cogitator/core';
+import { type Cogitator, Agent } from '@cogitator/core';
 import type { Tool } from '@cogitator/types';
 import { ThreadManager, type StoredAssistant } from './thread-manager.js';
 import { nanoid } from 'nanoid';
@@ -65,7 +65,6 @@ export class OpenAIAdapter {
     return this.threadManager;
   }
 
-
   createAssistant(params: {
     model: string;
     name?: string;
@@ -118,7 +117,6 @@ export class OpenAIAdapter {
     };
   }
 
-
   createThread(metadata?: Record<string, string>) {
     return this.threadManager.createThread(metadata);
   }
@@ -130,7 +128,6 @@ export class OpenAIAdapter {
   deleteThread(id: string) {
     return this.threadManager.deleteThread(id);
   }
-
 
   addMessage(threadId: string, params: { role: 'user' | 'assistant'; content: string; metadata?: Record<string, string> }) {
     return this.threadManager.addMessage(threadId, params);
@@ -149,7 +146,6 @@ export class OpenAIAdapter {
   }) {
     return this.threadManager.listMessages(threadId, options);
   }
-
 
   /**
    * Create and execute a run
@@ -227,7 +223,7 @@ export class OpenAIAdapter {
    */
   getRun(threadId: string, runId: string): Run | undefined {
     const state = this.runs.get(runId);
-    if (state && state.run.thread_id === threadId) {
+    if (state?.run.thread_id === threadId) {
       return state.run;
     }
     return undefined;
@@ -238,7 +234,7 @@ export class OpenAIAdapter {
    */
   cancelRun(threadId: string, runId: string): Run | undefined {
     const state = this.runs.get(runId);
-    if (state && state.run.thread_id === threadId) {
+    if (state?.run.thread_id === threadId) {
       state.abortController.abort();
       state.run.status = 'cancelled';
       state.run.cancelled_at = Math.floor(Date.now() / 1000);
@@ -256,7 +252,7 @@ export class OpenAIAdapter {
     request: SubmitToolOutputsRequest
   ): Promise<Run | undefined> {
     const state = this.runs.get(runId);
-    if (!state || state.run.thread_id !== threadId) {
+    if (state?.run.thread_id !== threadId) {
       return undefined;
     }
 
@@ -276,7 +272,6 @@ export class OpenAIAdapter {
 
     return state.run;
   }
-
 
   private async executeRun(
     runId: string,
@@ -357,4 +352,3 @@ export function createOpenAIAdapter(
 ): OpenAIAdapter {
   return new OpenAIAdapter(cogitator, options);
 }
-

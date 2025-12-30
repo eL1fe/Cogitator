@@ -42,7 +42,7 @@ export function useSSE(url: string, options: SSEOptions = {}) {
       setConnected(false);
       setError('Connection lost');
       onError?.(event);
-      
+
       eventSource.close();
       eventSourceRef.current = null;
 
@@ -95,4 +95,3 @@ export function useSSE(url: string, options: SSEOptions = {}) {
 
   return { connected, error, disconnect, reconnect: connect };
 }
-

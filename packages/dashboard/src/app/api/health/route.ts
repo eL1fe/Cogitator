@@ -23,16 +23,8 @@ interface HealthResponse {
 }
 
 async function checkWasmAvailable(): Promise<boolean> {
-  try {
-    // Check if extism module is available without importing it directly
-    // This avoids build-time dependency issues
-    const module = await import('module');
-    const require = module.createRequire(import.meta.url);
-    require.resolve('@extism/extism');
-    return true;
-  } catch {
-    return false;
-  }
+
+  return process.env.COGITATOR_WASM_ENABLED === 'true';
 }
 
 export async function GET() {
@@ -95,7 +87,6 @@ export async function GET() {
     health.services.ollama = { status: 'down' };
   }
 
-  // Check WASM availability
   try {
     const wasmAvailable = await checkWasmAvailable();
     health.services.wasm = {
@@ -110,7 +101,7 @@ export async function GET() {
     health.status = 'unhealthy';
   }
 
-  const statusCode = health.status === 'healthy' ? 200 : 
+  const statusCode = health.status === 'healthy' ? 200 :
                      health.status === 'degraded' ? 200 : 503;
 
   return NextResponse.json(health, { status: statusCode });

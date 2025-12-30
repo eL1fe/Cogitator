@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { authenticateUser, initializeUsersSchema, ensureDefaultAdmin } from '@/lib/auth/users';
 import { createAccessToken, createRefreshToken } from '@/lib/auth/jwt';
+import { loginSchema } from '@/lib/validation';
+import { rateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 let schemaInitialized = false;
 
@@ -15,18 +17,30 @@ async function ensureSchema() {
 
 export async function POST(request: NextRequest) {
   try {
+
+    const rateLimitResult = await rateLimit(request, RATE_LIMITS.auth);
+    if (!rateLimitResult.allowed) {
+      return rateLimitResult.response!;
+    }
+
     await ensureSchema();
 
     const body = await request.json();
-    const { email, password } = body;
-
-    if (!email || !password) {
+    const parsed = loginSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        {
+          error: 'Validation failed',
+          details: parsed.error.errors.map(e => ({
+            path: e.path.join('.'),
+            message: e.message,
+          })),
+        },
         { status: 400 }
       );
     }
 
+    const { email, password } = parsed.data;
     const user = await authenticateUser(email, password);
 
     if (!user) {

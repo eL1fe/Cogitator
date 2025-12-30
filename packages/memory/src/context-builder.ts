@@ -55,7 +55,7 @@ export class ContextBuilder {
     let usedTokens = 0;
     const messages: Message[] = [];
     const facts: Fact[] = [];
-    const semanticResults: Array<Embedding & { score: number }> = [];
+    const semanticResults: (Embedding & { score: number })[] = [];
 
     if (this.config.includeSystemPrompt && options.systemPrompt) {
       const systemMsg: Message = { role: 'system', content: options.systemPrompt };

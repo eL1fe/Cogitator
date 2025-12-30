@@ -65,7 +65,7 @@ export class SwarmCoordinator implements SwarmCoordinatorInterface {
   }
 
   private initializeAgents(): void {
-    const agentEntries: Array<{ agent: Agent; metadata: SwarmAgentMetadata }> = [];
+    const agentEntries: { agent: Agent; metadata: SwarmAgentMetadata }[] = [];
 
     if (this.config.supervisor) {
       agentEntries.push({
@@ -221,7 +221,7 @@ export class SwarmCoordinator implements SwarmCoordinatorInterface {
   }
 
   async runAgentsParallel(
-    agents: Array<{ name: string; input: string; context?: Record<string, unknown> }>,
+    agents: { name: string; input: string; context?: Record<string, unknown> }[],
     maxConcurrency?: number
   ): Promise<Map<string, RunResult>> {
     const concurrency = maxConcurrency ?? this.config.resources?.maxConcurrency ?? 4;

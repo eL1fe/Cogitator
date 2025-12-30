@@ -211,6 +211,110 @@ If you discover a security vulnerability:
 
 ## Security Audits
 
-- [ ] Initial security review (Month 9)
+- [x] Initial security review (Month 9) - Completed
 - [ ] External penetration test (planned)
 - [ ] SOC 2 compliance (planned for cloud offering)
+
+---
+
+## Internal Security Review (Month 9)
+
+### WASM Sandbox Security Analysis
+
+**Reviewed**: December 2024
+
+**Implementation**: `packages/sandbox/src/executors/wasm.ts`
+
+#### Security Properties Verified
+
+| Property | Status | Notes |
+|----------|--------|-------|
+| Memory isolation | ✅ | Extism provides linear memory bounds checking |
+| No filesystem access | ✅ | WASM modules cannot access host filesystem |
+| No network access | ✅ | No network primitives available in WASM |
+| Timeout enforcement | ✅ | Promise.race with configurable timeout |
+| Output size limits | ✅ | MAX_OUTPUT_SIZE = 50KB |
+| Plugin caching | ✅ | LRU cache with configurable size |
+
+#### WASI Configuration
+
+When `wasi: true` is enabled:
+- Limited filesystem access may be exposed
+- Environment variables may be accessible
+- **Recommendation**: Keep `wasi: false` for untrusted code
+
+#### Known Attack Vectors
+
+1. **Resource exhaustion**: Mitigated by timeout and output limits
+2. **Memory bombs**: Mitigated by Extism memory limits
+3. **Infinite loops**: Mitigated by execution timeout
+4. **Side-channel attacks**: Low risk in current implementation
+
+#### Recommendations
+
+1. Pin Extism version in production (`@extism/extism@^1.0.3`)
+2. Audit WASM modules before deployment
+3. Monitor plugin cache memory usage
+4. Set conservative timeouts (< 30s recommended)
+
+### Docker Sandbox Security Analysis
+
+**Reviewed**: December 2024
+
+**Implementation**: `packages/sandbox/src/executors/docker.ts`
+
+#### Security Controls Verified
+
+| Control | Status | Implementation |
+|---------|--------|----------------|
+| Network isolation | ✅ | `NetworkMode: 'none'` |
+| Capability dropping | ✅ | `CapDrop: ['ALL']` |
+| Privilege escalation | ✅ | `no-new-privileges` |
+| Non-root user | ✅ | User namespace mapping |
+| Resource limits | ✅ | Memory, CPU, PID limits |
+| Timeout | ✅ | Container kill after timeout |
+
+#### Container Pool Security
+
+- Containers are reused to reduce cold start
+- Idle containers are cleaned up after 60s
+- Max pool size prevents resource exhaustion
+
+#### Recommendations
+
+1. Use distroless or scratch-based images
+2. Enable seccomp profiles in production
+3. Consider gVisor or Kata Containers for additional isolation
+4. Regularly update base images
+
+### Native Executor Security
+
+**Status**: Development use only
+
+**WARNING**: The native executor provides NO isolation and should never be used with untrusted code in production.
+
+#### Use Cases
+
+- Local development and testing
+- Trusted internal tools only
+- Debugging and profiling
+
+---
+
+## Security Incident Response
+
+### Sandbox Escape Detection
+
+Monitor for:
+- Unexpected network connections from sandbox hosts
+- File access outside designated paths
+- Process creation outside containers
+- Memory usage anomalies
+
+### Response Procedure
+
+1. **Isolate**: Stop affected agents and sandboxes
+2. **Contain**: Revoke API keys if compromised
+3. **Investigate**: Check audit logs and traces
+4. **Remediate**: Patch vulnerability, rotate secrets
+5. **Report**: Document incident and notify affected users

@@ -18,7 +18,6 @@ export async function processWorkflowJob(
   const { workflowConfig, input, runId } = payload;
   const startTime = Date.now();
 
-
   console.warn(
     `[worker] Workflow "${workflowConfig.name}" (${runId}) execution not fully implemented`
   );

@@ -14,7 +14,7 @@ interface SpanRow {
   end_time: string | null;
   duration: number | null;
   attributes: Record<string, unknown> | null;
-  events: Array<{ name: string; timestamp: number; attributes?: Record<string, unknown> }> | null;
+  events: { name: string; timestamp: number; attributes?: Record<string, unknown> }[] | null;
 }
 
 function rowToSpan(row: SpanRow): TraceSpan {
@@ -39,7 +39,7 @@ export async function getSpansByRunId(runId: string): Promise<TraceSpan[]> {
     'SELECT * FROM dashboard_spans WHERE run_id = $1 ORDER BY start_time',
     [runId]
   );
-  
+
   const spans = rows.map(rowToSpan);
   return buildSpanTree(spans);
 }
@@ -49,7 +49,7 @@ export async function getSpansByTraceId(traceId: string): Promise<TraceSpan[]> {
     'SELECT * FROM dashboard_spans WHERE trace_id = $1 ORDER BY start_time',
     [traceId]
   );
-  
+
   const spans = rows.map(rowToSpan);
   return buildSpanTree(spans);
 }
@@ -90,7 +90,7 @@ export async function createSpan(data: {
   attributes?: Record<string, unknown>;
 }): Promise<string> {
   const id = `span_${nanoid(12)}`;
-  
+
   await execute(
     `INSERT INTO dashboard_spans (id, run_id, trace_id, parent_id, name, kind, start_time, attributes)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
@@ -113,20 +113,20 @@ export async function endSpan(id: string, data: {
   status: 'ok' | 'error' | 'unset';
   endTime: number;
   attributes?: Record<string, unknown>;
-  events?: Array<{ name: string; timestamp: number; attributes?: Record<string, unknown> }>;
+  events?: { name: string; timestamp: number; attributes?: Record<string, unknown> }[];
 }): Promise<void> {
   const span = await queryOne<SpanRow>(
     'SELECT start_time FROM dashboard_spans WHERE id = $1',
     [id]
   );
-  
+
   if (!span) return;
 
   const duration = data.endTime - parseInt(span.start_time);
 
   await execute(
-    `UPDATE dashboard_spans 
-     SET status = $1, end_time = $2, duration = $3, 
+    `UPDATE dashboard_spans
+     SET status = $1, end_time = $2, duration = $3,
          attributes = COALESCE(attributes, '{}'::jsonb) || $4::jsonb,
          events = $5
      WHERE id = $6`,
@@ -147,10 +147,9 @@ export async function addSpanEvent(id: string, event: {
   attributes?: Record<string, unknown>;
 }): Promise<void> {
   await execute(
-    `UPDATE dashboard_spans 
+    `UPDATE dashboard_spans
      SET events = COALESCE(events, '[]'::jsonb) || $1::jsonb
      WHERE id = $2`,
     [JSON.stringify([event]), id]
   );
 }
-

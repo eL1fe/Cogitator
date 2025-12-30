@@ -22,7 +22,7 @@ export function createVotingTools(
   blackboard: Blackboard,
   events: SwarmEventEmitter,
   currentAgent: string,
-  agentWeight: number = 1
+  agentWeight = 1
 ) {
   const castVote = tool({
     name: 'cast_vote',

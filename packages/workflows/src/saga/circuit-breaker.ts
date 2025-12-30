@@ -67,7 +67,7 @@ interface CircuitBreakerInternalConfig {
 
 export class CircuitBreaker {
   private config: CircuitBreakerInternalConfig;
-  private breakers: Map<string, CircuitBreakerData> = new Map();
+  private breakers = new Map<string, CircuitBreakerData>();
   private eventHandlers: CircuitBreakerEventHandler[] = [];
 
   constructor(config: Partial<CircuitBreakerConfig> = {}) {
@@ -197,7 +197,7 @@ export class CircuitBreaker {
   /**
    * Record a successful execution
    */
-  recordSuccess(nodeId: string, duration: number = 0): void {
+  recordSuccess(nodeId: string, duration = 0): void {
     const breaker = this.getBreaker(nodeId);
 
     breaker.successes++;

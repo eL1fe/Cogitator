@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import {
   getSwarms,
   createSwarm,
@@ -6,6 +6,7 @@ import {
   initializeExtendedSchema,
 } from '@/lib/cogitator/db';
 import { initializeSchema } from '@/lib/db';
+import { withAuth } from '@/lib/auth/middleware';
 
 let initialized = false;
 
@@ -30,7 +31,7 @@ const VALID_STRATEGIES = [
   'debate',
 ] as const;
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request) => {
   try {
     await ensureInitialized();
 
@@ -52,9 +53,9 @@ export async function GET(request: NextRequest) {
     console.error('[api/swarms] Failed to fetch swarms:', error);
     return NextResponse.json({ error: 'Failed to fetch swarms' }, { status: 500 });
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
     await ensureInitialized();
     const body = await request.json();
@@ -98,5 +99,4 @@ export async function POST(request: NextRequest) {
     console.error('[api/swarms] Failed to create swarm:', error);
     return NextResponse.json({ error: 'Failed to create swarm' }, { status: 500 });
   }
-}
-
+});

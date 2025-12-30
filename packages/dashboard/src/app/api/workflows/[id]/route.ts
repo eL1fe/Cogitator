@@ -1,13 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getWorkflow, updateWorkflow, deleteWorkflow } from '@/lib/cogitator/db';
+import { withAuth } from '@/lib/auth/middleware';
 
-interface RouteParams {
-  params: Promise<{ id: string }>;
-}
-
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export const GET = withAuth(async (_request, context) => {
   try {
-    const { id } = await params;
+    const { id } = await context!.params!;
     const workflow = await getWorkflow(id);
 
     if (!workflow) {
@@ -22,11 +19,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export const PATCH = withAuth(async (request, context) => {
   try {
-    const { id } = await params;
+    const { id } = await context!.params!;
     const body = await request.json();
 
     const workflow = await updateWorkflow(id, {
@@ -49,11 +46,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export const DELETE = withAuth(async (_request, context) => {
   try {
-    const { id } = await params;
+    const { id } = await context!.params!;
     const deleted = await deleteWorkflow(id);
 
     if (!deleted) {
@@ -68,5 +65,4 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     );
   }
-}
-
+});

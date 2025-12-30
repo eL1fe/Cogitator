@@ -37,4 +37,3 @@ export const useAgentsStore = create<AgentsState>((set) => ({
   setError: (error) => set({ error }),
   selectAgent: (id) => set({ selectedAgentId: id }),
 }));
-

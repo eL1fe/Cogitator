@@ -127,7 +127,7 @@ export const runCommand = new Command('run')
         if (configPath.endsWith('.json')) {
           config = JSON.parse(raw);
         } else {
-          config = await loadConfig();
+          config = loadConfig();
         }
       } catch {
       }

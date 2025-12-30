@@ -45,7 +45,7 @@ export function RunDetail({ runId }: RunDetailProps) {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await fetch(`/api/runs/${runId}`);
         if (!response.ok) {
           if (response.status === 404) {
@@ -55,7 +55,7 @@ export function RunDetail({ runId }: RunDetailProps) {
           }
           return;
         }
-        
+
         const data = await response.json();
         setRun(data);
       } catch (err) {
@@ -287,8 +287,8 @@ export function RunDetail({ runId }: RunDetailProps) {
                     </span>
                   )}
                 </div>
-                <Badge 
-                  variant={tool.status === 'success' ? 'success' : tool.status === 'error' ? 'error' : 'warning'} 
+                <Badge
+                  variant={tool.status === 'success' ? 'success' : tool.status === 'error' ? 'error' : 'warning'}
                   size="sm"
                 >
                   {tool.status}
@@ -306,8 +306,8 @@ export function RunDetail({ runId }: RunDetailProps) {
                     <div>
                       <p className="text-xs text-text-tertiary mb-1">Result</p>
                       <pre className="bg-bg-elevated rounded-lg p-3 text-xs font-mono text-text-secondary overflow-x-auto max-h-64">
-                        {typeof tool.result === 'string' 
-                          ? tool.result 
+                        {typeof tool.result === 'string'
+                          ? tool.result
                           : JSON.stringify(tool.result, null, 2)}
                       </pre>
                     </div>

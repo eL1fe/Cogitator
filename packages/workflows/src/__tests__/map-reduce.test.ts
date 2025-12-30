@@ -26,12 +26,12 @@ interface TestState {
   multiplier?: number;
 }
 
-interface ObjectState {
-  items: Array<{ value: number }>;
+interface _ObjectState {
+  items: { value: number }[];
 }
 
 interface TypedItemState {
-  items: Array<{ type: string; value: number }>;
+  items: { type: string; value: number }[];
 }
 
 describe('Map-Reduce Pattern', () => {
@@ -435,8 +435,8 @@ describe('Map-Reduce Pattern', () => {
         const config = groupBy<{ type: string; value: number }, string>((result) => result.type);
         const result = executeReduce(mapResults, state, { name: 'groupBy', ...config });
 
-        expect(result['a']).toHaveLength(2);
-        expect(result['b']).toHaveLength(1);
+        expect(result.a).toHaveLength(2);
+        expect(result.b).toHaveLength(1);
       });
     });
 

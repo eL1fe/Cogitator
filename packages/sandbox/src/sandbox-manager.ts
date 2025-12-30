@@ -10,7 +10,7 @@ import type {
   SandboxResult,
   SandboxType,
 } from '@cogitator/types';
-import { BaseSandboxExecutor } from './executors/base.js';
+import { type BaseSandboxExecutor } from './executors/base.js';
 import { DockerSandboxExecutor } from './executors/docker.js';
 import { NativeSandboxExecutor } from './executors/native.js';
 import { WasmSandboxExecutor } from './executors/wasm.js';

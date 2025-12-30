@@ -64,7 +64,7 @@ export abstract class BaseIdempotencyStore implements IdempotencyStore {
  * In-memory idempotency store
  */
 export class InMemoryIdempotencyStore extends BaseIdempotencyStore {
-  private records: Map<string, IdempotencyRecord> = new Map();
+  private records = new Map<string, IdempotencyRecord>();
   private ttl: number;
   private cleanupInterval?: ReturnType<typeof setInterval>;
 

@@ -5,7 +5,7 @@
  * Supports graceful shutdown and health monitoring.
  */
 
-import { Worker, Job } from 'bullmq';
+import { Worker, type Job } from 'bullmq';
 import type {
   WorkerConfig,
   JobPayload,

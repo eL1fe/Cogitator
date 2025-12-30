@@ -39,10 +39,10 @@ export async function getOllamaModels(): Promise<OllamaModelInfo[]> {
     if (!response.ok) {
       throw new Error(`Ollama error: ${response.status}`);
     }
-    
+
     const data = await response.json();
     const models: OllamaModel[] = data.models || [];
-    
+
     return models.map((m) => ({
       name: m.name,
       displayName: formatModelName(m.name),
@@ -67,9 +67,9 @@ export async function getModelInfo(name: string): Promise<OllamaModelInfo | null
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
     });
-    
+
     if (!response.ok) return null;
-    
+
     const data = await response.json();
     return {
       name,
@@ -97,18 +97,18 @@ export async function pullModel(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, stream: true }),
     });
-    
+
     if (!response.ok || !response.body) {
       throw new Error(`Failed to pull model: ${response.status}`);
     }
-    
+
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    
+
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      
+
       const lines = decoder.decode(value).split('\n').filter(Boolean);
       for (const line of lines) {
         try {
@@ -121,7 +121,7 @@ export async function pullModel(
         }
       }
     }
-    
+
     return true;
   } catch (error) {
     console.error('Failed to pull model:', error);
@@ -186,4 +186,3 @@ function formatSize(bytes: number): string {
   if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 }
-

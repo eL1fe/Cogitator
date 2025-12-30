@@ -38,7 +38,7 @@ export class OpenAIEmbeddingService implements EmbeddingService {
     }
 
     const data = (await response.json()) as {
-      data: Array<{ embedding: number[] }>;
+      data: { embedding: number[] }[];
     };
 
     return data.data[0].embedding;
@@ -63,7 +63,7 @@ export class OpenAIEmbeddingService implements EmbeddingService {
     }
 
     const data = (await response.json()) as {
-      data: Array<{ embedding: number[]; index: number }>;
+      data: { embedding: number[]; index: number }[];
     };
 
     return data.data

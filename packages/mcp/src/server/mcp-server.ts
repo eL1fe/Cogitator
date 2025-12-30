@@ -13,7 +13,7 @@ import { resultToMCPContent, zodToJsonSchema } from '../adapter/tool-adapter.js'
 
 interface MCPCallToolResult {
   [key: string]: unknown;
-  content: Array<{ type: 'text'; text: string }>;
+  content: { type: 'text'; text: string }[];
   isError?: boolean;
 }
 
@@ -150,8 +150,8 @@ export class MCPServer {
       const result = await tool.execute(validatedArgs, context);
 
       const rawContent = resultToMCPContent(result);
-      
-      const content: Array<{ type: 'text'; text: string }> = rawContent.map((item) => {
+
+      const content: { type: 'text'; text: string }[] = rawContent.map((item) => {
         if (item.type === 'text') {
           return { type: 'text' as const, text: item.text };
         }

@@ -1,18 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getAuthenticatedUser } from '@/lib/auth/middleware';
+import { NextResponse } from 'next/server';
+import { withAuth, type AuthenticatedRequest } from '@/lib/auth/middleware';
 import { getUserById } from '@/lib/auth/users';
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request: AuthenticatedRequest) => {
   try {
-    const user = await getAuthenticatedUser(request);
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
-    }
-
+    const user = request.user!;
     const userData = await getUserById(user.id);
 
     return NextResponse.json({
@@ -25,4 +17,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

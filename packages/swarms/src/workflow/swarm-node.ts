@@ -118,16 +118,16 @@ export function conditionalSwarmNode<S extends WorkflowState = WorkflowState>(
  * Create a node that runs multiple swarms in parallel and merges results
  */
 export function parallelSwarmsNode<S extends WorkflowState = WorkflowState>(
-  swarms: Array<{
+  swarms: {
     swarm: Swarm | SwarmConfig;
     key: string;
     options?: SwarmNodeOptions<S>;
-  }>,
+  }[],
   mergeResults?: (results: Record<string, StrategyResult>) => Partial<S>
 ): WorkflowNode<S> {
   return {
     name: `parallel-swarms:${swarms.map(s => {
-      const swarm = s.swarm instanceof Swarm ? s.swarm : s.swarm as SwarmConfig;
+      const swarm = s.swarm instanceof Swarm ? s.swarm : s.swarm;
       return 'name' in swarm ? swarm.name : 'unnamed';
     }).join(',')}`,
     fn: async (ctx): Promise<NodeResult<S>> => {

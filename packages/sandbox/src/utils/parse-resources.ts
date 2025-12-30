@@ -7,7 +7,7 @@
  * @example parseMemory('256MB') => 268435456
  */
 export function parseMemory(memory: string): number {
-  const match = memory.match(/^(\d+(?:\.\d+)?)\s*(B|KB|MB|GB|TB)?$/i);
+  const match = /^(\d+(?:\.\d+)?)\s*(B|KB|MB|GB|TB)?$/i.exec(memory);
   if (!match) {
     throw new Error(`Invalid memory format: ${memory}`);
   }

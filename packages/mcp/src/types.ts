@@ -4,7 +4,6 @@
 
 import type { Tool } from '@cogitator/types';
 
-
 export type MCPTransportType = 'stdio' | 'http' | 'sse';
 
 export interface MCPClientConfig {
@@ -70,7 +69,6 @@ export interface MCPPromptMessage {
   };
 }
 
-
 export interface MCPServerConfig {
   /** Server name */
   name: string;
@@ -111,7 +109,6 @@ export type MCPToolContent =
   | { type: 'image'; data: string; mimeType: string }
   | { type: 'resource'; resource: MCPResourceContent };
 
-
 export interface ToolAdapterOptions {
   /** Prefix to add to converted tool names */
   namePrefix?: string;
@@ -127,4 +124,3 @@ export interface ConvertedTools {
   tools: Tool[];
   cleanup: () => Promise<void>;
 }
-

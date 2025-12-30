@@ -4,7 +4,6 @@
 
 import type { ToolSchema } from '@cogitator/types';
 
-
 /**
  * Serialized agent configuration for queue transport
  * Tools are stored as schemas, recreated on worker side
@@ -52,7 +51,6 @@ export interface SerializedSwarm {
   consensusThreshold?: number;
 }
 
-
 export interface AgentJobPayload {
   type: 'agent';
   jobId: string;
@@ -81,15 +79,14 @@ export interface SwarmJobPayload {
 
 export type JobPayload = AgentJobPayload | WorkflowJobPayload | SwarmJobPayload;
 
-
 export interface AgentJobResult {
   type: 'agent';
   output: string;
-  toolCalls: Array<{
+  toolCalls: {
     name: string;
     input: unknown;
     output: unknown;
-  }>;
+  }[];
   tokenUsage?: {
     prompt: number;
     completion: number;
@@ -108,14 +105,13 @@ export interface SwarmJobResult {
   type: 'swarm';
   output: string;
   rounds: number;
-  agentOutputs: Array<{
+  agentOutputs: {
     agent: string;
     output: string;
-  }>;
+  }[];
 }
 
 export type JobResult = AgentJobResult | WorkflowJobResult | SwarmJobResult;
-
 
 export interface QueueConfig {
   /** Queue name (default: 'cogitator-jobs') */
@@ -127,7 +123,7 @@ export interface QueueConfig {
     password?: string;
     /** For cluster mode */
     cluster?: {
-      nodes: Array<{ host: string; port: number }>;
+      nodes: { host: string; port: number }[];
     };
   };
   /** Default job options */
@@ -156,7 +152,6 @@ export interface WorkerConfig extends QueueConfig {
   /** Stalled job check interval */
   stalledInterval?: number;
 }
-
 
 export interface QueueMetrics {
   /** Jobs waiting to be processed */

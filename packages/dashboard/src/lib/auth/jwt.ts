@@ -1,13 +1,33 @@
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || process.env.COGITATOR_ENCRYPTION_KEY || 'cogitator-jwt-secret-change-in-production'
-);
-
 const JWT_ISSUER = 'cogitator-dashboard';
 const JWT_AUDIENCE = 'cogitator-api';
 const TOKEN_EXPIRY = '24h';
 const REFRESH_TOKEN_EXPIRY = '7d';
+
+let _jwtSecret: Uint8Array | null = null;
+
+function getJwtSecret(): Uint8Array {
+  if (_jwtSecret) return _jwtSecret;
+
+  const secret = process.env.JWT_SECRET || process.env.COGITATOR_ENCRYPTION_KEY;
+
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'JWT_SECRET environment variable is required in production. ' +
+        'Generate one with: openssl rand -base64 64'
+    );
+  }
+
+  const finalSecret = secret || 'cogitator-dev-secret-do-not-use-in-production';
+
+  if (secret && secret.length < 32) {
+    console.warn('[Auth] JWT_SECRET should be at least 32 characters for security');
+  }
+
+  _jwtSecret = new TextEncoder().encode(finalSecret);
+  return _jwtSecret;
+}
 
 export interface TokenPayload extends JWTPayload {
   sub: string;
@@ -34,7 +54,7 @@ export async function createAccessToken(user: User): Promise<string> {
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE)
     .setExpirationTime(TOKEN_EXPIRY)
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
 }
 
 export async function createRefreshToken(user: User): Promise<string> {
@@ -48,12 +68,12 @@ export async function createRefreshToken(user: User): Promise<string> {
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE)
     .setExpirationTime(REFRESH_TOKEN_EXPIRY)
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
 }
 
 export async function verifyToken(token: string): Promise<TokenPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET, {
+    const { payload } = await jwtVerify(token, getJwtSecret(), {
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,
     });

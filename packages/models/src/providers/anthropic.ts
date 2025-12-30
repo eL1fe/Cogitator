@@ -94,4 +94,3 @@ export const ANTHROPIC_MODELS: ModelInfo[] = [
     aliases: ['claude-3-haiku'],
   },
 ];
-

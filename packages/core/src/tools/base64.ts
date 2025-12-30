@@ -20,7 +20,7 @@ export const base64Encode = tool({
   execute: async ({ data, urlSafe = false }) => {
     let result = Buffer.from(data).toString('base64');
     if (urlSafe) {
-      result = result.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      result = result.replace(/\+/g, '-').replace(/\
     }
     return { result, urlSafe };
   },

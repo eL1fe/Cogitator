@@ -44,4 +44,3 @@ export const useLogsStore = create<LogsState>((set) => ({
   setLevelFilter: (levelFilter) => set({ levelFilter }),
   setSearchQuery: (searchQuery) => set({ searchQuery }),
 }));
-

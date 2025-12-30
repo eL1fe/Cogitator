@@ -34,7 +34,7 @@ type FireCallback = (entry: TimerEntry) => void;
  * In-memory timer store
  */
 export class InMemoryTimerStore implements TimerStore {
-  private timers: Map<string, TimerEntry> = new Map();
+  private timers = new Map<string, TimerEntry>();
   private fireCallbacks: FireCallback[] = [];
 
   async schedule(
@@ -200,7 +200,7 @@ export class FileTimerStore implements TimerStore {
   private directory: string;
   private indexFile: string;
   private initialized = false;
-  private cache: Map<string, TimerEntry> = new Map();
+  private cache = new Map<string, TimerEntry>();
   private fireCallbacks: FireCallback[] = [];
 
   constructor(directory: string) {

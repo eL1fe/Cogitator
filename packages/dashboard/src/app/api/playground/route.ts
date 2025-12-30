@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getCogitator, createAgentFromConfig, getToolByName } from '@/lib/cogitator';
 import {
   createRun,
@@ -8,20 +8,38 @@ import {
   incrementAgentStats,
 } from '@/lib/cogitator/db';
 import { nanoid } from 'nanoid';
+import { withAuth } from '@/lib/auth/middleware';
+import { withRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 interface PlaygroundRequest {
   model: string;
-  messages: Array<{ role: string; content: string }>;
+  messages: { role: string; content: string }[];
   temperature?: number;
   tools?: string[];
   threadId?: string;
   agentId?: string;
 }
 
-export async function POST(request: NextRequest) {
+function buildModelString(model: string): string {
+  if (model.includes('/')) return model;
+
+  if (model.includes('gpt') || model.includes('o1') || model.includes('o3')) {
+    return `openai/${model}`;
+  }
+  if (model.includes('claude')) {
+    return `anthropic/${model}`;
+  }
+  if (model.includes('gemini')) {
+    return `google/${model}`;
+  }
+
+  return `ollama/${model}`;
+}
+
+export const POST = withAuth(withRateLimit(RATE_LIMITS.playground, async (request) => {
   try {
     const body: PlaygroundRequest = await request.json();
     const {
@@ -34,15 +52,12 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!model || !messages || messages.length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'Model and messages required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return NextResponse.json({ error: 'Model and messages required' }, { status: 400 });
     }
 
     const userMessages = messages.filter((m) => m.role === 'user');
     const input = userMessages[userMessages.length - 1]?.content || '';
-    
+
     const systemMessage = messages.find((m) => m.role === 'system');
     const instructions = systemMessage?.content || 'You are a helpful assistant.';
 
@@ -86,12 +101,12 @@ export async function POST(request: NextRequest) {
 
     const encoder = new TextEncoder();
     let fullContent = '';
-    const allToolCalls: Array<{
+    const allToolCalls: {
       id: string;
       name: string;
       arguments: unknown;
       result?: unknown;
-    }> = [];
+    }[] = [];
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -200,7 +215,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return new Response(stream, {
+    return new NextResponse(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -209,27 +224,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[playground] Error:', error);
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : 'Failed to process request',
-      }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed to process request' },
+      { status: 500 }
     );
   }
-}
-
-function buildModelString(model: string): string {
-  if (model.includes('/')) return model;
-
-  if (model.includes('gpt') || model.includes('o1') || model.includes('o3')) {
-    return `openai/${model}`;
-  }
-  if (model.includes('claude')) {
-    return `anthropic/${model}`;
-  }
-  if (model.includes('gemini')) {
-    return `google/${model}`;
-  }
-
-  return `ollama/${model}`;
-}
+}));

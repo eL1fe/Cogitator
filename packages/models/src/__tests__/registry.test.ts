@@ -106,7 +106,7 @@ describe('ModelRegistry', () => {
     it('should return all providers', () => {
       const providers = registry.listProviders();
       expect(providers.length).toBeGreaterThan(0);
-      
+
       const providerIds = providers.map((p) => p.id);
       expect(providerIds).toContain('openai');
       expect(providerIds).toContain('anthropic');
@@ -156,4 +156,3 @@ describe('ModelRegistry initialization', () => {
     expect(reg.getModelCount()).toBeGreaterThan(0);
   });
 });
-

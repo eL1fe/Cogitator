@@ -1,9 +1,0 @@
-{
-  "[project]/node_modules/.pnpm/@monaco-editor+react@4.7.0_monaco-editor@0.55.1_react-dom@19.2.3_react@19.2.3/node_modules/@monaco-editor/react/dist/index.mjs [app-client] (ecmascript, next/dynamic entry)": {
-    "id": "[project]/node_modules/.pnpm/@monaco-editor+react@4.7.0_monaco-editor@0.55.1_react-dom@19.2.3_react@19.2.3/node_modules/@monaco-editor/react/dist/index.mjs [app-client] (ecmascript, next/dynamic entry)",
-    "files": [
-      "static/chunks/node_modules__pnpm_ff148d11._.js",
-      "static/chunks/91e17_@monaco-editor_react_dist_index_mjs_4192e6d6._.js"
-    ]
-  }
-}

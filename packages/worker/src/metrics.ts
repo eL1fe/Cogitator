@@ -67,7 +67,7 @@ const DURATION_BUCKETS = [0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60, 120, 300];
  * Simple histogram tracker for job durations
  */
 export class DurationHistogram {
-  private buckets: Map<number, number> = new Map();
+  private buckets = new Map<number, number>();
   private sum = 0;
   private count = 0;
   private readonly name: string;

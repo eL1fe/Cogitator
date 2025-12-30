@@ -608,7 +608,7 @@ export class Cogitator {
       }
     }
 
-    const args = toolCall.arguments as Record<string, unknown>;
+    const args = toolCall.arguments;
     const sandboxConfig = tool.sandbox!;
 
     const isWasm = sandboxConfig.type === 'wasm';

@@ -292,7 +292,7 @@ export class GoogleBackend extends BaseLLMBackend {
     let systemInstruction: string | null = null;
     const contents: GeminiContent[] = [];
 
-    let pendingToolResults: Map<string, Message> = new Map();
+    const pendingToolResults = new Map<string, Message>();
 
     for (const msg of messages) {
       switch (msg.role) {
@@ -418,4 +418,3 @@ export class GoogleBackend extends BaseLLMBackend {
     }
   }
 }
-

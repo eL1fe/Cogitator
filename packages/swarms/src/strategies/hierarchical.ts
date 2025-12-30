@@ -80,7 +80,7 @@ export class HierarchicalStrategy extends BaseStrategy {
   }
 
   private buildDelegationInstructions(
-    workerInfo: Array<{ name: string; description: string; expertise: string[] }>
+    workerInfo: { name: string; description: string; expertise: string[] }[]
   ): string {
     const workerList = workerInfo
       .map((w) => {

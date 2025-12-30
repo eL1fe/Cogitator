@@ -210,4 +210,3 @@ export function createOpenAIServer(
 ): OpenAIServer {
   return new OpenAIServer(cogitator, config);
 }
-

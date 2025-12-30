@@ -13,10 +13,7 @@
  * - Workflow management API
  */
 
-
-export interface WorkflowState {
-  [key: string]: unknown;
-}
+export type WorkflowState = Record<string, unknown>;
 
 export interface NodeConfig {
   name?: string;
@@ -148,7 +145,6 @@ export interface AddLoopOptions {
   after?: string[];
 }
 
-
 export type ApprovalType =
   | 'approve-reject'
   | 'multi-choice'
@@ -240,7 +236,6 @@ export interface ApprovalNotifier {
     to: string
   ): Promise<void>;
 }
-
 
 export type BackoffStrategy = 'constant' | 'linear' | 'exponential';
 
@@ -342,7 +337,6 @@ export interface IdempotencyStore {
   clear(): Promise<void>;
 }
 
-
 export interface MapNodeConfig<S = WorkflowState, T = unknown>
   extends NodeConfig {
   items: (state: S) => T[];
@@ -369,10 +363,9 @@ export interface MapReduceResult<R = unknown> {
   succeeded: number;
   failed: number;
   total: number;
-  errors: Array<{ index: number; error: Error; item?: unknown }>;
+  errors: { index: number; error: Error; item?: unknown }[];
   duration: number;
 }
-
 
 export type TimerType = 'fixed' | 'dynamic' | 'cron' | 'recurring';
 
@@ -426,7 +419,6 @@ export interface CronSchedule {
   iterate(count: number): Date[];
 }
 
-
 export type SubworkflowErrorStrategy =
   | 'propagate'
   | 'catch'
@@ -451,7 +443,6 @@ export interface SubworkflowResult<CS = WorkflowState> {
   error?: Error;
   depth: number;
 }
-
 
 export interface CronTriggerConfig {
   expression: string;
@@ -536,7 +527,6 @@ export interface TriggerManager {
     callback: (trigger: WorkflowTrigger, context: TriggerContext) => void
   ): () => void;
 }
-
 
 export type SpanExporter = 'console' | 'otlp' | 'jaeger' | 'zipkin';
 
@@ -639,10 +629,7 @@ export interface TraceContext {
   traceState?: string;
 }
 
-export interface Baggage {
-  [key: string]: string;
-}
-
+export type Baggage = Record<string, string>;
 
 export interface ScheduleOptions {
   at?: number;
@@ -772,7 +759,6 @@ export interface RunStore {
   getStats(workflowName?: string): Promise<WorkflowRunStats>;
   cleanup(olderThan: number): Promise<number>;
 }
-
 
 export interface WorkflowExecuteOptionsV2 extends WorkflowExecuteOptions {
   approvalStore?: ApprovalStore;

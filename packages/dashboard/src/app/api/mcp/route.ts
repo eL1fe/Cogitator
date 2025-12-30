@@ -1,16 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import {
   MCPClient,
   MCPServer,
 } from '@cogitator/mcp';
 import type { MCPClientConfig, MCPServerConfig } from '@cogitator/mcp';
 import { getAvailableTools, getCogitator } from '@/lib/cogitator';
+import { withAuth } from '@/lib/auth/middleware';
 
 const activeClients = new Map<string, MCPClient>();
 
 let mcpServer: MCPServer | null = null;
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request) => {
   try {
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get('action');
@@ -87,9 +88,9 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
     const body = await request.json();
     const { action } = body;
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'connect': {
         const { config, clientId } = body;
-        
+
         if (!config || !clientId) {
           return NextResponse.json(
             { error: 'config and clientId required' },
@@ -167,7 +168,7 @@ export async function POST(request: NextRequest) {
 
       case 'call-tool': {
         const { clientId, toolName, args } = body;
-        
+
         if (!clientId || !toolName) {
           return NextResponse.json(
             { error: 'clientId and toolName required' },
@@ -186,7 +187,7 @@ export async function POST(request: NextRequest) {
 
       case 'read-resource': {
         const { clientId, uri } = body;
-        
+
         if (!clientId || !uri) {
           return NextResponse.json(
             { error: 'clientId and uri required' },
@@ -205,7 +206,7 @@ export async function POST(request: NextRequest) {
 
       case 'get-prompt': {
         const { clientId, promptName, args } = body;
-        
+
         if (!clientId || !promptName) {
           return NextResponse.json(
             { error: 'clientId and promptName required' },
@@ -224,7 +225,7 @@ export async function POST(request: NextRequest) {
 
       case 'import-tools': {
         const { clientId } = body;
-        
+
         if (!clientId) {
           return NextResponse.json({ error: 'clientId required' }, { status: 400 });
         }
@@ -252,7 +253,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: 'Server already running' }, { status: 409 });
         }
 
-        const cogitator = await getCogitator();
+        await getCogitator();
         const tools = getAvailableTools();
 
         const serverConfig: MCPServerConfig = {
@@ -265,7 +266,6 @@ export async function POST(request: NextRequest) {
 
         mcpServer.registerTools(tools as Parameters<typeof mcpServer.registerTools>[0]);
 
-        
         return NextResponse.json({
           started: true,
           toolCount: tools.length,
@@ -293,9 +293,9 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = withAuth(async () => {
   try {
     for (const [id, client] of activeClients) {
       try {
@@ -319,5 +319,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
+});

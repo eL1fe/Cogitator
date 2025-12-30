@@ -53,7 +53,7 @@ export async function createAgent(data: {
   instructions?: string;
 }): Promise<Agent> {
   const id = `agent_${nanoid(12)}`;
-  
+
   await execute(
     `INSERT INTO dashboard_agents (id, name, model, description, instructions)
      VALUES ($1, $2, $3, $4, $5)`,
@@ -116,8 +116,8 @@ export async function deleteAgent(id: string): Promise<boolean> {
 
 export async function incrementAgentStats(id: string, tokens: number, cost: number): Promise<void> {
   await execute(
-    `UPDATE dashboard_agents 
-     SET total_runs = total_runs + 1, 
+    `UPDATE dashboard_agents
+     SET total_runs = total_runs + 1,
          total_tokens = total_tokens + $1,
          total_cost = total_cost + $2,
          last_run_at = NOW(),
@@ -141,7 +141,7 @@ export async function getAgentCount(): Promise<number> {
 
 export async function seedDefaultAgents(): Promise<void> {
   const count = await getAgentCount();
-  
+
   if (count === 0) {
     const defaultAgents = [
       { name: 'Research Agent', model: 'gpt-4o', description: 'Analyzes data and provides comprehensive research reports' },

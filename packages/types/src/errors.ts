@@ -12,7 +12,7 @@
  * Error codes organized by domain
  */
 export enum ErrorCode {
-  // LLM errors (1xxx)
+
   LLM_UNAVAILABLE = 'LLM_UNAVAILABLE',
   LLM_RATE_LIMITED = 'LLM_RATE_LIMITED',
   LLM_TIMEOUT = 'LLM_TIMEOUT',
@@ -20,39 +20,32 @@ export enum ErrorCode {
   LLM_CONTEXT_LENGTH_EXCEEDED = 'LLM_CONTEXT_LENGTH_EXCEEDED',
   LLM_CONTENT_FILTERED = 'LLM_CONTENT_FILTERED',
 
-  // Sandbox errors (2xxx)
   SANDBOX_UNAVAILABLE = 'SANDBOX_UNAVAILABLE',
   SANDBOX_TIMEOUT = 'SANDBOX_TIMEOUT',
   SANDBOX_OOM = 'SANDBOX_OOM',
   SANDBOX_EXECUTION_FAILED = 'SANDBOX_EXECUTION_FAILED',
   SANDBOX_INVALID_MODULE = 'SANDBOX_INVALID_MODULE',
 
-  // Tool errors (3xxx)
   TOOL_NOT_FOUND = 'TOOL_NOT_FOUND',
   TOOL_INVALID_ARGS = 'TOOL_INVALID_ARGS',
   TOOL_EXECUTION_FAILED = 'TOOL_EXECUTION_FAILED',
   TOOL_TIMEOUT = 'TOOL_TIMEOUT',
 
-  // Memory errors (4xxx)
   MEMORY_UNAVAILABLE = 'MEMORY_UNAVAILABLE',
   MEMORY_WRITE_FAILED = 'MEMORY_WRITE_FAILED',
   MEMORY_READ_FAILED = 'MEMORY_READ_FAILED',
 
-  // Agent errors (5xxx)
   AGENT_NOT_FOUND = 'AGENT_NOT_FOUND',
   AGENT_ALREADY_RUNNING = 'AGENT_ALREADY_RUNNING',
   AGENT_MAX_ITERATIONS = 'AGENT_MAX_ITERATIONS',
 
-  // Workflow errors (6xxx)
   WORKFLOW_NOT_FOUND = 'WORKFLOW_NOT_FOUND',
   WORKFLOW_STEP_FAILED = 'WORKFLOW_STEP_FAILED',
   WORKFLOW_CYCLE_DETECTED = 'WORKFLOW_CYCLE_DETECTED',
 
-  // Swarm errors (7xxx)
   SWARM_NO_WORKERS = 'SWARM_NO_WORKERS',
   SWARM_CONSENSUS_FAILED = 'SWARM_CONSENSUS_FAILED',
 
-  // General errors (9xxx)
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   CONFIGURATION_ERROR = 'CONFIGURATION_ERROR',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
@@ -64,7 +57,7 @@ export enum ErrorCode {
  * Maps error codes to HTTP status codes
  */
 export const ERROR_STATUS_CODES: Record<ErrorCode, number> = {
-  // LLM errors
+
   [ErrorCode.LLM_UNAVAILABLE]: 503,
   [ErrorCode.LLM_RATE_LIMITED]: 429,
   [ErrorCode.LLM_TIMEOUT]: 504,
@@ -72,39 +65,32 @@ export const ERROR_STATUS_CODES: Record<ErrorCode, number> = {
   [ErrorCode.LLM_CONTEXT_LENGTH_EXCEEDED]: 400,
   [ErrorCode.LLM_CONTENT_FILTERED]: 400,
 
-  // Sandbox errors
   [ErrorCode.SANDBOX_UNAVAILABLE]: 503,
   [ErrorCode.SANDBOX_TIMEOUT]: 504,
   [ErrorCode.SANDBOX_OOM]: 507,
   [ErrorCode.SANDBOX_EXECUTION_FAILED]: 500,
   [ErrorCode.SANDBOX_INVALID_MODULE]: 400,
 
-  // Tool errors
   [ErrorCode.TOOL_NOT_FOUND]: 404,
   [ErrorCode.TOOL_INVALID_ARGS]: 400,
   [ErrorCode.TOOL_EXECUTION_FAILED]: 500,
   [ErrorCode.TOOL_TIMEOUT]: 504,
 
-  // Memory errors
   [ErrorCode.MEMORY_UNAVAILABLE]: 503,
   [ErrorCode.MEMORY_WRITE_FAILED]: 500,
   [ErrorCode.MEMORY_READ_FAILED]: 500,
 
-  // Agent errors
   [ErrorCode.AGENT_NOT_FOUND]: 404,
   [ErrorCode.AGENT_ALREADY_RUNNING]: 409,
   [ErrorCode.AGENT_MAX_ITERATIONS]: 400,
 
-  // Workflow errors
   [ErrorCode.WORKFLOW_NOT_FOUND]: 404,
   [ErrorCode.WORKFLOW_STEP_FAILED]: 500,
   [ErrorCode.WORKFLOW_CYCLE_DETECTED]: 400,
 
-  // Swarm errors
   [ErrorCode.SWARM_NO_WORKERS]: 503,
   [ErrorCode.SWARM_CONSENSUS_FAILED]: 500,
 
-  // General errors
   [ErrorCode.VALIDATION_ERROR]: 400,
   [ErrorCode.CONFIGURATION_ERROR]: 500,
   [ErrorCode.INTERNAL_ERROR]: 500,
@@ -115,9 +101,7 @@ export const ERROR_STATUS_CODES: Record<ErrorCode, number> = {
 /**
  * Error details for additional context
  */
-export interface ErrorDetails {
-  [key: string]: unknown;
-}
+export type ErrorDetails = Record<string, unknown>;
 
 /**
  * Options for creating a CogitatorError
@@ -163,7 +147,6 @@ export class CogitatorError extends Error {
     this.retryable = options.retryable ?? false;
     this.retryAfter = options.retryAfter;
 
-    // Maintains proper stack trace in V8
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, CogitatorError);
     }
@@ -218,7 +201,6 @@ export function isRetryableError(error: unknown): boolean {
     return error.retryable;
   }
 
-  // Common retryable HTTP errors
   if (error instanceof Error) {
     const message = error.message.toLowerCase();
     return (
@@ -237,7 +219,7 @@ export function isRetryableError(error: unknown): boolean {
 /**
  * Get retry delay from an error
  */
-export function getRetryDelay(error: unknown, defaultDelay: number = 1000): number {
+export function getRetryDelay(error: unknown, defaultDelay = 1000): number {
   if (error instanceof CogitatorError && error.retryAfter) {
     return error.retryAfter;
   }

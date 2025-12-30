@@ -50,7 +50,7 @@ export class TokenBucket {
   /**
    * Try to consume tokens
    */
-  consume(count: number = 1): RateLimitResult {
+  consume(count = 1): RateLimitResult {
     this.refill();
 
     if (count > this.burstLimit) {
@@ -85,7 +85,7 @@ export class TokenBucket {
   /**
    * Check if tokens are available without consuming
    */
-  check(count: number = 1): RateLimitResult {
+  check(count = 1): RateLimitResult {
     this.refill();
 
     if (this.tokens >= count) {
@@ -147,7 +147,7 @@ export class RateLimiter {
   private readonly config: TokenBucketConfig;
   private cleanupInterval?: ReturnType<typeof setInterval>;
 
-  constructor(config: TokenBucketConfig, cleanupIntervalMs: number = 60000) {
+  constructor(config: TokenBucketConfig, cleanupIntervalMs = 60000) {
     this.config = config;
 
     this.cleanupInterval = setInterval(() => {
@@ -158,7 +158,7 @@ export class RateLimiter {
   /**
    * Check rate limit for a key
    */
-  check(key: string, count: number = 1): RateLimitResult {
+  check(key: string, count = 1): RateLimitResult {
     const bucket = this.getBucket(key);
     return bucket.check(count);
   }
@@ -166,7 +166,7 @@ export class RateLimiter {
   /**
    * Consume tokens for a key
    */
-  consume(key: string, count: number = 1): RateLimitResult {
+  consume(key: string, count = 1): RateLimitResult {
     const bucket = this.getBucket(key);
     return bucket.consume(count);
   }
@@ -234,7 +234,7 @@ export class SlidingWindowRateLimiter {
   private readonly windowMs: number;
   private cleanupInterval?: ReturnType<typeof setInterval>;
 
-  constructor(maxRequests: number, windowMs: number, cleanupIntervalMs: number = 60000) {
+  constructor(maxRequests: number, windowMs: number, cleanupIntervalMs = 60000) {
     this.maxRequests = maxRequests;
     this.windowMs = windowMs;
 

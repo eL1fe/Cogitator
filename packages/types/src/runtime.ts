@@ -88,5 +88,5 @@ export interface Span {
   endTime: number;
   duration: number;
   attributes: Record<string, unknown>;
-  events?: Array<{ name: string; timestamp: number; attributes?: Record<string, unknown> }>;
+  events?: { name: string; timestamp: number; attributes?: Record<string, unknown> }[];
 }

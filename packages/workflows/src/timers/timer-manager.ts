@@ -100,7 +100,7 @@ export class TimerManager {
     Omit<TimerManagerConfig, 'onError' | 'onTimerFired' | 'onTimerMissed'>
   > &
     Pick<TimerManagerConfig, 'onError' | 'onTimerFired' | 'onTimerMissed'>;
-  private handlers: Map<string, TimerHandler> = new Map();
+  private handlers = new Map<string, TimerHandler>();
   private defaultHandler?: TimerHandler;
   private pollTimer?: ReturnType<typeof setInterval>;
   private cleanupTimer?: ReturnType<typeof setInterval>;
@@ -403,7 +403,7 @@ export function createTimerManager(
  */
 export class RecurringTimerScheduler {
   private manager: TimerManager;
-  private recurring: Map<
+  private recurring = new Map<
     string,
     {
       workflowId: string;
@@ -412,7 +412,7 @@ export class RecurringTimerScheduler {
       metadata?: Record<string, unknown>;
       currentTimerId?: string;
     }
-  > = new Map();
+  >();
 
   constructor(manager: TimerManager) {
     this.manager = manager;

@@ -246,17 +246,17 @@ await cog.workflow(workflow).run({ task: 'Build a REST API' });
 
 #### Week 1-2: WASM Sandbox
 
-- [ ] Extism integration
-- [ ] WASM tool execution
-- [ ] Performance optimization
-- [ ] Security audit for sandbox
+- [x] Extism integration
+- [x] WASM tool execution
+- [x] Performance optimization
+- [x] Security audit for sandbox
 
 #### Week 3-4: Production Hardening
 
-- [ ] Comprehensive error handling
-- [ ] Graceful degradation
+- [x] Comprehensive error handling
+- [x] Graceful degradation
 - [x] Health checks and readiness probes
-- [ ] Disaster recovery documentation
+- [x] Disaster recovery documentation
 
 **Deliverables:**
 

@@ -1,14 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getCogitatorConfig, setCogitatorConfig, getAllConfig } from '@/lib/db/config';
 import { initializeSchema } from '@/lib/db';
 import {
   loadConfig,
   CogitatorConfigSchema,
-  loadYamlConfig,
   loadEnvConfig,
 } from '@cogitator/config';
-import type { CogitatorConfigOutput } from '@cogitator/config';
 import * as yaml from 'js-yaml';
+import { withRole } from '@/lib/auth/middleware';
 
 let initialized = false;
 
@@ -23,16 +22,16 @@ async function ensureInitialized() {
   }
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withRole(['admin'], async (request) => {
   try {
     await ensureInitialized();
-    
+
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get('action');
 
     if (action === 'load-from-file') {
       try {
-        const config = await loadConfig({
+        const config = loadConfig({
           configPath: process.cwd(),
         });
         return NextResponse.json({
@@ -79,7 +78,10 @@ export async function GET(request: NextRequest) {
             llm: {
               type: 'object',
               properties: {
-                defaultProvider: { type: 'string', enum: ['ollama', 'openai', 'anthropic', 'google', 'vllm'] },
+                defaultProvider: {
+                  type: 'string',
+                  enum: ['ollama', 'openai', 'anthropic', 'google', 'vllm'],
+                },
                 providers: { type: 'object' },
               },
             },
@@ -111,7 +113,7 @@ export async function GET(request: NextRequest) {
 
     const config = await getCogitatorConfig();
     const allConfig = await getAllConfig();
-    
+
     const envVars = {
       POSTGRES_HOST: process.env.POSTGRES_HOST || 'localhost',
       POSTGRES_PORT: process.env.POSTGRES_PORT || '5432',
@@ -138,18 +140,15 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Failed to fetch config:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch config' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch config' }, { status: 500 });
   }
-}
+});
 
-export async function PUT(request: NextRequest) {
+export const PUT = withRole(['admin'], async (request) => {
   try {
     await ensureInitialized();
     const body = await request.json();
-    
+
     if (!body.llm?.provider || !body.llm?.model) {
       return NextResponse.json(
         { error: 'llm.provider and llm.model are required' },
@@ -163,12 +162,9 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(config);
   } catch (error) {
     console.error('Failed to update config:', error);
-    return NextResponse.json(
-      { error: 'Failed to update config' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update config' }, { status: 500 });
   }
-}
+});
 
 function getDefaultConfig() {
   return {

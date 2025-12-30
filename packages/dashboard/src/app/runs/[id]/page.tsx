@@ -8,7 +8,7 @@ interface RunDetailPageProps {
 
 export default async function RunDetailPage({ params }: RunDetailPageProps) {
   const { id } = await params;
-  
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
@@ -23,4 +23,3 @@ export default async function RunDetailPage({ params }: RunDetailPageProps) {
     </div>
   );
 }
-

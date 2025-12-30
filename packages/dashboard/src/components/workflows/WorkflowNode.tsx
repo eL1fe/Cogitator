@@ -101,4 +101,3 @@ function WorkflowNodeComponent({ data, selected }: NodeProps) {
 }
 
 export const WorkflowNode = memo(WorkflowNodeComponent);
-

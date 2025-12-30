@@ -70,7 +70,7 @@ export default function SwarmsPage() {
 
       if (swarmsRes.ok) {
         const swarmsData = await swarmsRes.json();
-        setSwarms(swarmsData);
+        setSwarms(swarmsData.swarms || []);
       }
 
       if (agentsRes.ok) {
@@ -290,4 +290,3 @@ export default function SwarmsPage() {
     </div>
   );
 }
-

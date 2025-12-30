@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken, extractTokenFromHeader, type TokenPayload, type User } from './jwt';
+import { type NextRequest, NextResponse } from 'next/server';
+import { verifyToken, extractTokenFromHeader, type User } from './jwt';
 import { cookies } from 'next/headers';
 
 export interface AuthenticatedRequest extends NextRequest {
@@ -17,12 +17,18 @@ export type AuthenticatedRouteHandler = (
 ) => Promise<NextResponse> | NextResponse;
 
 function isAuthEnabled(): boolean {
+
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.COGITATOR_AUTH_ENABLED !== 'false';
+  }
   return process.env.COGITATOR_AUTH_ENABLED === 'true';
 }
 
 function getDefaultUser(): User {
+
   return {
-    id: 'default-admin',
+    id: 'dev-admin',
+    email: 'dev@localhost',
     role: 'admin',
   };
 }
@@ -43,7 +49,7 @@ export async function getAuthenticatedUser(request: NextRequest): Promise<User |
   if (!token) return null;
 
   const payload = await verifyToken(token);
-  if (!payload || payload.type !== 'access') return null;
+  if (payload?.type !== 'access') return null;
 
   return {
     id: payload.sub,
@@ -69,7 +75,7 @@ export function withAuth(handler: AuthenticatedRouteHandler): RouteHandler {
 }
 
 export function withRole(
-  roles: Array<'admin' | 'user' | 'readonly'>,
+  roles: ('admin' | 'user' | 'readonly')[],
   handler: AuthenticatedRouteHandler
 ): RouteHandler {
   return async (request: NextRequest, context) => {

@@ -54,7 +54,7 @@ export function registerRunRoutes(
   );
 
   fastify.post<{
-    Body: CreateRunRequest & { thread?: { messages?: Array<{ role: 'user' | 'assistant'; content: string }> } };
+    Body: CreateRunRequest & { thread?: { messages?: { role: 'user' | 'assistant'; content: string }[] } };
   }>(
     '/v1/threads/runs',
     async (request, reply) => {
@@ -219,4 +219,3 @@ async function handleStreamingRun(
   sendEvent('done', '[DONE]');
   reply.raw.end();
 }
-

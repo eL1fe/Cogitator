@@ -11,7 +11,6 @@ import type { Tool, ToolSchema, ToolContext } from '@cogitator/types';
 import type { MCPToolDefinition, MCPToolContent, ToolAdapterOptions } from '../types.js';
 import type { MCPClient } from '../client/mcp-client.js';
 
-
 /**
  * Convert a Zod schema to JSON Schema
  */
@@ -163,7 +162,6 @@ function jsonSchemaPropertyToZod(prop: JsonSchemaProperty): ZodTypeAny {
   }
 }
 
-
 /**
  * Convert a Cogitator Tool to MCP tool definition format
  */
@@ -195,7 +193,6 @@ export function toolSchemaToMCP(schema: ToolSchema): MCPToolDefinition {
     },
   };
 }
-
 
 /**
  * Convert an MCP tool definition to a Cogitator Tool
@@ -263,7 +260,6 @@ export async function wrapMCPTools(
   const definitions = await client.listToolDefinitions();
   return definitions.map((def) => mcpToCogitator(def, client, options));
 }
-
 
 /**
  * Convert a tool execution result to MCP content format

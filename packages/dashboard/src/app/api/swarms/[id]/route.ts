@@ -1,9 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getSwarm, updateSwarm, deleteSwarm, getAgents } from '@/lib/cogitator/db';
-
-interface RouteParams {
-  params: Promise<{ id: string }>;
-}
+import { withAuth } from '@/lib/auth/middleware';
 
 const VALID_STRATEGIES = [
   'hierarchical',
@@ -14,9 +11,9 @@ const VALID_STRATEGIES = [
   'debate',
 ] as const;
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export const GET = withAuth(async (_request, context) => {
   try {
-    const { id } = await params;
+    const { id } = await context!.params!;
     const swarm = await getSwarm(id);
 
     if (!swarm) {
@@ -28,11 +25,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     console.error('[api/swarms] Failed to fetch swarm:', error);
     return NextResponse.json({ error: 'Failed to fetch swarm' }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export const PATCH = withAuth(async (request, context) => {
   try {
-    const { id } = await params;
+    const { id } = await context!.params!;
     const body = await request.json();
 
     if (body.strategy && !VALID_STRATEGIES.includes(body.strategy)) {
@@ -45,7 +42,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (body.agentIds && body.agentIds.length > 0) {
       const agents = await getAgents();
       const validIds = new Set(agents.map((a) => a.id));
-      const invalidIds = body.agentIds.filter((id: string) => !validIds.has(id));
+      const invalidIds = body.agentIds.filter((agentId: string) => !validIds.has(agentId));
       if (invalidIds.length > 0) {
         return NextResponse.json(
           { error: `Invalid agent IDs: ${invalidIds.join(', ')}` },
@@ -71,11 +68,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     console.error('[api/swarms] Failed to update swarm:', error);
     return NextResponse.json({ error: 'Failed to update swarm' }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export const DELETE = withAuth(async (_request, context) => {
   try {
-    const { id } = await params;
+    const { id } = await context!.params!;
     const deleted = await deleteSwarm(id);
 
     if (!deleted) {
@@ -87,5 +84,4 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     console.error('[api/swarms] Failed to delete swarm:', error);
     return NextResponse.json({ error: 'Failed to delete swarm' }, { status: 500 });
   }
-}
-
+});

@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/middleware';
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
     const { name } = await request.json();
-    
+
     if (!name) {
       return NextResponse.json(
         { error: 'Model name required' },
@@ -34,5 +35,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
+});

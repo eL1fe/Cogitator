@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getWorkflow, getAgent, createWorkflowRun, updateWorkflowRun } from '@/lib/cogitator/db';
 import { getCogitator, getAvailableTools } from '@/lib/cogitator';
 import {
@@ -7,15 +7,11 @@ import {
   agentNode,
   toolNode,
   functionNode,
-  delayNode,
   InMemoryCheckpointStore,
 } from '@cogitator/workflows';
-import { Agent, Tool } from '@cogitator/core';
+import { Agent, type Tool } from '@cogitator/core';
 import type { WorkflowState, NodeResult } from '@cogitator/types';
-
-interface RouteParams {
-  params: Promise<{ id: string }>;
-}
+import { withAuth } from '@/lib/auth/middleware';
 
 interface WorkflowNodeDefinition {
   id: string;
@@ -41,9 +37,9 @@ interface WorkflowDefinition {
   edges: WorkflowEdgeDefinition[];
 }
 
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export const POST = withAuth(async (request, context) => {
   try {
-    const { id } = await params;
+    const { id } = await context!.params!;
     const body = await request.json();
     const { input, initialState } = body;
 
@@ -116,7 +112,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             if (!agentData) {
               throw new Error(`Agent ${nodeDef.agentId} not found`);
             }
-            
+
             const agent = new Agent({
               id: agentData.id,
               name: agentData.name,
@@ -127,8 +123,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
             const agentWorkflowNode = agentNode(agent, {
               inputMapper: (state) => {
-                return typeof state.input === 'string' 
-                  ? state.input 
+                return typeof state.input === 'string'
+                  ? state.input
                   : JSON.stringify(state);
               },
               stateMapper: (result) => ({
@@ -195,7 +191,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
           case 'delay': {
             const delayMs = nodeDef.delay || nodeDef.config?.delay as number || 1000;
-            const delayConfig = delayNode<WorkflowState>(nodeDef.id, delayMs);
 
             builder.addNode(nodeDef.id, async (ctx) => {
               await new Promise(resolve => setTimeout(resolve, delayMs));
@@ -309,5 +304,4 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       { status: 500 }
     );
   }
-}
-
+});

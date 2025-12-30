@@ -1,14 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getAgent, updateAgent, deleteAgent, getRuns } from '@/lib/cogitator/db';
 import { getAvailableTools } from '@/lib/cogitator';
+import { withAuth } from '@/lib/auth/middleware';
 
-interface RouteParams {
-  params: Promise<{ id: string }>;
-}
-
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export const GET = withAuth(async (_request, context) => {
   try {
-    const { id } = await params;
+    const { id } = await context!.params!;
     const agent = await getAgent(id);
 
     if (!agent) {
@@ -22,11 +19,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     console.error('[api/agents] Failed to fetch agent:', error);
     return NextResponse.json({ error: 'Failed to fetch agent' }, { status: 500 });
   }
-}
+});
 
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export const PATCH = withAuth(async (request, context) => {
   try {
-    const { id } = await params;
+    const { id } = await context!.params!;
     const body = await request.json();
 
     if (body.tools) {
@@ -66,11 +63,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     console.error('[api/agents] Failed to update agent:', error);
     return NextResponse.json({ error: 'Failed to update agent' }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export const DELETE = withAuth(async (_request, context) => {
   try {
-    const { id } = await params;
+    const { id } = await context!.params!;
     const deleted = await deleteAgent(id);
 
     if (!deleted) {
@@ -82,4 +79,4 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     console.error('[api/agents] Failed to delete agent:', error);
     return NextResponse.json({ error: 'Failed to delete agent' }, { status: 500 });
   }
-}
+});

@@ -39,7 +39,7 @@ export async function getHourlyStats(hours = 24): Promise<HourlyStats[]> {
         INTERVAL '1 hour'
       ) AS hour
     )
-    SELECT 
+    SELECT
       h.hour,
       COALESCE(COUNT(r.id), 0) as runs,
       COALESCE(SUM(r.total_tokens), 0) as tokens,
@@ -71,7 +71,7 @@ export async function getModelStats(period: 'day' | 'week' | 'month' = 'day'): P
     tokens: string;
     cost: string;
   }>(`
-    SELECT 
+    SELECT
       a.model,
       COUNT(r.id) as runs,
       COALESCE(SUM(r.total_tokens), 0) as tokens,
@@ -108,7 +108,7 @@ export async function getTopAgents(limit = 10, period: 'day' | 'week' | 'month' 
     avg_duration: string;
     success_rate: string;
   }>(`
-    SELECT 
+    SELECT
       a.id,
       a.name,
       a.model,
@@ -173,4 +173,3 @@ export async function getDashboardStats(): Promise<{
     avgDuration: parseFloat(result?.avg_duration || '0'),
   };
 }
-

@@ -100,7 +100,6 @@ export function registerThreadRoutes(
     }
   );
 
-
   fastify.post<{ Params: { thread_id: string }; Body: CreateMessageRequest }>(
     '/v1/threads/:thread_id/messages',
     async (request, reply) => {
@@ -215,4 +214,3 @@ export function registerThreadRoutes(
     }
   );
 }
-

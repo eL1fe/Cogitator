@@ -176,7 +176,7 @@ export function AgentDetail({ agentId }: AgentDetailProps) {
             <CardTitle>About</CardTitle>
           </CardHeader>
           <p className="text-sm text-text-secondary mb-4">{agent.description}</p>
-          
+
           <CardTitle className="mb-2">System Instructions</CardTitle>
           <div className="bg-bg-elevated rounded-lg p-3 font-mono text-xs text-text-secondary">
             {agent.instructions}
@@ -220,4 +220,3 @@ export function AgentDetail({ agentId }: AgentDetailProps) {
     </div>
   );
 }
-

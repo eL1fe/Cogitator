@@ -26,9 +26,9 @@ export class ModelCache {
 
   async get(): Promise<ModelInfo[] | null> {
     const entry = await this.getEntry();
-    
+
     if (!entry) return null;
-    
+
     if (this.isStale(entry)) {
       return null;
     }
@@ -57,7 +57,7 @@ export class ModelCache {
 
   async clear(): Promise<void> {
     this.memoryCache = null;
-    
+
     if (this.options.storage === 'file') {
       try {
         await writeFile(this.options.filePath, '', 'utf-8');
@@ -91,9 +91,9 @@ export class ModelCache {
     try {
       const content = await readFile(this.options.filePath, 'utf-8');
       if (!content.trim()) return null;
-      
+
       const entry = JSON.parse(content) as CacheEntry;
-      
+
       if (!entry.models || !entry.timestamp || entry.version !== CACHE_VERSION) {
         return null;
       }
@@ -117,4 +117,3 @@ export class ModelCache {
     }
   }
 }
-

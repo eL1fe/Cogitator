@@ -153,8 +153,8 @@ export class InMemoryRunStore implements RunStore {
       const aVal = a[orderBy] ?? 0;
       const bVal = b[orderBy] ?? 0;
       return direction === 'asc'
-        ? (aVal as number) - (bVal as number)
-        : (bVal as number) - (aVal as number);
+        ? (aVal) - (bVal)
+        : (bVal) - (aVal);
     });
 
     const offset = filters.offset ?? 0;
@@ -427,8 +427,8 @@ export class FileRunStore implements RunStore {
       const aVal = a[orderBy] ?? 0;
       const bVal = b[orderBy] ?? 0;
       return direction === 'asc'
-        ? (aVal as number) - (bVal as number)
-        : (bVal as number) - (aVal as number);
+        ? (aVal) - (bVal)
+        : (bVal) - (aVal);
     });
 
     const offset = filters.offset ?? 0;

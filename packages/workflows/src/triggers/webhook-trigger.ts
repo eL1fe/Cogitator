@@ -13,7 +13,7 @@ import type {
   TriggerContext,
   WorkflowTrigger,
 } from '@cogitator/types';
-import { RateLimiter, createRateLimiter } from './rate-limiter.js';
+import { type RateLimiter, createRateLimiter } from './rate-limiter.js';
 
 /**
  * Incoming webhook request
@@ -361,8 +361,8 @@ export class WebhookTriggerExecutor {
   /**
    * Get registered paths
    */
-  getRegisteredPaths(): Array<{ path: string; method: string; triggerId: string }> {
-    const paths: Array<{ path: string; method: string; triggerId: string }> = [];
+  getRegisteredPaths(): { path: string; method: string; triggerId: string }[] {
+    const paths: { path: string; method: string; triggerId: string }[] = [];
 
     for (const state of this.triggers.values()) {
       paths.push({

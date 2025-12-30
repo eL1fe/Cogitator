@@ -10,8 +10,6 @@
 
 import { query, queryOne, execute, getPool } from '../db/index';
 import { nanoid } from 'nanoid';
-import type { AgentConfig, Tool } from '@cogitator/types';
-
 
 export async function initializeExtendedSchema(): Promise<void> {
   const pool = getPool();
@@ -203,7 +201,6 @@ export async function initializeExtendedSchema(): Promise<void> {
 
   console.log('[db] Extended schema initialized');
 }
-
 
 export interface AgentRow {
   id: string;
@@ -399,7 +396,7 @@ export async function incrementAgentStats(
   cost: number
 ): Promise<void> {
   await execute(
-    `UPDATE cogitator_agents 
+    `UPDATE cogitator_agents
      SET total_runs = total_runs + 1,
          total_tokens = total_tokens + $1,
          total_cost = total_cost + $2,
@@ -409,7 +406,6 @@ export async function incrementAgentStats(
     [tokens, cost, id]
   );
 }
-
 
 export interface RunRow {
   id: string;
@@ -572,7 +568,6 @@ export async function completeRun(
   return getRun(id);
 }
 
-
 export interface ThreadRow {
   id: string;
   agent_id: string | null;
@@ -659,7 +654,6 @@ export async function deleteThread(id: string): Promise<boolean> {
   const count = await execute('DELETE FROM cogitator_threads WHERE id = $1', [id]);
   return count > 0;
 }
-
 
 export interface WorkflowRow {
   id: string;
@@ -825,7 +819,6 @@ export async function deleteWorkflow(id: string): Promise<boolean> {
   return count > 0;
 }
 
-
 export interface WorkflowRunRow {
   id: string;
   workflow_id: string;
@@ -869,7 +862,7 @@ export async function createWorkflowRun(data: {
   input: string;
 }): Promise<WorkflowRunData> {
   const id = `wfrun_${nanoid(12)}`;
-  
+
   const row = await queryOne<WorkflowRunRow>(
     `INSERT INTO cogitator_workflow_runs (id, workflow_id, input, status, started_at)
      VALUES ($1, $2, $3, 'running', NOW())
@@ -878,7 +871,7 @@ export async function createWorkflowRun(data: {
   );
 
   if (!row) throw new Error('Failed to create workflow run');
-  
+
   await execute(
     'UPDATE cogitator_workflows SET total_runs = total_runs + 1, last_run_at = NOW() WHERE id = $1',
     [data.workflowId]
@@ -938,7 +931,6 @@ export async function getWorkflowRuns(workflowId: string): Promise<WorkflowRunDa
   );
   return rows.map(rowToWorkflowRunData);
 }
-
 
 export interface SwarmRow {
   id: string;
@@ -1110,7 +1102,6 @@ export async function deleteSwarm(id: string): Promise<boolean> {
   return count > 0;
 }
 
-
 export interface SwarmRunData {
   id: string;
   swarmId: string;
@@ -1223,18 +1214,17 @@ export async function updateSwarmRun(
   return row ? rowToSwarmRun(row) : null;
 }
 
-
 export interface AnalyticsData {
   totalRuns: number;
   totalTokens: number;
   totalCost: number;
   avgDuration: number;
-  runsPerDay: Array<{ date: string; count: number }>;
-  tokensByModel: Array<{ model: string; tokens: number }>;
-  costByModel: Array<{ model: string; cost: number }>;
+  runsPerDay: { date: string; count: number }[];
+  tokensByModel: { model: string; tokens: number }[];
+  costByModel: { model: string; cost: number }[];
 }
 
-export async function getAnalytics(days: number = 7): Promise<AnalyticsData> {
+export async function getAnalytics(days = 7): Promise<AnalyticsData> {
   const safeDays = Math.max(1, Math.min(365, Math.floor(days)));
 
   const [totals] = await query<{
@@ -1304,4 +1294,3 @@ export async function getAnalytics(days: number = 7): Promise<AnalyticsData> {
     })),
   };
 }
-

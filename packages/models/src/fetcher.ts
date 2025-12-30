@@ -72,7 +72,7 @@ function normalizeProvider(litellmProvider: string | undefined, modelId: string)
   if (litellmProvider) {
     const normalized = PROVIDER_MAPPINGS[litellmProvider];
     if (normalized) return normalized;
-    
+
     for (const [prefix, provider] of Object.entries(PROVIDER_MAPPINGS)) {
       if (litellmProvider.startsWith(prefix)) {
         return provider;
@@ -80,7 +80,7 @@ function normalizeProvider(litellmProvider: string | undefined, modelId: string)
     }
   }
 
-  const prefixMatch = modelId.match(/^([a-z_-]+)\//);
+  const prefixMatch = /^([a-z_-]+)\
   if (prefixMatch) {
     const prefix = prefixMatch[1];
     return PROVIDER_MAPPINGS[prefix] ?? prefix;
@@ -111,7 +111,7 @@ function extractModelName(modelId: string): string {
 
 function createDisplayName(modelId: string): string {
   const name = extractModelName(modelId);
-  
+
   return name
     .replace(/-/g, ' ')
     .replace(/_/g, ' ')
@@ -154,7 +154,7 @@ export function transformLiteLLMData(data: LiteLLMModelData): ModelInfo[] {
     }
 
     const normalizedId = extractModelName(modelId).toLowerCase();
-    
+
     if (seenIds.has(normalizedId)) {
       continue;
     }
@@ -166,8 +166,8 @@ export function transformLiteLLMData(data: LiteLLMModelData): ModelInfo[] {
     const contextWindow = entry.max_input_tokens ?? entry.max_tokens ?? 4096;
     const maxOutputTokens = entry.max_output_tokens ?? entry.max_tokens;
 
-    const isDeprecated = entry.deprecation_date 
-      ? new Date(entry.deprecation_date) < new Date() 
+    const isDeprecated = entry.deprecation_date
+      ? new Date(entry.deprecation_date) < new Date()
       : false;
 
     const model: ModelInfo = {
@@ -191,4 +191,3 @@ export function transformLiteLLMData(data: LiteLLMModelData): ModelInfo[] {
 
   return models.sort((a, b) => a.id.localeCompare(b.id));
 }
-

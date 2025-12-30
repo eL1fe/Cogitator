@@ -148,7 +148,7 @@ export class CircuitBreaker {
         this.transitionTo('closed');
       }
     } else if (this.state === 'closed') {
-      // Reset failure count on success
+
       this.failures = 0;
     }
   }
@@ -161,7 +161,7 @@ export class CircuitBreaker {
     this.lastFailure = new Date();
 
     if (this.state === 'half-open') {
-      // Any failure in half-open goes back to open
+
       this.transitionTo('open');
     } else if (this.state === 'closed') {
       if (this.failures >= this.options.failureThreshold) {
@@ -176,12 +176,10 @@ export class CircuitBreaker {
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     this.totalRequests++;
 
-    // Check if we should try to reset
     if (this.shouldAttemptReset()) {
       this.transitionTo('half-open');
     }
 
-    // If circuit is open, fail fast
     if (this.state === 'open') {
       throw new CogitatorError({
         message: 'Circuit breaker is open',

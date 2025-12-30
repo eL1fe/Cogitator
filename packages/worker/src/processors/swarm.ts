@@ -115,7 +115,7 @@ export async function processSwarmJob(
     input,
   });
 
-  const agentOutputs: Array<{ agent: string; output: string }> = [];
+  const agentOutputs: { agent: string; output: string }[] = [];
   if (result.agentResults) {
     for (const [agentId, runResult] of result.agentResults) {
       agentOutputs.push({

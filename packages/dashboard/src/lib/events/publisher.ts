@@ -58,12 +58,12 @@ export function createCogitatorCallbacks() {
   return {
     onRunStart: async (data: { runId: string; agentId: string; input: string; threadId: string }) => {
       currentRunContext = { runId: data.runId, agentId: data.agentId };
-      
+
       const event: RunStartEvent = {
         ...data,
         timestamp: Date.now(),
       };
-      
+
       try {
         await publish(CHANNELS.RUN_STARTED, event);
       } catch (error) {
@@ -82,13 +82,13 @@ export function createCogitatorCallbacks() {
         toolCalls: result.toolCalls.length,
         timestamp: Date.now(),
       };
-      
+
       try {
         await publish(CHANNELS.RUN_COMPLETED, event);
       } catch (error) {
         console.warn('[EventPublisher] Failed to publish run complete:', error);
       }
-      
+
       currentRunContext = null;
     },
 
@@ -100,26 +100,26 @@ export function createCogitatorCallbacks() {
         error: error.message,
         timestamp: Date.now(),
       };
-      
+
       try {
         await publish(CHANNELS.RUN_FAILED, event);
       } catch (err) {
         console.warn('[EventPublisher] Failed to publish run error:', err);
       }
-      
+
       currentRunContext = null;
     },
 
     onToolCall: async (toolCall: ToolCall) => {
       if (!currentRunContext) return;
-      
+
       const event: ToolCallEvent = {
         runId: currentRunContext.runId,
         agentId: currentRunContext.agentId,
         toolCall,
         timestamp: Date.now(),
       };
-      
+
       try {
         await publish(CHANNELS.TOOL_CALL, event);
       } catch (error) {
@@ -127,10 +127,10 @@ export function createCogitatorCallbacks() {
       }
     },
 
-    onToolResult: async (result: ToolResult) => {
+    onToolResult: async (_result: ToolResult) => {
     },
 
-    onSpan: async (span: Span) => {
+    onSpan: async (_span: Span) => {
     },
   };
 }
@@ -165,4 +165,3 @@ export async function publishAgentStatus(agentId: string, status: 'online' | 'of
     console.warn('[EventPublisher] Failed to publish agent status:', error);
   }
 }
-

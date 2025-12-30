@@ -79,7 +79,7 @@ export async function createLog(data: {
   metadata?: Record<string, unknown>;
 }): Promise<LogEntry> {
   const id = `log_${nanoid(12)}`;
-  
+
   await execute(
     `INSERT INTO dashboard_logs (id, level, message, source, agent_id, run_id, metadata)
      VALUES ($1, $2, $3, $4, $5, $6, $7)`,
@@ -98,14 +98,14 @@ export async function createLog(data: {
     'SELECT * FROM dashboard_logs WHERE id = $1',
     [id]
   );
-  
+
   return rowToLog(row!);
 }
 
 export async function getLogCount(level?: string): Promise<number> {
   let sql = 'SELECT COUNT(*) as count FROM dashboard_logs';
   const params: unknown[] = [];
-  
+
   if (level) {
     sql += ' WHERE level = $1';
     params.push(level);
@@ -140,7 +140,7 @@ export async function getLogStats(): Promise<{
     warn: string;
     error: string;
   }>(`
-    SELECT 
+    SELECT
       COUNT(*) as total,
       SUM(CASE WHEN level = 'debug' THEN 1 ELSE 0 END) as debug,
       SUM(CASE WHEN level = 'info' THEN 1 ELSE 0 END) as info,
@@ -158,4 +158,3 @@ export async function getLogStats(): Promise<{
     error: parseInt(result?.error || '0'),
   };
 }
-

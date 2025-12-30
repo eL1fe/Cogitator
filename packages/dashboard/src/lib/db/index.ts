@@ -1,4 +1,4 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool, type PoolClient } from 'pg';
 
 let pool: Pool | null = null;
 
@@ -38,7 +38,7 @@ export async function execute(sql: string, params?: unknown[]): Promise<number> 
 export async function withTransaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
   const pool = getPool();
   const client = await pool.connect();
-  
+
   try {
     await client.query('BEGIN');
     const result = await fn(client);
@@ -54,7 +54,7 @@ export async function withTransaction<T>(fn: (client: PoolClient) => Promise<T>)
 
 export async function initializeSchema(): Promise<void> {
   const pool = getPool();
-  
+
   await pool.query(`
     -- Agents table
     CREATE TABLE IF NOT EXISTS dashboard_agents (

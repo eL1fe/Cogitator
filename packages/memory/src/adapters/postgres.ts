@@ -155,7 +155,6 @@ export class PostgresAdapter
     return this.success(undefined);
   }
 
-
   async createThread(
     agentId: string,
     metadata: Record<string, unknown> = {}
@@ -229,7 +228,6 @@ export class PostgresAdapter
     ]);
     return this.success(undefined);
   }
-
 
   async addEntry(
     entry: Omit<MemoryEntry, 'id' | 'createdAt'>
@@ -350,7 +348,6 @@ export class PostgresAdapter
     );
     return this.success(undefined);
   }
-
 
   async addFact(
     fact: Omit<Fact, 'id' | 'createdAt' | 'updatedAt'>
@@ -512,7 +509,6 @@ export class PostgresAdapter
     );
   }
 
-
   async addEmbedding(
     embedding: Omit<Embedding, 'id' | 'createdAt'>
   ): Promise<MemoryResult<Embedding>> {
@@ -543,7 +539,7 @@ export class PostgresAdapter
 
   async search(
     options: SemanticSearchOptions
-  ): Promise<MemoryResult<Array<Embedding & { score: number }>>> {
+  ): Promise<MemoryResult<(Embedding & { score: number })[]>> {
     if (!this.pool) return this.failure('Not connected');
 
     if (!options.vector) {
@@ -605,7 +601,6 @@ export class PostgresAdapter
     );
     return this.success(undefined);
   }
-
 
   setVectorDimensions(dimensions: number): void {
     this.vectorDimensions = dimensions;

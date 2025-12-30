@@ -7,15 +7,16 @@
 import { NextResponse } from 'next/server';
 import { getOllamaModels, checkOllamaHealth } from '@/lib/ollama';
 import { OPENAI_MODELS, ANTHROPIC_MODELS, GOOGLE_MODELS } from '@cogitator/models';
+import { withAuth } from '@/lib/auth/middleware';
 
-export async function GET() {
+export const GET = withAuth(async () => {
   try {
-    const models: Array<{
+    const models: {
       id: string;
       object: 'model';
       created: number;
       owned_by: string;
-    }> = [];
+    }[] = [];
 
     const ollamaHealth = await checkOllamaHealth();
     if (ollamaHealth.available) {
@@ -79,5 +80,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
-
+});

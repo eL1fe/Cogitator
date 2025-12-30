@@ -39,7 +39,7 @@ memory:
     prefix: cogitator
   postgres:
     url: postgresql:
-    
+
 sandbox:
   enabled: true
   defaultType: docker
@@ -56,12 +56,12 @@ agents:
   - name: Research Agent
     model: gpt-4o
     instructions: |
-      You are a research assistant specialized in 
+      You are a research assistant specialized in
       finding and analyzing information from the web.
     tools:
       - web_search
       - read_url
-      
+
   - name: Code Assistant
     model: claude-3-5-sonnet
     instructions: |
@@ -270,4 +270,3 @@ export function ConfigEditor() {
     </div>
   );
 }
-

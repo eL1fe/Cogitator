@@ -40,19 +40,23 @@ pnpm dev
 ```
 cogitator/
 ├── packages/
-│   ├── core/           # Core runtime (@cogitator/core)
+│   ├── core/           # Core runtime and LLM backends (@cogitator/core)
 │   ├── cli/            # CLI tool (@cogitator/cli)
+│   ├── config/         # Configuration loader (@cogitator/config)
 │   ├── types/          # Shared types (@cogitator/types)
 │   ├── memory/         # Memory adapters (@cogitator/memory)
-│   ├── tools/          # Built-in tools (@cogitator/tools)
+│   ├── models/         # Model registry and discovery (@cogitator/models)
+│   ├── mcp/            # Model Context Protocol adapter (@cogitator/mcp)
+│   ├── openai-compat/  # OpenAI-compatible API server (@cogitator/openai-compat)
+│   ├── redis/          # Redis client with cluster support (@cogitator/redis)
 │   ├── workflows/      # Workflow engine (@cogitator/workflows)
 │   ├── swarms/         # Swarm coordination (@cogitator/swarms)
-│   ├── sandbox/        # Execution sandbox (@cogitator/sandbox)
-│   └── dashboard/      # Observability UI (@cogitator/dashboard)
-├── examples/           # Example agents and workflows
+│   ├── sandbox/        # Code execution sandbox (@cogitator/sandbox)
+│   ├── wasm-tools/     # WASM plugin system (@cogitator/wasm-tools)
+│   ├── worker/         # Background job worker (@cogitator/worker)
+│   └── dashboard/      # Web dashboard & API (@cogitator/dashboard)
 ├── docs/               # Documentation
-├── deploy/             # Deployment configurations
-└── scripts/            # Build and release scripts
+└── scripts/            # Build and utility scripts
 ```
 
 ## How to Contribute
@@ -135,11 +139,18 @@ Scopes:
 
 - `core`: @cogitator/core
 - `cli`: @cogitator/cli
+- `config`: @cogitator/config
+- `types`: @cogitator/types
 - `memory`: @cogitator/memory
-- `tools`: @cogitator/tools
+- `models`: @cogitator/models
+- `mcp`: @cogitator/mcp
+- `openai-compat`: @cogitator/openai-compat
+- `redis`: @cogitator/redis
 - `workflows`: @cogitator/workflows
 - `swarms`: @cogitator/swarms
 - `sandbox`: @cogitator/sandbox
+- `wasm-tools`: @cogitator/wasm-tools
+- `worker`: @cogitator/worker
 - `dashboard`: @cogitator/dashboard
 
 Examples:

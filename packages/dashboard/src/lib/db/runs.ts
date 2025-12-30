@@ -1,4 +1,4 @@
-import { query, queryOne, execute, withTransaction } from './index';
+import { query, queryOne, execute } from './index';
 import { nanoid } from 'nanoid';
 import type { Run, ToolCall, Message } from '@/types';
 
@@ -157,7 +157,7 @@ export async function createRun(data: {
   input: string;
 }): Promise<Run> {
   const id = `run_${nanoid(12)}`;
-  
+
   await execute(
     `INSERT INTO dashboard_runs (id, agent_id, thread_id, input, status)
      VALUES ($1, $2, $3, $4, 'running')`,
@@ -235,7 +235,7 @@ export async function addToolCall(data: {
   arguments?: Record<string, unknown>;
 }): Promise<string> {
   const id = `tc_${nanoid(12)}`;
-  
+
   await execute(
     `INSERT INTO dashboard_tool_calls (id, run_id, name, arguments)
      VALUES ($1, $2, $3, $4)`,
@@ -252,7 +252,7 @@ export async function updateToolCall(id: string, data: {
   error?: string;
 }): Promise<void> {
   await execute(
-    `UPDATE dashboard_tool_calls 
+    `UPDATE dashboard_tool_calls
      SET status = $1, result = $2, duration = $3, error = $4, completed_at = NOW()
      WHERE id = $5`,
     [data.status, JSON.stringify(data.result), data.duration || null, data.error || null, id]
@@ -266,7 +266,7 @@ export async function addMessage(data: {
   toolCallId?: string;
 }): Promise<string> {
   const id = `msg_${nanoid(12)}`;
-  
+
   await execute(
     `INSERT INTO dashboard_messages (id, run_id, role, content, tool_call_id)
      VALUES ($1, $2, $3, $4, $5)`,
@@ -279,7 +279,7 @@ export async function addMessage(data: {
 export async function getRunCount(status?: string): Promise<number> {
   let sql = 'SELECT COUNT(*) as count FROM dashboard_runs';
   const params: unknown[] = [];
-  
+
   if (status) {
     sql += ' WHERE status = $1';
     params.push(status);
@@ -317,7 +317,7 @@ export async function getRunStats(period: 'day' | 'week' | 'month' = 'day'): Pro
     total_tokens: string;
     total_cost: string;
   }>(`
-    SELECT 
+    SELECT
       COUNT(*) as total_runs,
       SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_runs,
       SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed_runs,
@@ -335,4 +335,3 @@ export async function getRunStats(period: 'day' | 'week' | 'month' = 'day'): Pro
     totalCost: parseFloat(result?.total_cost || '0'),
   };
 }
-

@@ -27,7 +27,7 @@ export async function getAllConfig(): Promise<Record<string, unknown>> {
   const rows = await query<{ key: string; value: unknown }>(
     'SELECT key, value FROM dashboard_config'
   );
-  
+
   const config: Record<string, unknown> = {};
   for (const row of rows) {
     config[row.key] = row.value;
@@ -66,7 +66,6 @@ export async function getCogitatorConfig(): Promise<CogitatorConfig | null> {
 export async function setCogitatorConfig(config: CogitatorConfig): Promise<void> {
   await setConfig('cogitator', config);
 }
-
 
 export interface ApiKeysConfig {
   openai?: string;
@@ -133,4 +132,3 @@ export async function getMaskedApiKeys(): Promise<Record<string, string>> {
 
   return masked;
 }
-

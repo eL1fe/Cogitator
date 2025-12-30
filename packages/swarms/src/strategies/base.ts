@@ -36,7 +36,7 @@ export abstract class BaseStrategy implements IStrategy {
    * Run agents sequentially
    */
   protected async runSequential(
-    agents: Array<{ name: string; input: string | ((prevOutput?: string) => string); context?: Record<string, unknown> }>
+    agents: { name: string; input: string | ((prevOutput?: string) => string); context?: Record<string, unknown> }[]
   ): Promise<Map<string, RunResult>> {
     const results = new Map<string, RunResult>();
     let prevOutput: string | undefined;

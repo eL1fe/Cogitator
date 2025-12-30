@@ -205,7 +205,7 @@ export class DockerSandboxExecutor extends BaseSandboxExecutor {
           });
         } catch (error) {
           clearTimeout(timer);
-          reject(error);
+          reject(error instanceof Error ? error : new Error(String(error)));
         }
       })();
     });

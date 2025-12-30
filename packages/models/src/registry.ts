@@ -4,9 +4,9 @@ import { fetchLiteLLMData, transformLiteLLMData } from './fetcher.js';
 import { BUILTIN_MODELS, BUILTIN_PROVIDERS } from './providers/index.js';
 
 export class ModelRegistry {
-  private models: Map<string, ModelInfo> = new Map();
-  private aliases: Map<string, string> = new Map();
-  private providers: Map<string, ProviderInfo> = new Map();
+  private models = new Map<string, ModelInfo>();
+  private aliases = new Map<string, string>();
+  private providers = new Map<string, ProviderInfo>();
   private cache: ModelCache;
   private options: Required<RegistryOptions>;
   private initialized = false;
@@ -28,11 +28,11 @@ export class ModelRegistry {
 
     try {
       const cached = await this.cache.get();
-      
+
       if (cached && cached.length > 0) {
         this.loadModels(cached);
         this.initialized = true;
-        
+
         this.refreshInBackground();
         return;
       }
@@ -56,9 +56,9 @@ export class ModelRegistry {
     try {
       const data = await fetchLiteLLMData();
       const models = transformLiteLLMData(data);
-      
+
       const allModels = this.mergeWithBuiltin(models);
-      
+
       await this.cache.set(allModels);
       this.loadModels(allModels);
       this.initialized = true;
@@ -82,9 +82,9 @@ export class ModelRegistry {
 
   getModel(id: string): ModelInfo | null {
     this.ensureInitialized();
-    
+
     const normalized = this.normalizeModelId(id);
-    
+
     const direct = this.models.get(normalized);
     if (direct) return direct;
 
@@ -110,7 +110,7 @@ export class ModelRegistry {
 
   listModels(filter?: ModelFilter): ModelInfo[] {
     this.ensureInitialized();
-    
+
     let models = Array.from(this.models.values());
 
     if (filter) {
@@ -118,30 +118,30 @@ export class ModelRegistry {
         if (filter.provider && model.provider !== filter.provider) {
           return false;
         }
-        
+
         if (filter.supportsTools && !model.capabilities?.supportsTools) {
           return false;
         }
-        
+
         if (filter.supportsVision && !model.capabilities?.supportsVision) {
           return false;
         }
-        
+
         if (filter.minContextWindow && model.contextWindow < filter.minContextWindow) {
           return false;
         }
-        
+
         if (filter.maxPricePerMillion) {
           const avgPrice = (model.pricing.input + model.pricing.output) / 2;
           if (avgPrice > filter.maxPricePerMillion) {
             return false;
           }
         }
-        
+
         if (filter.excludeDeprecated && model.deprecated) {
           return false;
         }
-        
+
         return true;
       });
     }
@@ -183,7 +183,7 @@ export class ModelRegistry {
 
     for (const model of models) {
       this.models.set(model.id, model);
-      
+
       if (model.aliases) {
         for (const alias of model.aliases) {
           this.aliases.set(alias.toLowerCase(), model.id);
@@ -213,7 +213,7 @@ export class ModelRegistry {
 
   private mergeWithBuiltin(fetched: ModelInfo[]): ModelInfo[] {
     const modelMap = new Map<string, ModelInfo>();
-    
+
     for (const model of BUILTIN_MODELS) {
       modelMap.set(model.id, model);
     }
@@ -238,7 +238,7 @@ export class ModelRegistry {
 
   private normalizeModelId(id: string): string {
     let normalized = id.toLowerCase();
-    
+
     if (normalized.includes('/')) {
       normalized = normalized.split('/').pop() ?? normalized;
     }
@@ -309,4 +309,3 @@ export function getModel(modelId: string): ModelInfo | null {
 export function listModels(filter?: ModelFilter): ModelInfo[] {
   return getModelRegistry().listModels(filter);
 }
-

@@ -19,7 +19,7 @@ export class CircuitBreaker {
   private failureCount = 0;
   private successCount = 0;
   private lastFailureTime = 0;
-  private stateChangeListeners: Array<(state: CircuitState) => void> = [];
+  private stateChangeListeners: ((state: CircuitState) => void)[] = [];
 
   constructor(config: CircuitBreakerConfig) {
     this.config = {

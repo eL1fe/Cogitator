@@ -52,7 +52,7 @@ export abstract class BaseDLQ {
  * In-memory Dead Letter Queue
  */
 export class InMemoryDLQ extends BaseDLQ {
-  private entries: Map<string, DeadLetterEntry> = new Map();
+  private entries = new Map<string, DeadLetterEntry>();
   private defaultTTL: number;
   private cleanupInterval?: ReturnType<typeof setInterval>;
 

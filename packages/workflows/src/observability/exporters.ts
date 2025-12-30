@@ -310,7 +310,7 @@ export class ZipkinSpanExporter implements SpanExporterInstance {
     }
 
     if (span.status === 'error') {
-      result.tags['error'] = 'true';
+      result.tags.error = 'true';
       if (span.statusMessage) {
         result.tags['error.message'] = span.statusMessage;
       }
@@ -488,8 +488,8 @@ interface ZipkinSpan {
     serviceName: string;
   };
   tags: Record<string, string>;
-  annotations: Array<{
+  annotations: {
     timestamp: number;
     value: string;
-  }>;
+  }[];
 }

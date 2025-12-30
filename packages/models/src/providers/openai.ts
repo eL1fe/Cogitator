@@ -120,4 +120,3 @@ export const OPENAI_MODELS: ModelInfo[] = [
     },
   },
 ];
-

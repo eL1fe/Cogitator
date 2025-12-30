@@ -136,7 +136,7 @@ export class WorkflowTracer {
   private completedSpans: WorkflowSpan[] = [];
   private currentTraceContext: TraceContext | null = null;
   private baggage: Baggage = {};
-  private sampleDecision: boolean = true;
+  private sampleDecision = true;
 
   constructor(config: Partial<TracingConfig> = {}) {
     this.config = {

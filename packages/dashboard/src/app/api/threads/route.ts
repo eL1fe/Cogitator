@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import {
   getThreads,
   createThread,
@@ -6,6 +6,7 @@ import {
 } from '@/lib/cogitator/db';
 import { initializeSchema } from '@/lib/db';
 import { nanoid } from 'nanoid';
+import { withAuth } from '@/lib/auth/middleware';
 
 let initialized = false;
 
@@ -21,7 +22,7 @@ async function ensureInitialized() {
   }
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request) => {
   try {
     await ensureInitialized();
 
@@ -35,9 +36,9 @@ export async function GET(request: NextRequest) {
     console.error('[api/threads] Failed to fetch threads:', error);
     return NextResponse.json({ error: 'Failed to fetch threads' }, { status: 500 });
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async (request) => {
   try {
     await ensureInitialized();
     const body = await request.json();
@@ -53,5 +54,4 @@ export async function POST(request: NextRequest) {
     console.error('[api/threads] Failed to create thread:', error);
     return NextResponse.json({ error: 'Failed to create thread' }, { status: 500 });
   }
-}
-
+});
