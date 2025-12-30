@@ -1,0 +1,33 @@
+import type { ModelInfo } from '../types.js';
+import { OPENAI_MODELS } from './openai.js';
+import { ANTHROPIC_MODELS } from './anthropic.js';
+import { GOOGLE_MODELS } from './google.js';
+
+export { OPENAI_MODELS } from './openai.js';
+export { ANTHROPIC_MODELS } from './anthropic.js';
+export { GOOGLE_MODELS } from './google.js';
+
+export const BUILTIN_MODELS: ModelInfo[] = [
+  ...OPENAI_MODELS,
+  ...ANTHROPIC_MODELS,
+  ...GOOGLE_MODELS,
+];
+
+export const BUILTIN_PROVIDERS = [
+  { id: 'openai', name: 'OpenAI', website: 'https://openai.com' },
+  { id: 'anthropic', name: 'Anthropic', website: 'https://anthropic.com' },
+  { id: 'google', name: 'Google', website: 'https://ai.google.dev' },
+  { id: 'ollama', name: 'Ollama', website: 'https://ollama.com' },
+  { id: 'azure', name: 'Azure OpenAI', website: 'https://azure.microsoft.com/products/ai-services/openai-service' },
+  { id: 'aws', name: 'AWS Bedrock', website: 'https://aws.amazon.com/bedrock' },
+  { id: 'mistral', name: 'Mistral AI', website: 'https://mistral.ai' },
+  { id: 'cohere', name: 'Cohere', website: 'https://cohere.com' },
+  { id: 'groq', name: 'Groq', website: 'https://groq.com' },
+  { id: 'together', name: 'Together AI', website: 'https://together.ai' },
+  { id: 'fireworks', name: 'Fireworks AI', website: 'https://fireworks.ai' },
+  { id: 'deepinfra', name: 'DeepInfra', website: 'https://deepinfra.com' },
+  { id: 'perplexity', name: 'Perplexity', website: 'https://perplexity.ai' },
+  { id: 'replicate', name: 'Replicate', website: 'https://replicate.com' },
+  { id: 'xai', name: 'xAI', website: 'https://x.ai' },
+];
+

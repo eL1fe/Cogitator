@@ -1,0 +1,123 @@
+import type { ModelInfo } from '../types.js';
+
+export const OPENAI_MODELS: ModelInfo[] = [
+  {
+    id: 'gpt-4o',
+    provider: 'openai',
+    displayName: 'GPT-4o',
+    pricing: { input: 2.5, output: 10 },
+    contextWindow: 128000,
+    maxOutputTokens: 16384,
+    capabilities: {
+      supportsTools: true,
+      supportsVision: true,
+      supportsFunctions: true,
+      supportsStreaming: true,
+      supportsJson: true,
+    },
+  },
+  {
+    id: 'gpt-4o-mini',
+    provider: 'openai',
+    displayName: 'GPT-4o Mini',
+    pricing: { input: 0.15, output: 0.6 },
+    contextWindow: 128000,
+    maxOutputTokens: 16384,
+    capabilities: {
+      supportsTools: true,
+      supportsVision: true,
+      supportsFunctions: true,
+      supportsStreaming: true,
+      supportsJson: true,
+    },
+  },
+  {
+    id: 'gpt-4-turbo',
+    provider: 'openai',
+    displayName: 'GPT-4 Turbo',
+    pricing: { input: 10, output: 30 },
+    contextWindow: 128000,
+    maxOutputTokens: 4096,
+    capabilities: {
+      supportsTools: true,
+      supportsVision: true,
+      supportsFunctions: true,
+      supportsStreaming: true,
+      supportsJson: true,
+    },
+  },
+  {
+    id: 'gpt-4',
+    provider: 'openai',
+    displayName: 'GPT-4',
+    pricing: { input: 30, output: 60 },
+    contextWindow: 8192,
+    maxOutputTokens: 8192,
+    capabilities: {
+      supportsTools: true,
+      supportsFunctions: true,
+      supportsStreaming: true,
+    },
+  },
+  {
+    id: 'gpt-3.5-turbo',
+    provider: 'openai',
+    displayName: 'GPT-3.5 Turbo',
+    pricing: { input: 0.5, output: 1.5 },
+    contextWindow: 16385,
+    maxOutputTokens: 4096,
+    capabilities: {
+      supportsTools: true,
+      supportsFunctions: true,
+      supportsStreaming: true,
+      supportsJson: true,
+    },
+  },
+  {
+    id: 'o1',
+    provider: 'openai',
+    displayName: 'o1',
+    pricing: { input: 15, output: 60 },
+    contextWindow: 200000,
+    maxOutputTokens: 100000,
+    capabilities: {
+      supportsStreaming: true,
+    },
+  },
+  {
+    id: 'o1-mini',
+    provider: 'openai',
+    displayName: 'o1 Mini',
+    pricing: { input: 3, output: 12 },
+    contextWindow: 128000,
+    maxOutputTokens: 65536,
+    capabilities: {
+      supportsStreaming: true,
+    },
+  },
+  {
+    id: 'o1-preview',
+    provider: 'openai',
+    displayName: 'o1 Preview',
+    pricing: { input: 15, output: 60 },
+    contextWindow: 128000,
+    maxOutputTokens: 32768,
+    capabilities: {
+      supportsStreaming: true,
+    },
+  },
+  {
+    id: 'o3-mini',
+    provider: 'openai',
+    displayName: 'o3 Mini',
+    pricing: { input: 1.1, output: 4.4 },
+    contextWindow: 200000,
+    maxOutputTokens: 100000,
+    capabilities: {
+      supportsTools: true,
+      supportsFunctions: true,
+      supportsStreaming: true,
+    },
+  },
+];
+
