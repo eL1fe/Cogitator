@@ -199,6 +199,21 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.0.0
         version: 4.1.18
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.3
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.16.0
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.7
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.7)
       '@xyflow/react':
         specifier: ^12.4.4
         version: 12.10.0(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3)
@@ -259,22 +274,6 @@ importers:
       zustand:
         specifier: ^5.0.3
         version: 5.0.9(@types/react@19.2.7)(react@19.2.3)
-    devDependencies:
-      '@types/js-yaml':
-        specifier: ^4.0.9
-        version: 4.0.9
-      '@types/node':
-        specifier: ^22.10.0
-        version: 22.19.3
-      '@types/pg':
-        specifier: ^8.11.10
-        version: 8.16.0
-      '@types/react':
-        specifier: ^19.0.0
-        version: 19.2.7
-      '@types/react-dom':
-        specifier: ^19.0.0
-        version: 19.2.3(@types/react@19.2.7)
 
   packages/mcp:
     dependencies:
@@ -2705,7 +2704,7 @@ packages:
 
   /@types/js-yaml@4.0.9:
     resolution: {integrity: sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==}
-    dev: true
+    dev: false
 
   /@types/json-schema@7.0.15:
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -2744,7 +2743,6 @@ packages:
       '@types/node': 22.19.3
       pg-protocol: 1.10.3
       pg-types: 2.2.0
-    dev: true
 
   /@types/phoenix@1.6.7:
     resolution: {integrity: sha512-oN9ive//QSBkf19rfDv45M7eZPi0eEXylht2OLEXicu5b4KoQ1OzXIw+xDSGWxSxe1JmepRR/ZH283vsu518/Q==}
@@ -2756,12 +2754,13 @@ packages:
       '@types/react': ^19.2.0
     dependencies:
       '@types/react': 19.2.7
-    dev: true
+    dev: false
 
   /@types/react@19.2.7:
     resolution: {integrity: sha512-MWtvHrGZLFttgeEj28VXHxpmwYbor/ATPYbBfSFZEIRK0ecCFLl2Qo55z52Hss+UV9CRN7trSeq1zbgx7YDWWg==}
     dependencies:
       csstype: 3.2.3
+    dev: false
 
   /@types/ssh2@1.15.5:
     resolution: {integrity: sha512-N1ASjp/nXH3ovBHddRJpli4ozpk6UdDYIX4RJWFa9L1YKnzdhTlVmiGHm4DZnj/jLbqZpes4aeR30EFGQtvhQQ==}
@@ -3572,6 +3571,7 @@ packages:
 
   /csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+    dev: false
 
   /d3-array@3.2.4:
     resolution: {integrity: sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==}
