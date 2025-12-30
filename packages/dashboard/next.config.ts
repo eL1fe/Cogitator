@@ -7,9 +7,17 @@ const nextConfig: NextConfig = {
     },
   },
   transpilePackages: [
+    '@cogitator/config',
     '@cogitator/core',
-    '@cogitator/types',
+    '@cogitator/mcp',
+    '@cogitator/memory',
     '@cogitator/models',
+    '@cogitator/openai-compat',
+    '@cogitator/redis',
+    '@cogitator/sandbox',
+    '@cogitator/swarms',
+    '@cogitator/types',
+    '@cogitator/workflows',
   ],
 };
 
