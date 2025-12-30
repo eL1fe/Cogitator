@@ -115,10 +115,11 @@ export function PlaygroundChat() {
 
         for (const provider of data.cloud) {
           const providerType = provider.id as 'openai' | 'anthropic' | 'google';
-          for (const modelId of provider.models) {
+          for (const model of provider.models) {
+            const modelData = typeof model === 'string' ? { id: model, name: model } : model;
             modelOptions.push({
-              id: modelId,
-              name: modelId,
+              id: modelData.id,
+              name: modelData.name || modelData.id,
               provider: providerType,
               available: provider.configured,
             });

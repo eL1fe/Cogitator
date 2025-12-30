@@ -1,3 +1,6 @@
+# Docker Compose for CPU-only systems (no NVIDIA GPU)
+# Usage: docker-compose -f docker-compose.cpu.yml up -d
+
 services:
   # PostgreSQL - Primary database for agents, runs, workflows, swarms
   postgres:
@@ -35,7 +38,7 @@ services:
       retries: 5
     restart: unless-stopped
 
-  # Ollama - Local LLM runtime
+  # Ollama - Local LLM runtime (CPU only)
   ollama:
     image: ollama/ollama:latest
     container_name: cogitator-ollama
@@ -43,16 +46,8 @@ services:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
     restart: unless-stopped
-    # Note: GPU support requires nvidia-container-toolkit
-    # Remove 'deploy' section if running on CPU only
+    # No GPU configuration - runs on CPU
 
   # Ollama model initialization
   ollama-init:
@@ -71,8 +66,8 @@ services:
         echo "⏳ Waiting for Ollama to be ready..."
         sleep 10
         
-        echo "📦 Pulling embedding model: nomic-embed-text-v2-moe..."
-        ollama pull nomic-embed-text-v2-moe
+        echo "📦 Pulling embedding model: nomic-embed-text..."
+        ollama pull nomic-embed-text
         
         echo "📦 Pulling default LLM: llama3.2:3b..."
         ollama pull llama3.2:3b
@@ -80,27 +75,6 @@ services:
         echo "✅ Models ready!"
         ollama list
     restart: "no"
-
-  # Cogitator Dashboard (optional - uncomment to run in Docker)
-  # dashboard:
-  #   build:
-  #     context: .
-  #     dockerfile: docker/dashboard/Dockerfile
-  #   container_name: cogitator-dashboard
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - DATABASE_URL=postgresql://cogitator:cogitator_dev@postgres:5432/cogitator
-  #     - REDIS_URL=redis://redis:6379
-  #     - OLLAMA_URL=http://ollama:11434
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #     ollama-init:
-  #       condition: service_completed_successfully
-  #   restart: unless-stopped
 
 volumes:
   postgres_data:
@@ -113,3 +87,4 @@ volumes:
 networks:
   default:
     name: cogitator_network
+

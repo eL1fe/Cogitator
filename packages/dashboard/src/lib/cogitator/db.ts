@@ -811,6 +811,124 @@ export async function deleteWorkflow(id: string): Promise<boolean> {
 }
 
 // ============================================================================
+// Workflow Runs
+// ============================================================================
+
+export interface WorkflowRunRow {
+  id: string;
+  workflow_id: string;
+  input: string;
+  output: string | null;
+  status: string;
+  error: string | null;
+  duration: number | null;
+  started_at: Date;
+  completed_at: Date | null;
+}
+
+export interface WorkflowRunData {
+  id: string;
+  workflowId: string;
+  input: string;
+  output?: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  error?: string;
+  duration?: number;
+  startedAt: string;
+  completedAt?: string;
+}
+
+function rowToWorkflowRunData(row: WorkflowRunRow): WorkflowRunData {
+  return {
+    id: row.id,
+    workflowId: row.workflow_id,
+    input: row.input,
+    output: row.output || undefined,
+    status: row.status as WorkflowRunData['status'],
+    error: row.error || undefined,
+    duration: row.duration || undefined,
+    startedAt: row.started_at.toISOString(),
+    completedAt: row.completed_at?.toISOString(),
+  };
+}
+
+export async function createWorkflowRun(data: {
+  workflowId: string;
+  input: string;
+}): Promise<WorkflowRunData> {
+  const id = `wfrun_${nanoid(12)}`;
+  
+  const row = await queryOne<WorkflowRunRow>(
+    `INSERT INTO cogitator_workflow_runs (id, workflow_id, input, status, started_at)
+     VALUES ($1, $2, $3, 'running', NOW())
+     RETURNING *`,
+    [id, data.workflowId, data.input]
+  );
+
+  if (!row) throw new Error('Failed to create workflow run');
+  
+  // Update workflow total_runs
+  await execute(
+    'UPDATE cogitator_workflows SET total_runs = total_runs + 1, last_run_at = NOW() WHERE id = $1',
+    [data.workflowId]
+  );
+
+  return rowToWorkflowRunData(row);
+}
+
+export async function updateWorkflowRun(
+  id: string,
+  data: Partial<{
+    status: 'running' | 'completed' | 'failed';
+    output: string;
+    error: string;
+    duration: number;
+  }>
+): Promise<WorkflowRunData | null> {
+  const updates: string[] = [];
+  const values: unknown[] = [];
+  let paramIndex = 1;
+
+  if (data.status !== undefined) {
+    updates.push(`status = $${paramIndex++}`);
+    values.push(data.status);
+  }
+  if (data.output !== undefined) {
+    updates.push(`output = $${paramIndex++}`);
+    values.push(data.output);
+  }
+  if (data.error !== undefined) {
+    updates.push(`error = $${paramIndex++}`);
+    values.push(data.error);
+  }
+  if (data.duration !== undefined) {
+    updates.push(`duration = $${paramIndex++}`);
+    values.push(data.duration);
+  }
+  if (data.status === 'completed' || data.status === 'failed') {
+    updates.push(`completed_at = NOW()`);
+  }
+
+  if (updates.length === 0) return null;
+
+  values.push(id);
+  const row = await queryOne<WorkflowRunRow>(
+    `UPDATE cogitator_workflow_runs SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+    values
+  );
+
+  return row ? rowToWorkflowRunData(row) : null;
+}
+
+export async function getWorkflowRuns(workflowId: string): Promise<WorkflowRunData[]> {
+  const rows = await query<WorkflowRunRow>(
+    'SELECT * FROM cogitator_workflow_runs WHERE workflow_id = $1 ORDER BY started_at DESC',
+    [workflowId]
+  );
+  return rows.map(rowToWorkflowRunData);
+}
+
+// ============================================================================
 // Swarm Queries
 // ============================================================================
 

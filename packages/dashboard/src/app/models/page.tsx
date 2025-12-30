@@ -482,7 +482,9 @@ export default function ModelsPage() {
                         </Badge>
                       </div>
                       <p className="text-sm text-text-muted mt-1">
-                        {provider.models.join(', ')}
+                        {provider.models.map((m: { id: string; name: string } | string) => 
+                          typeof m === 'string' ? m : m.name
+                        ).join(', ')}
                       </p>
                     </div>
                   </div>

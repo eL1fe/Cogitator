@@ -93,7 +93,7 @@ export function ActiveAgents() {
       ) : (
         <div className="space-y-2">
           {displayAgents.map((agent) => {
-            const config = statusConfig[agent.status];
+            const config = statusConfig[agent.status as keyof typeof statusConfig] || statusConfig.offline;
 
             return (
               <Link

@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOllamaModels, checkOllamaHealth, POPULAR_MODELS } from '@/lib/ollama';
 import { getConfig, setConfig } from '@/lib/db/config';
+import {
+  getModelRegistry,
+  initializeModels,
+  getModel,
+  getPrice,
+  listModels,
+  BUILTIN_MODELS,
+  OPENAI_MODELS,
+  ANTHROPIC_MODELS,
+  GOOGLE_MODELS,
+} from '@cogitator/models';
 
 interface ApiKeysConfig {
   openai?: string;
@@ -8,8 +19,58 @@ interface ApiKeysConfig {
   google?: string;
 }
 
-export async function GET() {
+let modelsInitialized = false;
+
+async function ensureModelsInitialized() {
+  if (!modelsInitialized) {
+    try {
+      await initializeModels();
+      modelsInitialized = true;
+    } catch (error) {
+      console.warn('[models] Failed to initialize models registry:', error);
+      modelsInitialized = true;
+    }
+  }
+}
+
+export async function GET(request: NextRequest) {
   try {
+    const searchParams = request.nextUrl.searchParams;
+    const action = searchParams.get('action');
+
+    // Handle specific actions
+    if (action === 'pricing') {
+      await ensureModelsInitialized();
+      const modelName = searchParams.get('model');
+      
+      if (modelName) {
+        const price = getPrice(modelName);
+        const model = getModel(modelName);
+        return NextResponse.json({
+          model: modelName,
+          pricing: price,
+          info: model,
+        });
+      }
+
+      // Return all models with pricing
+      const allModels = listModels();
+      return NextResponse.json({
+        models: allModels.map(m => ({
+          ...m,
+          pricing: getPrice(m.id),
+        })),
+      });
+    }
+
+    if (action === 'registry') {
+      await ensureModelsInitialized();
+      const provider = searchParams.get('provider');
+      const models = listModels(provider ? { provider } : undefined);
+      return NextResponse.json({ models });
+    }
+
+    // Default: return all available models
     // Get Ollama models
     const ollamaHealth = await checkOllamaHealth();
     const ollamaModels = ollamaHealth.available ? await getOllamaModels() : [];
@@ -18,30 +79,70 @@ export async function GET() {
     const apiKeys = await getConfig<ApiKeysConfig>('api_keys');
     
     // Mark which popular models are downloaded
-    const downloadedNames = new Set(ollamaModels.map((m) => m.name));
-    const availableModels = POPULAR_MODELS.map((m) => ({
-      ...m,
-      isDownloaded: downloadedNames.has(m.name),
-    }));
+    // Build sets for efficient lookup
+    const downloadedFullNames = new Set(ollamaModels.map((m) => m.name));
+    
+    const availableModels = POPULAR_MODELS.map((m) => {
+      const [baseName, tag] = m.name.split(':');
+      
+      // Check for exact match first
+      if (downloadedFullNames.has(m.name)) {
+        return { ...m, isDownloaded: true };
+      }
+      
+      // For models without explicit tag (e.g., "nomic-embed-text"), check if :latest exists
+      if (!tag) {
+        if (downloadedFullNames.has(`${baseName}:latest`)) {
+          return { ...m, isDownloaded: true };
+        }
+      }
+      
+      // For models with a tag, also check if base:latest exists (some models use :latest as alias)
+      // But only if the requested tag is a common variant like numbers (3b, 7b, etc.)
+      // Don't match different size variants
+      
+      return { ...m, isDownloaded: false };
+    });
 
-    // Cloud providers
+    // Get model info from registry
+    await ensureModelsInitialized();
+
+    // Cloud providers with pricing from @cogitator/models
     const cloudProviders = [
       {
         id: 'openai',
         name: 'OpenAI',
-        models: ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo', 'o1-preview', 'o1-mini'],
+        models: OPENAI_MODELS.map(m => ({
+          id: m.id,
+          name: m.displayName,
+          contextLength: m.contextWindow,
+          pricing: m.pricing,
+          capabilities: m.capabilities,
+        })),
         configured: !!apiKeys?.openai || !!process.env.OPENAI_API_KEY,
       },
       {
         id: 'anthropic',
         name: 'Anthropic',
-        models: ['claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'],
+        models: ANTHROPIC_MODELS.map(m => ({
+          id: m.id,
+          name: m.displayName,
+          contextLength: m.contextWindow,
+          pricing: m.pricing,
+          capabilities: m.capabilities,
+        })),
         configured: !!apiKeys?.anthropic || !!process.env.ANTHROPIC_API_KEY,
       },
       {
         id: 'google',
         name: 'Google',
-        models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash-exp'],
+        models: GOOGLE_MODELS.map(m => ({
+          id: m.id,
+          name: m.displayName,
+          contextLength: m.contextWindow,
+          pricing: m.pricing,
+          capabilities: m.capabilities,
+        })),
         configured: !!apiKeys?.google || !!process.env.GOOGLE_API_KEY,
       },
     ];
@@ -54,6 +155,10 @@ export async function GET() {
       },
       available: availableModels,
       cloud: cloudProviders,
+      registry: {
+        totalModels: BUILTIN_MODELS.length,
+        providers: ['openai', 'anthropic', 'google', 'ollama'],
+      },
     });
   } catch (error) {
     console.error('Failed to fetch models:', error);

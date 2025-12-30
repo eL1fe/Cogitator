@@ -153,15 +153,27 @@ importers:
 
   packages/dashboard:
     dependencies:
+      '@cogitator/config':
+        specifier: workspace:*
+        version: link:../config
       '@cogitator/core':
         specifier: workspace:*
         version: link:../core
+      '@cogitator/mcp':
+        specifier: workspace:*
+        version: link:../mcp
       '@cogitator/memory':
         specifier: workspace:*
         version: link:../memory
       '@cogitator/models':
         specifier: workspace:*
         version: link:../models
+      '@cogitator/openai-compat':
+        specifier: workspace:*
+        version: link:../openai-compat
+      '@cogitator/sandbox':
+        specifier: workspace:*
+        version: link:../sandbox
       '@cogitator/swarms':
         specifier: workspace:*
         version: link:../swarms
@@ -189,6 +201,9 @@ importers:
       ioredis:
         specifier: ^5.4.1
         version: 5.8.2
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.1
       lucide-react:
         specifier: ^0.468.0
         version: 0.468.0(react@19.2.3)
@@ -223,6 +238,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.0.0
         version: 4.1.18
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@types/node':
         specifier: ^22.10.0
         version: 22.19.3
@@ -2259,6 +2277,10 @@ packages:
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
     dev: true
 
+  /@types/js-yaml@4.0.9:
+    resolution: {integrity: sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==}
+    dev: true
+
   /@types/json-schema@7.0.15:
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
     dev: true
@@ -2713,7 +2735,6 @@ packages:
 
   /argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
-    dev: true
 
   /array-union@2.1.0:
     resolution: {integrity: sha512-HGyxoOTYUyCM6stUe6EJgnd4EoewAI7zMdfqO+kGjnlZmBDz/cR5pf8r/cR4Wq60sL/p0IkcjUEEPwS3GFrIyw==}
@@ -4285,7 +4306,6 @@ packages:
     hasBin: true
     dependencies:
       argparse: 2.0.1
-    dev: true
 
   /json-buffer@3.0.1:
     resolution: {integrity: sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==}

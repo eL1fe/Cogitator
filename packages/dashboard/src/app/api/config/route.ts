@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCogitatorConfig, setCogitatorConfig, getAllConfig } from '@/lib/db/config';
 import { initializeSchema } from '@/lib/db';
+import {
+  loadConfig,
+  CogitatorConfigSchema,
+  loadYamlConfig,
+  loadEnvConfig,
+} from '@cogitator/config';
+import type { CogitatorConfigOutput } from '@cogitator/config';
+import * as yaml from 'js-yaml';
 
 let initialized = false;
 
@@ -15,10 +23,96 @@ async function ensureInitialized() {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     await ensureInitialized();
     
+    const searchParams = request.nextUrl.searchParams;
+    const action = searchParams.get('action');
+
+    // Load config using @cogitator/config
+    if (action === 'load-from-file') {
+      try {
+        // Try to load from cogitator.yaml in project root
+        const config = await loadConfig({
+          configPath: process.cwd(),
+        });
+        return NextResponse.json({
+          source: 'file',
+          config,
+          valid: true,
+        });
+      } catch (error) {
+        return NextResponse.json({
+          source: 'file',
+          error: error instanceof Error ? error.message : 'Failed to load config',
+          valid: false,
+        });
+      }
+    }
+
+    if (action === 'validate') {
+      const yamlContent = searchParams.get('yaml');
+      if (!yamlContent) {
+        return NextResponse.json({ error: 'yaml parameter required' }, { status: 400 });
+      }
+
+      try {
+        const parsed = yaml.load(yamlContent);
+        const result = CogitatorConfigSchema.safeParse(parsed);
+        return NextResponse.json({
+          valid: result.success,
+          errors: result.success ? undefined : result.error.errors,
+          config: result.success ? result.data : undefined,
+        });
+      } catch (error) {
+        return NextResponse.json({
+          valid: false,
+          errors: [{ message: error instanceof Error ? error.message : 'Invalid YAML' }],
+        });
+      }
+    }
+
+    if (action === 'schema') {
+      // Return JSON Schema for the config
+      return NextResponse.json({
+        schema: {
+          type: 'object',
+          properties: {
+            llm: {
+              type: 'object',
+              properties: {
+                defaultProvider: { type: 'string', enum: ['ollama', 'openai', 'anthropic', 'google', 'vllm'] },
+                providers: { type: 'object' },
+              },
+            },
+            memory: {
+              type: 'object',
+              properties: {
+                adapter: { type: 'string', enum: ['memory', 'redis', 'postgres'] },
+              },
+            },
+            sandbox: {
+              type: 'object',
+              properties: {
+                enabled: { type: 'boolean' },
+                type: { type: 'string', enum: ['native', 'docker', 'wasm'] },
+              },
+            },
+            limits: {
+              type: 'object',
+              properties: {
+                maxTurns: { type: 'number' },
+                maxTokens: { type: 'number' },
+                maxCost: { type: 'number' },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    // Default: return current config from DB and environment
     const config = await getCogitatorConfig();
     const allConfig = await getAllConfig();
     
@@ -31,12 +125,22 @@ export async function GET() {
       OPENAI_API_KEY: process.env.OPENAI_API_KEY ? '***' : undefined,
       ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ? '***' : undefined,
       GOOGLE_API_KEY: process.env.GOOGLE_API_KEY ? '***' : undefined,
+      OLLAMA_URL: process.env.OLLAMA_URL || 'http://localhost:11434',
     };
+
+    // Try to load env config using @cogitator/config
+    let envConfig;
+    try {
+      envConfig = loadEnvConfig();
+    } catch {
+      envConfig = null;
+    }
 
     return NextResponse.json({
       cogitator: config || getDefaultConfig(),
       all: allConfig,
       environment: envVars,
+      fromEnv: envConfig,
     });
   } catch (error) {
     console.error('Failed to fetch config:', error);
