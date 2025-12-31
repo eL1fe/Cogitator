@@ -95,8 +95,7 @@ export class WorkflowExecutor {
             ctx.input = inputs.length === 1 ? inputs[0] : inputs;
           }
 
-          (ctx as NodeContext<S> & { cogitator: Cogitator }).cogitator =
-            this.cogitator;
+          (ctx as NodeContext<S> & { cogitator: Cogitator }).cogitator = this.cogitator;
 
           const result = await node.fn(ctx);
           const duration = Date.now() - nodeStart;
@@ -106,10 +105,7 @@ export class WorkflowExecutor {
           return { nodeName, result, duration };
         });
 
-        const results = await this.scheduler.runParallel(
-          tasks,
-          maxConcurrency
-        );
+        const results = await this.scheduler.runParallel(tasks, maxConcurrency);
 
         const nextNodes: string[] = [];
 
@@ -126,16 +122,10 @@ export class WorkflowExecutor {
           completedNodes.add(nodeName);
 
           if (result.next) {
-            const next = Array.isArray(result.next)
-              ? result.next
-              : [result.next];
+            const next = Array.isArray(result.next) ? result.next : [result.next];
             nextNodes.push(...next);
           } else {
-            const edgeNext = this.scheduler.getNextNodes(
-              workflow,
-              nodeName,
-              state
-            );
+            const edgeNext = this.scheduler.getNextNodes(workflow, nodeName, state);
             nextNodes.push(...edgeNext);
           }
         }
@@ -159,9 +149,7 @@ export class WorkflowExecutor {
       }
 
       if (iterations >= maxIterations) {
-        error = new Error(
-          `Workflow exceeded max iterations (${maxIterations.toString()})`
-        );
+        error = new Error(`Workflow exceeded max iterations (${maxIterations.toString()})`);
       }
     } catch (e) {
       error = e instanceof Error ? e : new Error(String(e));
@@ -209,10 +197,7 @@ export class WorkflowExecutor {
         workflowName: workflow.name,
         state: checkpoint.state as S,
         nodeResults: new Map(
-          Object.entries(checkpoint.nodeResults).map(([k, v]) => [
-            k,
-            { output: v, duration: 0 },
-          ])
+          Object.entries(checkpoint.nodeResults).map(([k, v]) => [k, { output: v, duration: 0 }])
         ),
         duration: 0,
         checkpointId,

@@ -28,17 +28,15 @@ export class HierarchicalStrategy extends BaseStrategy {
   async execute(options: SwarmRunOptions): Promise<StrategyResult> {
     const agentResults = new Map<string, RunResult>();
 
-    const supervisors = this.coordinator.getAgents().filter(
-      (a) => a.metadata.role === 'supervisor'
-    );
+    const supervisors = this.coordinator
+      .getAgents()
+      .filter((a) => a.metadata.role === 'supervisor');
     if (supervisors.length === 0) {
       throw new Error('Hierarchical strategy requires a supervisor agent');
     }
     const supervisor = supervisors[0];
 
-    const workers = this.coordinator.getAgents().filter(
-      (a) => a.metadata.role === 'worker'
-    );
+    const workers = this.coordinator.getAgents().filter((a) => a.metadata.role === 'worker');
 
     const workerInfo = workers.map((w) => ({
       name: w.agent.name,

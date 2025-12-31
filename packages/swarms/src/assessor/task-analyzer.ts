@@ -88,7 +88,8 @@ const SPEED_KEYWORDS = {
 const DOMAIN_PATTERNS: Record<string, RegExp> = {
   code: /\b(code|program|function|class|api|typescript|javascript|python|rust|go|java|c\+\+|implement|debug|refactor|test|compile|build)\b/i,
   math: /\b(math|calculate|equation|formula|statistics|probability|algebra|calculus|numerical|compute)\b/i,
-  creative: /\b(write|story|article|creative|blog|content|poem|essay|narrative|fiction|script|dialogue)\b/i,
+  creative:
+    /\b(write|story|article|creative|blog|content|poem|essay|narrative|fiction|script|dialogue)\b/i,
   analysis: /\b(analyze|research|data|report|study|investigate|examine|assess|evaluate|review)\b/i,
   legal: /\b(legal|law|contract|compliance|regulation|policy|statute|liability|terms)\b/i,
   medical: /\b(medical|health|clinical|diagnosis|treatment|symptom|patient|doctor|healthcare)\b/i,

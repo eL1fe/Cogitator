@@ -73,10 +73,7 @@ export class InMemoryIdempotencyStore extends BaseIdempotencyStore {
     this.ttl = options.ttl ?? DEFAULT_TTL;
 
     if (options.cleanupIntervalMs) {
-      this.cleanupInterval = setInterval(
-        () => void this.cleanup(),
-        options.cleanupIntervalMs
-      );
+      this.cleanupInterval = setInterval(() => void this.cleanup(), options.cleanupIntervalMs);
     }
   }
 
@@ -179,8 +176,7 @@ export class FileIdempotencyStore extends BaseIdempotencyStore {
 
     try {
       await fs.mkdir(this.directory, { recursive: true });
-    } catch {
-    }
+    } catch {}
     this.initialized = true;
   }
 
@@ -269,8 +265,7 @@ export class FileIdempotencyStore extends BaseIdempotencyStore {
             await fs.unlink(path).catch(() => {});
           }
         }
-      } catch {
-      }
+      } catch {}
     };
 
     await clearDir(this.directory);
@@ -309,10 +304,7 @@ export async function idempotent<T>(
 /**
  * Decorator for idempotent methods
  */
-export function Idempotent(
-  store: IdempotencyStore,
-  keyGenerator: (...args: unknown[]) => string
-) {
+export function Idempotent(store: IdempotencyStore, keyGenerator: (...args: unknown[]) => string) {
   return function (
     _target: unknown,
     _propertyKey: string,
@@ -332,9 +324,10 @@ export function Idempotent(
 /**
  * Create an in-memory idempotency store
  */
-export function createInMemoryIdempotencyStore(
-  options?: { ttl?: number; cleanupIntervalMs?: number }
-): InMemoryIdempotencyStore {
+export function createInMemoryIdempotencyStore(options?: {
+  ttl?: number;
+  cleanupIntervalMs?: number;
+}): InMemoryIdempotencyStore {
   return new InMemoryIdempotencyStore(options);
 }
 

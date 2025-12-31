@@ -4,16 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import {
-  X,
-  Bot,
-  ChevronDown,
-  ChevronUp,
-  Wrench,
-  Brain,
-  Settings2,
-  Sparkles,
-} from 'lucide-react';
+import { X, Bot, ChevronDown, ChevronUp, Wrench, Brain, Settings2, Sparkles } from 'lucide-react';
 
 interface CreateAgentModalProps {
   isOpen: boolean;
@@ -185,10 +176,7 @@ export function CreateAgentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       <Card className="relative w-full max-w-2xl mx-4 z-10 animate-fade-in max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6 sticky top-0 bg-bg-secondary pt-4 -mt-4 pb-4 border-b border-border-primary">
@@ -200,10 +188,7 @@ export function CreateAgentModal({
               {isEditing ? 'Edit Agent' : 'Create Agent'}
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg hover:bg-bg-hover transition-colors"
-          >
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-bg-hover transition-colors">
             <X className="w-5 h-5 text-text-muted" />
           </button>
         </div>
@@ -224,28 +209,20 @@ export function CreateAgentModal({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-text-secondary mb-1">
-                  Name *
-                </label>
+                <label className="block text-sm text-text-secondary mb-1">Name *</label>
                 <Input
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, name: e.target.value }))
-                  }
+                  onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                   placeholder="My Agent"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-text-secondary mb-1">
-                  Model *
-                </label>
+                <label className="block text-sm text-text-secondary mb-1">Model *</label>
                 <select
                   value={formData.model}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, model: e.target.value }))
-                  }
+                  onChange={(e) => setFormData((prev) => ({ ...prev, model: e.target.value }))}
                   className="w-full px-3 py-2 bg-bg-elevated border border-border-primary rounded-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/50"
                   required
                 >
@@ -282,14 +259,10 @@ export function CreateAgentModal({
             </div>
 
             <div>
-              <label className="block text-sm text-text-secondary mb-1">
-                Description
-              </label>
+              <label className="block text-sm text-text-secondary mb-1">Description</label>
               <Input
                 value={formData.description}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, description: e.target.value }))
-                }
+                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                 placeholder="What does this agent do?"
               />
             </div>
@@ -300,9 +273,7 @@ export function CreateAgentModal({
               </label>
               <textarea
                 value={formData.instructions}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, instructions: e.target.value }))
-                }
+                onChange={(e) => setFormData((prev) => ({ ...prev, instructions: e.target.value }))}
                 placeholder="You are a helpful assistant..."
                 rows={4}
                 className="w-full px-3 py-2 bg-bg-elevated border border-border-primary rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none font-mono text-sm"
@@ -336,16 +307,10 @@ export function CreateAgentModal({
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-sm text-text-primary">
-                      {tool.name}
-                    </span>
-                    {tool.requiresApproval && (
-                      <span className="text-xs text-warning">⚠️</span>
-                    )}
+                    <span className="font-medium text-sm text-text-primary">{tool.name}</span>
+                    {tool.requiresApproval && <span className="text-xs text-warning">⚠️</span>}
                   </div>
-                  <p className="text-xs text-text-muted mt-1 line-clamp-2">
-                    {tool.description}
-                  </p>
+                  <p className="text-xs text-text-muted mt-1 line-clamp-2">{tool.description}</p>
                 </button>
               ))}
               {tools.length === 0 && (
@@ -377,9 +342,7 @@ export function CreateAgentModal({
               />
               <div>
                 <span className="text-sm text-text-primary">Enable Memory</span>
-                <p className="text-xs text-text-muted">
-                  Remember conversation history across runs
-                </p>
+                <p className="text-xs text-text-muted">Remember conversation history across runs</p>
               </div>
             </label>
           </section>
@@ -450,18 +413,14 @@ export function CreateAgentModal({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-text-secondary mb-1">
-                      Max Tokens
-                    </label>
+                    <label className="block text-sm text-text-secondary mb-1">Max Tokens</label>
                     <Input
                       type="number"
                       value={formData.maxTokens || ''}
                       onChange={(e) =>
                         setFormData((prev) => ({
                           ...prev,
-                          maxTokens: e.target.value
-                            ? parseInt(e.target.value)
-                            : null,
+                          maxTokens: e.target.value ? parseInt(e.target.value) : null,
                         }))
                       }
                       placeholder="Auto"
@@ -471,9 +430,7 @@ export function CreateAgentModal({
                   </div>
 
                   <div>
-                    <label className="block text-sm text-text-secondary mb-1">
-                      Max Iterations
-                    </label>
+                    <label className="block text-sm text-text-secondary mb-1">Max Iterations</label>
                     <Input
                       type="number"
                       value={formData.maxIterations}
@@ -486,9 +443,7 @@ export function CreateAgentModal({
                       min={1}
                       max={100}
                     />
-                    <p className="text-xs text-text-muted mt-1">
-                      Max tool call iterations
-                    </p>
+                    <p className="text-xs text-text-muted mt-1">Max tool call iterations</p>
                   </div>
                 </div>
               </div>
@@ -496,22 +451,14 @@ export function CreateAgentModal({
           </section>
 
           <div className="flex gap-3 pt-4 border-t border-border-primary">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onClose}
-              className="flex-1"
-            >
+            <Button type="button" variant="ghost" onClick={onClose} className="flex-1">
               Cancel
             </Button>
             <Button
               type="submit"
               variant="primary"
               disabled={
-                loading ||
-                !formData.name.trim() ||
-                !formData.model ||
-                !formData.instructions.trim()
+                loading || !formData.name.trim() || !formData.model || !formData.instructions.trim()
               }
               className="flex-1"
             >

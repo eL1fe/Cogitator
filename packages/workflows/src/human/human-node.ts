@@ -57,14 +57,10 @@ export async function executeHumanNode<S extends WorkflowState>(
   const approval = config.approval;
 
   const description =
-    typeof approval.description === 'function'
-      ? approval.description(state)
-      : approval.description;
+    typeof approval.description === 'function' ? approval.description(state) : approval.description;
 
   const assignee =
-    typeof approval.assignee === 'function'
-      ? approval.assignee(state)
-      : approval.assignee;
+    typeof approval.assignee === 'function' ? approval.assignee(state) : approval.assignee;
 
   const assigneeGroup =
     typeof approval.assigneeGroup === 'function'
@@ -99,11 +95,7 @@ export async function executeHumanNode<S extends WorkflowState>(
 
   await context.approvalNotifier?.notify(request);
 
-  const response = await waitForResponse(
-    request,
-    context.approvalStore,
-    context.approvalNotifier
-  );
+  const response = await waitForResponse(request, context.approvalStore, context.approvalNotifier);
 
   const approved = isApproved(request.type, response.decision);
 
@@ -133,7 +125,8 @@ async function executeApprovalChain<S extends WorkflowState>(
   for (let i = 0; i < chain.length; i++) {
     const step = chain[i];
 
-    const effectiveTimeoutAction = step.timeoutAction === 'skip' ? 'fail' : (step.timeoutAction ?? 'fail');
+    const effectiveTimeoutAction =
+      step.timeoutAction === 'skip' ? 'fail' : (step.timeoutAction ?? 'fail');
 
     const request: ApprovalRequest = {
       id: nanoid(),

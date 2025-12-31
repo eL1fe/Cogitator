@@ -19,10 +19,7 @@ const execParams = z.object({
     .max(300000)
     .optional()
     .describe('Command timeout in milliseconds (default: 30000, max: 300000 = 5 minutes)'),
-  env: z
-    .record(z.string())
-    .optional()
-    .describe('Additional environment variables'),
+  env: z.record(z.string()).optional().describe('Additional environment variables'),
 });
 
 export const exec = tool({
@@ -66,7 +63,12 @@ export const exec = tool({
         command,
       };
     } catch (err) {
-      const error = err as Error & { code?: number; killed?: boolean; stdout?: string; stderr?: string };
+      const error = err as Error & {
+        code?: number;
+        killed?: boolean;
+        stdout?: string;
+        stderr?: string;
+      };
 
       if (error.killed) {
         return {

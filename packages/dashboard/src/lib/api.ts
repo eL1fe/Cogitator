@@ -1,4 +1,12 @@
-import type { Agent, Run, LogEntry, AnalyticsData, DashboardStats, SystemHealth, TraceSpan } from '@/types';
+import type {
+  Agent,
+  Run,
+  LogEntry,
+  AnalyticsData,
+  DashboardStats,
+  SystemHealth,
+  TraceSpan,
+} from '@/types';
 
 const API_BASE = '/api';
 
@@ -48,7 +56,11 @@ export const api = {
     });
   },
 
-  async getRuns(options?: { agentId?: string; status?: string; limit?: number }): Promise<{ runs: Run[]; stats: unknown }> {
+  async getRuns(options?: {
+    agentId?: string;
+    status?: string;
+    limit?: number;
+  }): Promise<{ runs: Run[]; stats: unknown }> {
     const params = new URLSearchParams();
     if (options?.agentId) params.set('agentId', options.agentId);
     if (options?.status) params.set('status', options.status);
@@ -74,7 +86,11 @@ export const api = {
     return fetchJSON('/analytics');
   },
 
-  async getLogs(options?: { level?: string; limit?: number; since?: string }): Promise<{ logs: LogEntry[]; stats: unknown }> {
+  async getLogs(options?: {
+    level?: string;
+    limit?: number;
+    since?: string;
+  }): Promise<{ logs: LogEntry[]; stats: unknown }> {
     const params = new URLSearchParams();
     if (options?.level) params.set('level', options.level);
     if (options?.limit) params.set('limit', String(options.limit));
@@ -94,7 +110,9 @@ export const api = {
     });
   },
 
-  async getModels(): Promise<{ id: string; name: string; provider: string; pricing: { input: number; output: number } }[]> {
+  async getModels(): Promise<
+    { id: string; name: string; provider: string; pricing: { input: number; output: number } }[]
+  > {
     return fetchJSON('/models');
   },
 

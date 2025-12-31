@@ -107,7 +107,10 @@ describe('datetime tool', () => {
     });
 
     it('formats time in specified timezone', async () => {
-      const utcResult = (await datetime.execute({ timezone: 'UTC', format: 'iso' }, mockContext)) as {
+      const utcResult = (await datetime.execute(
+        { timezone: 'UTC', format: 'iso' },
+        mockContext
+      )) as {
         datetime: string;
         timezone: string;
         format: string;

@@ -17,8 +17,7 @@ const fileReadParams = z.object({
 
 export const fileRead = tool({
   name: 'file_read',
-  description:
-    'Read the contents of a file. Use base64 encoding for binary files.',
+  description: 'Read the contents of a file. Use base64 encoding for binary files.',
   parameters: fileReadParams,
   execute: async ({ path, encoding = 'utf-8' }) => {
     try {
@@ -80,7 +79,10 @@ export const fileWrite = tool({
 const fileListParams = z.object({
   path: z.string().describe('Directory path to list'),
   recursive: z.boolean().optional().describe('List files recursively (default: false)'),
-  includeHidden: z.boolean().optional().describe('Include hidden files starting with . (default: false)'),
+  includeHidden: z
+    .boolean()
+    .optional()
+    .describe('Include hidden files starting with . (default: false)'),
 });
 
 export interface FileEntry {
@@ -90,7 +92,11 @@ export interface FileEntry {
   size: number;
 }
 
-async function listDir(dirPath: string, recursive: boolean, includeHidden: boolean): Promise<FileEntry[]> {
+async function listDir(
+  dirPath: string,
+  recursive: boolean,
+  includeHidden: boolean
+): Promise<FileEntry[]> {
   const entries: FileEntry[] = [];
   const items = await readdir(dirPath, { withFileTypes: true });
 
@@ -120,8 +126,7 @@ async function listDir(dirPath: string, recursive: boolean, includeHidden: boole
 
 export const fileList = tool({
   name: 'file_list',
-  description:
-    'List contents of a directory. Returns files and subdirectories with their sizes.',
+  description: 'List contents of a directory. Returns files and subdirectories with their sizes.',
   parameters: fileListParams,
   execute: async ({ path, recursive = false, includeHidden = false }) => {
     try {

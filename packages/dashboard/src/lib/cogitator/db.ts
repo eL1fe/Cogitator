@@ -272,17 +272,12 @@ function rowToAgentData(row: AgentRow): AgentData {
 }
 
 export async function getAgents(): Promise<AgentData[]> {
-  const rows = await query<AgentRow>(
-    'SELECT * FROM cogitator_agents ORDER BY created_at DESC'
-  );
+  const rows = await query<AgentRow>('SELECT * FROM cogitator_agents ORDER BY created_at DESC');
   return rows.map(rowToAgentData);
 }
 
 export async function getAgent(id: string): Promise<AgentData | null> {
-  const row = await queryOne<AgentRow>(
-    'SELECT * FROM cogitator_agents WHERE id = $1',
-    [id]
-  );
+  const row = await queryOne<AgentRow>('SELECT * FROM cogitator_agents WHERE id = $1', [id]);
   return row ? rowToAgentData(row) : null;
 }
 
@@ -377,10 +372,7 @@ export async function updateAgent(
   updates.push('updated_at = NOW()');
   values.push(id);
 
-  await execute(
-    `UPDATE cogitator_agents SET ${updates.join(', ')} WHERE id = $${idx}`,
-    values
-  );
+  await execute(`UPDATE cogitator_agents SET ${updates.join(', ')} WHERE id = $${idx}`, values);
 
   return getAgent(id);
 }
@@ -390,11 +382,7 @@ export async function deleteAgent(id: string): Promise<boolean> {
   return count > 0;
 }
 
-export async function incrementAgentStats(
-  id: string,
-  tokens: number,
-  cost: number
-): Promise<void> {
+export async function incrementAgentStats(id: string, tokens: number, cost: number): Promise<void> {
   await execute(
     `UPDATE cogitator_agents
      SET total_runs = total_runs + 1,
@@ -500,10 +488,7 @@ export async function getRuns(options?: {
 }
 
 export async function getRun(id: string): Promise<RunData | null> {
-  const row = await queryOne<RunRow>(
-    'SELECT * FROM cogitator_runs WHERE id = $1',
-    [id]
-  );
+  const row = await queryOne<RunRow>('SELECT * FROM cogitator_runs WHERE id = $1', [id]);
   return row ? rowToRunData(row) : null;
 }
 
@@ -629,10 +614,7 @@ export async function getThreads(options?: {
 }
 
 export async function getThread(id: string): Promise<ThreadData | null> {
-  const row = await queryOne<ThreadRow>(
-    'SELECT * FROM cogitator_threads WHERE id = $1',
-    [id]
-  );
+  const row = await queryOne<ThreadRow>('SELECT * FROM cogitator_threads WHERE id = $1', [id]);
   return row ? rowToThreadData(row) : null;
 }
 
@@ -734,10 +716,7 @@ export async function getWorkflows(options?: {
 }
 
 export async function getWorkflow(id: string): Promise<WorkflowData | null> {
-  const row = await queryOne<WorkflowRow>(
-    'SELECT * FROM cogitator_workflows WHERE id = $1',
-    [id]
-  );
+  const row = await queryOne<WorkflowRow>('SELECT * FROM cogitator_workflows WHERE id = $1', [id]);
   return row ? rowToWorkflowData(row) : null;
 }
 
@@ -806,10 +785,7 @@ export async function updateWorkflow(
   updates.push('updated_at = NOW()');
   values.push(id);
 
-  await execute(
-    `UPDATE cogitator_workflows SET ${updates.join(', ')} WHERE id = $${idx}`,
-    values
-  );
+  await execute(`UPDATE cogitator_workflows SET ${updates.join(', ')} WHERE id = $${idx}`, values);
 
   return getWorkflow(id);
 }
@@ -1004,10 +980,7 @@ export async function getSwarms(options?: {
       `SELECT * FROM cogitator_swarms ${where} ORDER BY created_at DESC LIMIT $${idx++} OFFSET $${idx}`,
       [...params, limit, offset]
     ),
-    queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM cogitator_swarms ${where}`,
-      params
-    ),
+    queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM cogitator_swarms ${where}`, params),
   ]);
 
   return {
@@ -1017,10 +990,7 @@ export async function getSwarms(options?: {
 }
 
 export async function getSwarm(id: string): Promise<SwarmData | null> {
-  const row = await queryOne<SwarmRow>(
-    'SELECT * FROM cogitator_swarms WHERE id = $1',
-    [id]
-  );
+  const row = await queryOne<SwarmRow>('SELECT * FROM cogitator_swarms WHERE id = $1', [id]);
   return row ? rowToSwarmData(row) : null;
 }
 
@@ -1089,10 +1059,7 @@ export async function updateSwarm(
   updates.push('updated_at = NOW()');
   values.push(id);
 
-  await execute(
-    `UPDATE cogitator_swarms SET ${updates.join(', ')} WHERE id = $${idx}`,
-    values
-  );
+  await execute(`UPDATE cogitator_swarms SET ${updates.join(', ')} WHERE id = $${idx}`, values);
 
   return getSwarm(id);
 }

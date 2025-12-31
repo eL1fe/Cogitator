@@ -122,6 +122,4 @@ export interface SandboxManagerConfig {
   wasm?: SandboxWasmConfig;
 }
 
-export type SandboxResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
+export type SandboxResult<T> = { success: true; data: T } | { success: false; error: string };

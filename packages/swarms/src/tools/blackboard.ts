@@ -15,7 +15,10 @@ export function createBlackboardTools(blackboard: Blackboard, currentAgent: stri
     description: 'Read data from the shared blackboard',
     parameters: z.object({
       section: z.string().describe('The section name to read from'),
-      key: z.string().optional().describe('Specific key within the section (reads entire section if omitted)'),
+      key: z
+        .string()
+        .optional()
+        .describe('Specific key within the section (reads entire section if omitted)'),
     }),
     execute: async ({ section, key }) => {
       const data = blackboard.read(section);
@@ -52,7 +55,10 @@ export function createBlackboardTools(blackboard: Blackboard, currentAgent: stri
     parameters: z.object({
       section: z.string().describe('The section name to write to'),
       data: z.unknown().describe('The data to write (will replace existing section data)'),
-      merge: z.boolean().optional().describe('If true and data is an object, merge with existing data'),
+      merge: z
+        .boolean()
+        .optional()
+        .describe('If true and data is an object, merge with existing data'),
     }),
     execute: async ({ section, data, merge }) => {
       if (merge && typeof data === 'object' && data !== null) {
@@ -110,7 +116,7 @@ export function createBlackboardTools(blackboard: Blackboard, currentAgent: stri
       let sections = blackboard.getSections();
 
       if (prefix) {
-        sections = sections.filter(s => s.startsWith(prefix));
+        sections = sections.filter((s) => s.startsWith(prefix));
       }
 
       return {
@@ -138,7 +144,7 @@ export function createBlackboardTools(blackboard: Blackboard, currentAgent: stri
         };
       }
 
-      const entries = history.slice(-limit).map(entry => ({
+      const entries = history.slice(-limit).map((entry) => ({
         version: entry.version,
         writtenBy: entry.writtenBy,
         timestamp: entry.timestamp,

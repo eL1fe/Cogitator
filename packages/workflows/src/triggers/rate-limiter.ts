@@ -251,7 +251,7 @@ export class SlidingWindowRateLimiter {
     const window = this.getWindow(key);
 
     const cutoff = now - this.windowMs;
-    window.timestamps = window.timestamps.filter(t => t > cutoff);
+    window.timestamps = window.timestamps.filter((t) => t > cutoff);
 
     if (window.timestamps.length >= this.maxRequests) {
       const oldestInWindow = window.timestamps[0];
@@ -289,7 +289,7 @@ export class SlidingWindowRateLimiter {
     }
 
     const cutoff = now - this.windowMs;
-    const validTimestamps = window.timestamps.filter(t => t > cutoff);
+    const validTimestamps = window.timestamps.filter((t) => t > cutoff);
 
     if (validTimestamps.length >= this.maxRequests) {
       const oldestInWindow = validTimestamps[0];
@@ -341,7 +341,7 @@ export class SlidingWindowRateLimiter {
     const cutoff = now - this.windowMs;
 
     for (const [key, window] of this.windows) {
-      window.timestamps = window.timestamps.filter(t => t > cutoff);
+      window.timestamps = window.timestamps.filter((t) => t > cutoff);
       if (window.timestamps.length === 0) {
         this.windows.delete(key);
       }

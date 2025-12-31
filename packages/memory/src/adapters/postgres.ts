@@ -28,10 +28,7 @@ type Pool = {
   end(): Promise<void>;
 };
 
-export class PostgresAdapter
-  extends BaseMemoryAdapter
-  implements FactAdapter, EmbeddingAdapter
-{
+export class PostgresAdapter extends BaseMemoryAdapter implements FactAdapter, EmbeddingAdapter {
   readonly provider: MemoryProvider = 'postgres';
 
   private pool: Pool | null = null;
@@ -75,8 +72,7 @@ export class PostgresAdapter
 
     try {
       await this.pool.query('CREATE EXTENSION IF NOT EXISTS vector');
-    } catch {
-    }
+    } catch {}
 
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS ${this.schema}.threads (
@@ -143,8 +139,7 @@ export class PostgresAdapter
         ON ${this.schema}.embeddings
         USING ivfflat (vector vector_cosine_ops) WITH (lists = 100)
       `);
-    } catch {
-    }
+    } catch {}
   }
 
   async disconnect(): Promise<MemoryResult<void>> {
@@ -176,10 +171,9 @@ export class PostgresAdapter
   async getThread(threadId: string): Promise<MemoryResult<Thread | null>> {
     if (!this.pool) return this.failure('Not connected');
 
-    const result = await this.pool.query(
-      `SELECT * FROM ${this.schema}.threads WHERE id = $1`,
-      [threadId]
-    );
+    const result = await this.pool.query(`SELECT * FROM ${this.schema}.threads WHERE id = $1`, [
+      threadId,
+    ]);
 
     if (result.rows.length === 0) return this.success(null);
 
@@ -223,15 +217,11 @@ export class PostgresAdapter
 
   async deleteThread(threadId: string): Promise<MemoryResult<void>> {
     if (!this.pool) return this.failure('Not connected');
-    await this.pool.query(`DELETE FROM ${this.schema}.threads WHERE id = $1`, [
-      threadId,
-    ]);
+    await this.pool.query(`DELETE FROM ${this.schema}.threads WHERE id = $1`, [threadId]);
     return this.success(undefined);
   }
 
-  async addEntry(
-    entry: Omit<MemoryEntry, 'id' | 'createdAt'>
-  ): Promise<MemoryResult<MemoryEntry>> {
+  async addEntry(entry: Omit<MemoryEntry, 'id' | 'createdAt'>): Promise<MemoryResult<MemoryEntry>> {
     if (!this.pool) return this.failure('Not connected');
 
     const id = this.generateId('entry');
@@ -256,9 +246,7 @@ export class PostgresAdapter
     return this.success({ ...entry, id, createdAt: now });
   }
 
-  async getEntries(
-    options: MemoryQueryOptions
-  ): Promise<MemoryResult<MemoryEntry[]>> {
+  async getEntries(options: MemoryQueryOptions): Promise<MemoryResult<MemoryEntry[]>> {
     if (!this.pool) return this.failure('Not connected');
 
     let query = `SELECT * FROM ${this.schema}.entries WHERE thread_id = $1`;
@@ -312,10 +300,9 @@ export class PostgresAdapter
   async getEntry(entryId: string): Promise<MemoryResult<MemoryEntry | null>> {
     if (!this.pool) return this.failure('Not connected');
 
-    const result = await this.pool.query(
-      `SELECT * FROM ${this.schema}.entries WHERE id = $1`,
-      [entryId]
-    );
+    const result = await this.pool.query(`SELECT * FROM ${this.schema}.entries WHERE id = $1`, [
+      entryId,
+    ]);
 
     if (result.rows.length === 0) return this.success(null);
 
@@ -334,24 +321,17 @@ export class PostgresAdapter
 
   async deleteEntry(entryId: string): Promise<MemoryResult<void>> {
     if (!this.pool) return this.failure('Not connected');
-    await this.pool.query(`DELETE FROM ${this.schema}.entries WHERE id = $1`, [
-      entryId,
-    ]);
+    await this.pool.query(`DELETE FROM ${this.schema}.entries WHERE id = $1`, [entryId]);
     return this.success(undefined);
   }
 
   async clearThread(threadId: string): Promise<MemoryResult<void>> {
     if (!this.pool) return this.failure('Not connected');
-    await this.pool.query(
-      `DELETE FROM ${this.schema}.entries WHERE thread_id = $1`,
-      [threadId]
-    );
+    await this.pool.query(`DELETE FROM ${this.schema}.entries WHERE thread_id = $1`, [threadId]);
     return this.success(undefined);
   }
 
-  async addFact(
-    fact: Omit<Fact, 'id' | 'createdAt' | 'updatedAt'>
-  ): Promise<MemoryResult<Fact>> {
+  async addFact(fact: Omit<Fact, 'id' | 'createdAt' | 'updatedAt'>): Promise<MemoryResult<Fact>> {
     if (!this.pool) return this.failure('Not connected');
 
     const id = this.generateId('fact');
@@ -377,10 +357,7 @@ export class PostgresAdapter
     return this.success({ ...fact, id, createdAt: now, updatedAt: now });
   }
 
-  async getFacts(
-    agentId: string,
-    category?: string
-  ): Promise<MemoryResult<Fact[]>> {
+  async getFacts(agentId: string, category?: string): Promise<MemoryResult<Fact[]>> {
     if (!this.pool) return this.failure('Not connected');
 
     let query = `SELECT * FROM ${this.schema}.facts WHERE agent_id = $1`;
@@ -414,9 +391,7 @@ export class PostgresAdapter
 
   async updateFact(
     factId: string,
-    updates: Partial<
-      Pick<Fact, 'content' | 'category' | 'confidence' | 'metadata' | 'expiresAt'>
-    >
+    updates: Partial<Pick<Fact, 'content' | 'category' | 'confidence' | 'metadata' | 'expiresAt'>>
   ): Promise<MemoryResult<Fact>> {
     if (!this.pool) return this.failure('Not connected');
 
@@ -473,16 +448,11 @@ export class PostgresAdapter
 
   async deleteFact(factId: string): Promise<MemoryResult<void>> {
     if (!this.pool) return this.failure('Not connected');
-    await this.pool.query(`DELETE FROM ${this.schema}.facts WHERE id = $1`, [
-      factId,
-    ]);
+    await this.pool.query(`DELETE FROM ${this.schema}.facts WHERE id = $1`, [factId]);
     return this.success(undefined);
   }
 
-  async searchFacts(
-    agentId: string,
-    query: string
-  ): Promise<MemoryResult<Fact[]>> {
+  async searchFacts(agentId: string, query: string): Promise<MemoryResult<Fact[]>> {
     if (!this.pool) return this.failure('Not connected');
 
     const result = await this.pool.query(
@@ -586,19 +556,13 @@ export class PostgresAdapter
 
   async deleteEmbedding(embeddingId: string): Promise<MemoryResult<void>> {
     if (!this.pool) return this.failure('Not connected');
-    await this.pool.query(
-      `DELETE FROM ${this.schema}.embeddings WHERE id = $1`,
-      [embeddingId]
-    );
+    await this.pool.query(`DELETE FROM ${this.schema}.embeddings WHERE id = $1`, [embeddingId]);
     return this.success(undefined);
   }
 
   async deleteBySource(sourceId: string): Promise<MemoryResult<void>> {
     if (!this.pool) return this.failure('Not connected');
-    await this.pool.query(
-      `DELETE FROM ${this.schema}.embeddings WHERE source_id = $1`,
-      [sourceId]
-    );
+    await this.pool.query(`DELETE FROM ${this.schema}.embeddings WHERE source_id = $1`, [sourceId]);
     return this.success(undefined);
   }
 

@@ -86,11 +86,7 @@ export class RedisAdapter extends BaseMemoryAdapter {
       updatedAt: new Date(),
     };
 
-    await this.client.setex(
-      this.key('thread', thread.id),
-      this.ttl,
-      JSON.stringify(thread)
-    );
+    await this.client.setex(this.key('thread', thread.id), this.ttl, JSON.stringify(thread));
 
     return this.success(thread);
   }
@@ -119,11 +115,7 @@ export class RedisAdapter extends BaseMemoryAdapter {
     thread.metadata = { ...thread.metadata, ...metadata };
     thread.updatedAt = new Date();
 
-    await this.client!.setex(
-      this.key('thread', threadId),
-      this.ttl,
-      JSON.stringify(thread)
-    );
+    await this.client!.setex(this.key('thread', threadId), this.ttl, JSON.stringify(thread));
 
     return this.success(thread);
   }
@@ -143,9 +135,7 @@ export class RedisAdapter extends BaseMemoryAdapter {
     return this.success(undefined);
   }
 
-  async addEntry(
-    entry: Omit<MemoryEntry, 'id' | 'createdAt'>
-  ): Promise<MemoryResult<MemoryEntry>> {
+  async addEntry(entry: Omit<MemoryEntry, 'id' | 'createdAt'>): Promise<MemoryResult<MemoryEntry>> {
     if (!this.client) return this.failure('Not connected');
 
     const full: MemoryEntry = {
@@ -165,9 +155,7 @@ export class RedisAdapter extends BaseMemoryAdapter {
     return this.success(full);
   }
 
-  async getEntries(
-    options: MemoryQueryOptions
-  ): Promise<MemoryResult<MemoryEntry[]>> {
+  async getEntries(options: MemoryQueryOptions): Promise<MemoryResult<MemoryEntry[]>> {
     if (!this.client) return this.failure('Not connected');
 
     const setKey = this.key('thread:entries', options.threadId);
@@ -220,10 +208,7 @@ export class RedisAdapter extends BaseMemoryAdapter {
     const result = await this.getEntry(entryId);
     if (result.success && result.data) {
       const key = this.key('entry', entryId);
-      await this.client.zrem(
-        this.key('thread:entries', result.data.threadId),
-        key
-      );
+      await this.client.zrem(this.key('thread:entries', result.data.threadId), key);
       await this.client.del(key);
     }
 

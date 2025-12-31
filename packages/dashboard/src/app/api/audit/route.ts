@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { withRole, type AuthenticatedRequest } from '@/lib/auth/middleware';
-import { getAuditLogs, getAuditLogCount, initializeAuditSchema, type AuditAction } from '@/lib/audit';
+import {
+  getAuditLogs,
+  getAuditLogCount,
+  initializeAuditSchema,
+  type AuditAction,
+} from '@/lib/audit';
 
 let schemaInitialized = false;
 
@@ -43,10 +48,7 @@ async function handler(request: AuthenticatedRequest) {
     });
   } catch (error) {
     console.error('[audit] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch audit logs' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch audit logs' }, { status: 500 });
   }
 }
 

@@ -125,15 +125,12 @@ export default function WorkflowsPage() {
     [setEdges]
   );
 
-  const onNodeDoubleClick = useCallback(
-    (_event: React.MouseEvent, node: Node) => {
-      if (node.data.nodeType !== 'start' && node.data.nodeType !== 'end') {
-        setSelectedNode(node);
-        setShowNodeConfig(true);
-      }
-    },
-    []
-  );
+  const onNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
+    if (node.data.nodeType !== 'start' && node.data.nodeType !== 'end') {
+      setSelectedNode(node);
+      setShowNodeConfig(true);
+    }
+  }, []);
 
   const addNode = (type: string) => {
     const nodeConfig = NODE_TYPES.find((n) => n.type === type);
@@ -155,16 +152,12 @@ export default function WorkflowsPage() {
 
   const deleteNode = (nodeId: string) => {
     setNodes((nds) => nds.filter((n) => n.id !== nodeId));
-    setEdges((eds) =>
-      eds.filter((e) => e.source !== nodeId && e.target !== nodeId)
-    );
+    setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId));
   };
 
   const updateNodeConfig = (nodeId: string, config: Record<string, unknown>) => {
     setNodes((nds) =>
-      nds.map((n) =>
-        n.id === nodeId ? { ...n, data: { ...n.data, config } } : n
-      )
+      nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, config } } : n))
     );
     setShowNodeConfig(false);
     setSelectedNode(null);
@@ -229,147 +222,124 @@ export default function WorkflowsPage() {
   return (
     <div className="flex h-full -m-6 overflow-hidden">
       <div className="flex-1 flex overflow-hidden">
-          {/* Workflows List Sidebar */}
-          <div className="w-72 border-r border-border-subtle bg-bg-secondary flex flex-col">
-            <div className="p-4 border-b border-border-subtle">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-text-primary">
-                  Workflows
-                </h2>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => setShowCreateModal(true)}
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
+        {/* Workflows List Sidebar */}
+        <div className="w-72 border-r border-border-subtle bg-bg-secondary flex flex-col">
+          <div className="p-4 border-b border-border-subtle">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-text-primary">Workflows</h2>
+              <Button variant="primary" size="sm" onClick={() => setShowCreateModal(true)}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <Input
+              placeholder="Search workflows..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              icon={<Search className="w-4 h-4" />}
+            />
+          </div>
+
+          <div className="flex-1 overflow-auto p-2 space-y-2">
+            {loading ? (
+              <>
+                <Skeleton className="h-16" />
+                <Skeleton className="h-16" />
+                <Skeleton className="h-16" />
+              </>
+            ) : filteredWorkflows.length === 0 ? (
+              <div className="text-center py-8 text-text-muted">
+                <GitBranch className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No workflows yet</p>
               </div>
-              <Input
-                placeholder="Search workflows..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                icon={<Search className="w-4 h-4" />}
-              />
+            ) : (
+              filteredWorkflows.map((workflow) => (
+                <button
+                  key={workflow.id}
+                  onClick={() => loadWorkflow(workflow)}
+                  className={`w-full p-3 rounded-lg text-left transition-colors ${
+                    selectedWorkflow?.id === workflow.id
+                      ? 'bg-accent/10 border border-accent'
+                      : 'bg-bg-tertiary hover:bg-bg-hover border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <GitBranch className="w-4 h-4 text-accent" />
+                    <span className="font-medium text-text-primary truncate">{workflow.name}</span>
+                  </div>
+                  {workflow.description && (
+                    <p className="text-xs text-text-muted mt-1 truncate">{workflow.description}</p>
+                  )}
+                  <div className="flex items-center gap-2 mt-2 text-xs text-text-muted">
+                    <span>{workflow.totalRuns} runs</span>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Workflow Builder */}
+        <div className="flex-1 flex flex-col">
+          {/* Toolbar */}
+          <div className="h-14 border-b border-border-subtle bg-bg-secondary flex items-center justify-between px-4">
+            <div className="flex items-center gap-2">
+              {NODE_TYPES.map((nodeType) => (
+                <Button
+                  key={nodeType.type}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => addNode(nodeType.type)}
+                  className="gap-1"
+                >
+                  <nodeType.icon className="w-4 h-4" style={{ color: nodeType.color }} />
+                  {nodeType.label}
+                </Button>
+              ))}
             </div>
 
-            <div className="flex-1 overflow-auto p-2 space-y-2">
-              {loading ? (
+            <div className="flex items-center gap-2">
+              {selectedWorkflow && (
                 <>
-                  <Skeleton className="h-16" />
-                  <Skeleton className="h-16" />
-                  <Skeleton className="h-16" />
+                  <Badge variant="outline">{selectedWorkflow.name}</Badge>
+                  <Button variant="ghost" size="sm" onClick={saveWorkflow} disabled={saving}>
+                    <Save className="w-4 h-4" />
+                    {saving ? 'Saving...' : 'Save'}
+                  </Button>
+                  <Button variant="primary" size="sm" onClick={runWorkflow}>
+                    <Play className="w-4 h-4" />
+                    Run
+                  </Button>
                 </>
-              ) : filteredWorkflows.length === 0 ? (
-                <div className="text-center py-8 text-text-muted">
-                  <GitBranch className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No workflows yet</p>
-                </div>
-              ) : (
-                filteredWorkflows.map((workflow) => (
-                  <button
-                    key={workflow.id}
-                    onClick={() => loadWorkflow(workflow)}
-                    className={`w-full p-3 rounded-lg text-left transition-colors ${
-                      selectedWorkflow?.id === workflow.id
-                        ? 'bg-accent/10 border border-accent'
-                        : 'bg-bg-tertiary hover:bg-bg-hover border border-transparent'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <GitBranch className="w-4 h-4 text-accent" />
-                      <span className="font-medium text-text-primary truncate">
-                        {workflow.name}
-                      </span>
-                    </div>
-                    {workflow.description && (
-                      <p className="text-xs text-text-muted mt-1 truncate">
-                        {workflow.description}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-2 mt-2 text-xs text-text-muted">
-                      <span>{workflow.totalRuns} runs</span>
-                    </div>
-                  </button>
-                ))
               )}
             </div>
           </div>
 
-          {/* Workflow Builder */}
-          <div className="flex-1 flex flex-col">
-            {/* Toolbar */}
-            <div className="h-14 border-b border-border-subtle bg-bg-secondary flex items-center justify-between px-4">
-              <div className="flex items-center gap-2">
-                {NODE_TYPES.map((nodeType) => (
-                  <Button
-                    key={nodeType.type}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => addNode(nodeType.type)}
-                    className="gap-1"
-                  >
-                    <nodeType.icon
-                      className="w-4 h-4"
-                      style={{ color: nodeType.color }}
-                    />
-                    {nodeType.label}
-                  </Button>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2">
-                {selectedWorkflow && (
-                  <>
-                    <Badge variant="outline">{selectedWorkflow.name}</Badge>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={saveWorkflow}
-                      disabled={saving}
-                    >
-                      <Save className="w-4 h-4" />
-                      {saving ? 'Saving...' : 'Save'}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={runWorkflow}
-                    >
-                      <Play className="w-4 h-4" />
-                      Run
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Canvas */}
-            <div className="flex-1">
-              <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                onNodeDoubleClick={onNodeDoubleClick}
-                nodeTypes={nodeTypes}
-                fitView
-                deleteKeyCode={['Backspace', 'Delete']}
-                className="bg-bg-primary"
-              >
-                <Background color="#333" gap={20} />
-                <Controls className="bg-bg-secondary border-border-subtle" />
-                <Panel position="bottom-center" className="mb-4">
-                  <Card className="px-4 py-2">
-                    <p className="text-xs text-text-muted">
-                      Double-click node to configure • Drag to connect •
-                      Backspace to delete
-                    </p>
-                  </Card>
-                </Panel>
-              </ReactFlow>
-            </div>
+          {/* Canvas */}
+          <div className="flex-1">
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onNodeDoubleClick={onNodeDoubleClick}
+              nodeTypes={nodeTypes}
+              fitView
+              deleteKeyCode={['Backspace', 'Delete']}
+              className="bg-bg-primary"
+            >
+              <Background color="#333" gap={20} />
+              <Controls className="bg-bg-secondary border-border-subtle" />
+              <Panel position="bottom-center" className="mb-4">
+                <Card className="px-4 py-2">
+                  <p className="text-xs text-text-muted">
+                    Double-click node to configure • Drag to connect • Backspace to delete
+                  </p>
+                </Card>
+              </Panel>
+            </ReactFlow>
           </div>
+        </div>
       </div>
 
       <CreateWorkflowModal

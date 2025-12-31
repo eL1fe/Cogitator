@@ -68,13 +68,12 @@ export const POST = withAuth(async (request, context) => {
 
     console.log('[workflow-run] Created run:', run.id);
 
-    const builder = new WorkflowBuilder<WorkflowState>(workflowData.name)
-      .initialState({
-        input: input || '',
-        results: {},
-        ...(initialState || {}),
-        ...(workflowData.initialState as WorkflowState || {}),
-      });
+    const builder = new WorkflowBuilder<WorkflowState>(workflowData.name).initialState({
+      input: input || '',
+      results: {},
+      ...(initialState || {}),
+      ...((workflowData.initialState as WorkflowState) || {}),
+    });
 
     const nodeDependencies = new Map<string, string[]>();
     for (const edge of definition.edges) {
@@ -85,16 +84,13 @@ export const POST = withAuth(async (request, context) => {
       nodeDependencies.set(edge.target, deps);
     }
 
-    const entryNode = definition.edges.find(e => e.source === 'start')?.target;
+    const entryNode = definition.edges.find((e) => e.source === 'start')?.target;
     if (!entryNode) {
       await updateWorkflowRun(run.id, {
         status: 'failed',
         error: 'No entry point found - workflow must have a start node',
       });
-      return NextResponse.json(
-        { error: 'No entry point found in workflow' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No entry point found in workflow' }, { status: 400 });
     }
 
     for (const nodeDef of definition.nodes) {
@@ -123,9 +119,7 @@ export const POST = withAuth(async (request, context) => {
 
             const agentWorkflowNode = agentNode(agent, {
               inputMapper: (state) => {
-                return typeof state.input === 'string'
-                  ? state.input
-                  : JSON.stringify(state);
+                return typeof state.input === 'string' ? state.input : JSON.stringify(state);
               },
               stateMapper: (result) => ({
                 results: { [nodeDef.id]: result.output },
@@ -142,7 +136,7 @@ export const POST = withAuth(async (request, context) => {
             if (!nodeDef.toolName) {
               throw new Error(`Tool node ${nodeDef.id} missing toolName`);
             }
-            const tool = availableTools.find(t => t.name === nodeDef.toolName);
+            const tool = availableTools.find((t) => t.name === nodeDef.toolName);
             if (!tool) {
               throw new Error(`Tool ${nodeDef.toolName} not found`);
             }
@@ -166,22 +160,25 @@ export const POST = withAuth(async (request, context) => {
           }
 
           case 'function': {
-            const code = nodeDef.code || nodeDef.config?.code as string || '';
-            const fnNode = functionNode(nodeDef.id, async (ctx): Promise<NodeResult<WorkflowState>> => {
-              try {
-                const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-                const fn = new AsyncFunction('state', 'input', code);
-                const result = await fn(ctx.state, ctx.input);
-                return {
-                  state: { results: { [nodeDef.id]: result } },
-                  output: result,
-                };
-              } catch (error) {
-                return {
-                  output: { error: String(error) },
-                };
+            const code = nodeDef.code || (nodeDef.config?.code as string) || '';
+            const fnNode = functionNode(
+              nodeDef.id,
+              async (ctx): Promise<NodeResult<WorkflowState>> => {
+                try {
+                  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+                  const fn = new AsyncFunction('state', 'input', code);
+                  const result = await fn(ctx.state, ctx.input);
+                  return {
+                    state: { results: { [nodeDef.id]: result } },
+                    output: result,
+                  };
+                } catch (error) {
+                  return {
+                    output: { error: String(error) },
+                  };
+                }
               }
-            });
+            );
 
             builder.addNode(nodeDef.id, fnNode.fn, {
               after: deps.length > 0 ? deps : undefined,
@@ -190,14 +187,18 @@ export const POST = withAuth(async (request, context) => {
           }
 
           case 'delay': {
-            const delayMs = nodeDef.delay || nodeDef.config?.delay as number || 1000;
+            const delayMs = nodeDef.delay || (nodeDef.config?.delay as number) || 1000;
 
-            builder.addNode(nodeDef.id, async (ctx) => {
-              await new Promise(resolve => setTimeout(resolve, delayMs));
-              return { state: ctx.state };
-            }, {
-              after: deps.length > 0 ? deps : undefined,
-            });
+            builder.addNode(
+              nodeDef.id,
+              async (ctx) => {
+                await new Promise((resolve) => setTimeout(resolve, delayMs));
+                return { state: ctx.state };
+              },
+              {
+                after: deps.length > 0 ? deps : undefined,
+              }
+            );
             break;
           }
         }
@@ -226,26 +227,30 @@ export const POST = withAuth(async (request, context) => {
     const eventLog: string[] = [];
 
     try {
-      const result = await executor.execute(workflow, { input }, {
-        maxConcurrency: 2,
-        maxIterations: 50,
-        checkpoint: true,
-        onNodeStart: (nodeName) => {
-          const event = `[${new Date().toISOString()}] node:start ${nodeName}`;
-          eventLog.push(event);
-          console.log('[workflow-run]', event);
-        },
-        onNodeComplete: (nodeName, output, duration) => {
-          const event = `[${new Date().toISOString()}] node:complete ${nodeName} (${duration}ms)`;
-          eventLog.push(event);
-          console.log('[workflow-run]', event);
-        },
-        onNodeError: (nodeName, error) => {
-          const event = `[${new Date().toISOString()}] node:error ${nodeName}: ${error.message}`;
-          eventLog.push(event);
-          console.error('[workflow-run]', event);
-        },
-      });
+      const result = await executor.execute(
+        workflow,
+        { input },
+        {
+          maxConcurrency: 2,
+          maxIterations: 50,
+          checkpoint: true,
+          onNodeStart: (nodeName) => {
+            const event = `[${new Date().toISOString()}] node:start ${nodeName}`;
+            eventLog.push(event);
+            console.log('[workflow-run]', event);
+          },
+          onNodeComplete: (nodeName, output, duration) => {
+            const event = `[${new Date().toISOString()}] node:complete ${nodeName} (${duration}ms)`;
+            eventLog.push(event);
+            console.log('[workflow-run]', event);
+          },
+          onNodeError: (nodeName, error) => {
+            const event = `[${new Date().toISOString()}] node:error ${nodeName}: ${error.message}`;
+            eventLog.push(event);
+            console.error('[workflow-run]', event);
+          },
+        }
+      );
 
       const duration = Date.now() - startTime;
 
@@ -275,7 +280,6 @@ export const POST = withAuth(async (request, context) => {
         error: result.error?.message,
         eventLog,
       });
-
     } catch (execError) {
       const duration = Date.now() - startTime;
       const errorMessage = execError instanceof Error ? execError.message : String(execError);
@@ -288,15 +292,17 @@ export const POST = withAuth(async (request, context) => {
 
       console.error('[workflow-run] Execution failed:', errorMessage);
 
-      return NextResponse.json({
-        runId: run.id,
-        status: 'failed',
-        error: errorMessage,
-        duration,
-        eventLog,
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          runId: run.id,
+          status: 'failed',
+          error: errorMessage,
+          duration,
+          eventLog,
+        },
+        { status: 500 }
+      );
     }
-
   } catch (error) {
     console.error('[workflow-run] Fatal error:', error);
     return NextResponse.json(

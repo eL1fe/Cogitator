@@ -29,6 +29,7 @@ aws s3 cp $BACKUP_FILE s3://cogitator-backups/postgres/
 #### Point-in-Time Recovery (WAL Archiving)
 
 Enable WAL archiving in `postgresql.conf`:
+
 ```
 wal_level = replica
 archive_mode = on
@@ -36,6 +37,7 @@ archive_command = 'aws s3 cp %p s3://cogitator-backups/wal/%f'
 ```
 
 Recovery:
+
 ```bash
 # Restore base backup
 pg_restore -d cogitator /backups/base_backup.tar
@@ -94,12 +96,14 @@ aws s3 cp "${BACKUP_DIR}/dump_${TIMESTAMP}.rdb" s3://cogitator-backups/redis/
 ### Complete System Recovery
 
 1. **Provision Infrastructure**
+
    ```bash
    # Using Terraform or manual setup
    terraform apply -var-file=prod.tfvars
    ```
 
 2. **Restore PostgreSQL**
+
    ```bash
    # Download latest backup
    aws s3 cp s3://cogitator-backups/postgres/latest.sql.gz /tmp/
@@ -109,6 +113,7 @@ aws s3 cp "${BACKUP_DIR}/dump_${TIMESTAMP}.rdb" s3://cogitator-backups/redis/
    ```
 
 3. **Restore Redis**
+
    ```bash
    # Stop Redis
    systemctl stop redis
@@ -122,6 +127,7 @@ aws s3 cp "${BACKUP_DIR}/dump_${TIMESTAMP}.rdb" s3://cogitator-backups/redis/
    ```
 
 4. **Deploy Application**
+
    ```bash
    # Using Kubernetes
    kubectl apply -f deploy/kubernetes/
@@ -142,6 +148,7 @@ aws s3 cp "${BACKUP_DIR}/dump_${TIMESTAMP}.rdb" s3://cogitator-backups/redis/
 **Symptoms**: API returns 503, health check shows database "down"
 
 **Resolution**:
+
 1. Check PostgreSQL status: `systemctl status postgresql`
 2. Check connection limits: `SELECT count(*) FROM pg_stat_activity;`
 3. Restart if needed: `systemctl restart postgresql`
@@ -152,6 +159,7 @@ aws s3 cp "${BACKUP_DIR}/dump_${TIMESTAMP}.rdb" s3://cogitator-backups/redis/
 **Symptoms**: Short-term memory unavailable, degraded mode active
 
 **Resolution**:
+
 1. Check Redis status: `redis-cli ping`
 2. Check memory: `redis-cli info memory`
 3. Restart if needed: `systemctl restart redis`
@@ -162,6 +170,7 @@ aws s3 cp "${BACKUP_DIR}/dump_${TIMESTAMP}.rdb" s3://cogitator-backups/redis/
 **Symptoms**: Circuit breaker open, fallback providers in use
 
 **Resolution**:
+
 1. Check circuit breaker status in health endpoint
 2. Verify provider status (Ollama, OpenAI, Anthropic)
 3. Circuit breaker auto-resets after timeout (default: 30s)
@@ -174,6 +183,7 @@ aws s3 cp "${BACKUP_DIR}/dump_${TIMESTAMP}.rdb" s3://cogitator-backups/redis/
 **Detection**: Query errors, inconsistent data
 
 **Response**:
+
 1. Stop all Cogitator instances
 2. Assess damage: `pg_dump --schema-only cogitator > /tmp/schema.sql`
 3. Restore from latest backup
@@ -181,6 +191,7 @@ aws s3 cp "${BACKUP_DIR}/dump_${TIMESTAMP}.rdb" s3://cogitator-backups/redis/
 5. Restart services
 
 **Prevention**:
+
 - Enable checksums: `initdb --data-checksums`
 - Regular VACUUM and ANALYZE
 - Monitor disk health
@@ -190,12 +201,14 @@ aws s3 cp "${BACKUP_DIR}/dump_${TIMESTAMP}.rdb" s3://cogitator-backups/redis/
 **Detection**: OOMKilled containers, slow responses
 
 **Response**:
+
 1. Scale horizontally: `kubectl scale deployment cogitator --replicas=3`
 2. Clear Redis cache: `redis-cli FLUSHDB`
 3. Implement memory TTLs
 4. Increase container limits
 
 **Prevention**:
+
 - Set resource limits in Kubernetes
 - Configure memory TTLs for Redis keys
 - Monitor memory usage with Prometheus
@@ -205,12 +218,14 @@ aws s3 cp "${BACKUP_DIR}/dump_${TIMESTAMP}.rdb" s3://cogitator-backups/redis/
 **Detection**: All LLM providers failing, circuit breakers open
 
 **Response**:
+
 1. Check provider status pages
 2. Manually close circuit breakers if needed: `POST /api/admin/circuit-breakers/reset`
 3. Switch to local Ollama if cloud providers down
 4. Enable queue mode to buffer requests
 
 **Prevention**:
+
 - Multiple LLM provider fallbacks
 - Local Ollama as last resort
 - Request queueing for transient failures
@@ -220,6 +235,7 @@ aws s3 cp "${BACKUP_DIR}/dump_${TIMESTAMP}.rdb" s3://cogitator-backups/redis/
 **Detection**: All services unreachable
 
 **Response**:
+
 1. Activate disaster recovery site
 2. Update DNS to point to DR site
 3. Restore from off-site backups
@@ -227,6 +243,7 @@ aws s3 cp "${BACKUP_DIR}/dump_${TIMESTAMP}.rdb" s3://cogitator-backups/redis/
 5. Notify users of recovery status
 
 **Prevention**:
+
 - Multi-region deployment
 - Cross-region backup replication
 - Regular DR drills
@@ -246,7 +263,7 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Database connection lost"
+          summary: 'Database connection lost'
 
       - alert: RedisDown
         expr: cogitator_health_redis_up == 0
@@ -254,7 +271,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Redis connection lost (degraded mode)"
+          summary: 'Redis connection lost (degraded mode)'
 
       - alert: CircuitBreakerOpen
         expr: cogitator_circuit_breaker_state{state="open"} == 1
@@ -262,7 +279,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "Circuit breaker open for {{ $labels.service }}"
+          summary: 'Circuit breaker open for {{ $labels.service }}'
 
       - alert: HighErrorRate
         expr: rate(cogitator_requests_errors_total[5m]) > 0.1
@@ -270,12 +287,13 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "High error rate detected"
+          summary: 'High error rate detected'
 ```
 
 ### Health Check Endpoint
 
 The `/api/health` endpoint returns:
+
 ```json
 {
   "status": "healthy|degraded|unhealthy",
@@ -295,31 +313,35 @@ The `/api/health` endpoint returns:
 
 ## Recovery Time Objectives
 
-| Component | RTO | RPO | Backup Frequency |
-|-----------|-----|-----|------------------|
-| PostgreSQL | 1 hour | 5 minutes | Continuous WAL |
-| Redis | 15 minutes | 1 minute | Every minute |
-| Application | 5 minutes | N/A | Container images |
-| Configuration | 5 minutes | N/A | Git repository |
+| Component     | RTO        | RPO       | Backup Frequency |
+| ------------- | ---------- | --------- | ---------------- |
+| PostgreSQL    | 1 hour     | 5 minutes | Continuous WAL   |
+| Redis         | 15 minutes | 1 minute  | Every minute     |
+| Application   | 5 minutes  | N/A       | Container images |
+| Configuration | 5 minutes  | N/A       | Git repository   |
 
 ## Runbook Checklist
 
 ### Daily
+
 - [ ] Verify backup completion
 - [ ] Check health endpoint status
 - [ ] Review error logs
 
 ### Weekly
+
 - [ ] Test backup restoration (non-prod)
 - [ ] Review circuit breaker events
 - [ ] Check disk space usage
 
 ### Monthly
+
 - [ ] Full DR drill
 - [ ] Update runbooks
 - [ ] Review RTO/RPO targets
 
 ### Quarterly
+
 - [ ] Cross-region failover test
 - [ ] Security audit
 - [ ] Capacity planning review

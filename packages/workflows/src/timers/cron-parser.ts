@@ -132,10 +132,7 @@ export function validateCronExpression(expression: string): {
 /**
  * Parse a cron expression
  */
-export function parseCronExpression(
-  expression: string,
-  timezone?: string
-): ParsedCron {
+export function parseCronExpression(expression: string, timezone?: string): ParsedCron {
   const normalized = CRON_PRESETS[expression.toLowerCase()] ?? expression;
   const parts = normalized.trim().split(/\s+/);
 
@@ -152,7 +149,7 @@ export function parseCronExpression(
   return {
     expression: normalized,
     fields: {
-      second: hasSeconds ? Array.from(fields.second) as number[] : undefined,
+      second: hasSeconds ? (Array.from(fields.second) as number[]) : undefined,
       minute: Array.from(fields.minute) as number[],
       hour: Array.from(fields.hour) as number[],
       dayOfMonth: Array.from(fields.dayOfMonth) as number[],
@@ -167,10 +164,7 @@ export function parseCronExpression(
 /**
  * Get the next occurrence of a cron expression
  */
-export function getNextCronOccurrence(
-  expression: string,
-  options: CronIteratorOptions = {}
-): Date {
+export function getNextCronOccurrence(expression: string, options: CronIteratorOptions = {}): Date {
   const normalized = CRON_PRESETS[expression.toLowerCase()] ?? expression;
 
   const interval = parser.parseExpression(normalized, {
@@ -234,11 +228,7 @@ export function getNextCronOccurrences(
 /**
  * Check if a cron expression matches a given date
  */
-export function cronMatchesDate(
-  expression: string,
-  date: Date,
-  timezone?: string
-): boolean {
+export function cronMatchesDate(expression: string, date: Date, timezone?: string): boolean {
   const normalized = CRON_PRESETS[expression.toLowerCase()] ?? expression;
 
   let checkDate = date;
@@ -254,8 +244,7 @@ export function cronMatchesDate(
       hour12: false,
     });
     const parts = formatter.formatToParts(date);
-    const get = (type: string) =>
-      parseInt(parts.find((p) => p.type === type)?.value ?? '0');
+    const get = (type: string) => parseInt(parts.find((p) => p.type === type)?.value ?? '0');
 
     checkDate = new Date(
       get('year'),
@@ -375,7 +364,15 @@ export function describeCronExpression(expression: string): string {
 
   if (dayOfMonth !== '*' || dayOfWeek !== '*') {
     if (dayOfWeek !== '*') {
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const dayNames = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ];
       if (dayOfWeek.includes(',')) {
         const days = dayOfWeek.split(',').map((d) => dayNames[parseInt(d)] || d);
         descriptions.push(`on ${days.join(', ')}`);

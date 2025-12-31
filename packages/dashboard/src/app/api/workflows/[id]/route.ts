@@ -14,10 +14,7 @@ export const GET = withAuth(async (_request, context) => {
     return NextResponse.json(workflow);
   } catch (error) {
     console.error('[api/workflows] Failed to fetch workflow:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch workflow' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch workflow' }, { status: 500 });
   }
 });
 
@@ -41,10 +38,7 @@ export const PATCH = withAuth(async (request, context) => {
     return NextResponse.json(workflow);
   } catch (error) {
     console.error('[api/workflows] Failed to update workflow:', error);
-    return NextResponse.json(
-      { error: 'Failed to update workflow' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update workflow' }, { status: 500 });
   }
 });
 
@@ -60,9 +54,6 @@ export const DELETE = withAuth(async (_request, context) => {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('[api/workflows] Failed to delete workflow:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete workflow' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete workflow' }, { status: 500 });
   }
 });

@@ -287,7 +287,12 @@ describe('Workflow Manager', () => {
 
       queue.enqueue({ runId: 'past', workflowName: 'wf', priority: 1, scheduledFor: now - 1000 });
       queue.enqueue({ runId: 'now', workflowName: 'wf', priority: 2, scheduledFor: now });
-      queue.enqueue({ runId: 'future', workflowName: 'wf', priority: 3, scheduledFor: now + 10000 });
+      queue.enqueue({
+        runId: 'future',
+        workflowName: 'wf',
+        priority: 3,
+        scheduledFor: now + 10000,
+      });
 
       const ready = queue.getReady(now);
       expect(ready).toHaveLength(2);
@@ -499,8 +504,7 @@ describe('Workflow Manager', () => {
 
       try {
         await resultPromise;
-      } catch {
-      }
+      } catch {}
 
       const updatedRuns = await manager.listRuns({ workflowName: 'cancellable' });
       expect(['cancelled', 'completed', 'failed']).toContain(updatedRuns[0].status);

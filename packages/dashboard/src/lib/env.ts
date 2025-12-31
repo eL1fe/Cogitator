@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 const envSchema = z.object({
-
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
 
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
@@ -36,7 +35,7 @@ export function validateEnv(): Env {
   const result = envSchema.safeParse(process.env);
 
   if (!result.success) {
-    const errors = result.error.errors.map(e => `  - ${e.path.join('.')}: ${e.message}`);
+    const errors = result.error.errors.map((e) => `  - ${e.path.join('.')}: ${e.message}`);
     console.error('Environment validation failed:');
     console.error(errors.join('\n'));
 
@@ -54,7 +53,9 @@ export function validateEnv(): Env {
   );
 
   if (!hasLLMProvider && process.env.NODE_ENV === 'production') {
-    console.warn('Warning: No LLM provider configured. Set at least one of: OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, OLLAMA_URL');
+    console.warn(
+      'Warning: No LLM provider configured. Set at least one of: OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, OLLAMA_URL'
+    );
   }
 
   validatedEnv = result.success ? result.data : (process.env as unknown as Env);

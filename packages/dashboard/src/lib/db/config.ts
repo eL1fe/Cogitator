@@ -2,10 +2,9 @@ import { query, queryOne, execute } from './index';
 import { encrypt, decrypt, isEncrypted, maskApiKey } from '../crypto';
 
 export async function getConfig<T>(key: string): Promise<T | null> {
-  const row = await queryOne<{ value: T }>(
-    'SELECT value FROM dashboard_config WHERE key = $1',
-    [key]
-  );
+  const row = await queryOne<{ value: T }>('SELECT value FROM dashboard_config WHERE key = $1', [
+    key,
+  ]);
   return row?.value || null;
 }
 

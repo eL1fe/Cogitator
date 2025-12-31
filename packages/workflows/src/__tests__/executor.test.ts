@@ -61,11 +61,9 @@ describe('WorkflowExecutor', () => {
       const workflow = new WorkflowBuilder<TestState>('conditional')
         .initialState({ value: 0, steps: [] })
         .addNode('start', async () => ({ state: { value: 10 } }))
-        .addConditional(
-          'router',
-          (state: TestState) => (state.value > 5 ? 'high' : 'low'),
-          { after: ['start'] }
-        )
+        .addConditional('router', (state: TestState) => (state.value > 5 ? 'high' : 'low'), {
+          after: ['start'],
+        })
         .addNode(
           'high',
           async (ctx) => ({
@@ -154,11 +152,7 @@ describe('WorkflowExecutor', () => {
       });
 
       expect(onNodeStart).toHaveBeenCalledWith('step1');
-      expect(onNodeComplete).toHaveBeenCalledWith(
-        'step1',
-        'result1',
-        expect.any(Number)
-      );
+      expect(onNodeComplete).toHaveBeenCalledWith('step1', 'result1', expect.any(Number));
     });
 
     it('handles node errors', async () => {

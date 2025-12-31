@@ -28,9 +28,7 @@ export const PATCH = withAuth(async (request, context) => {
 
     if (body.tools) {
       const availableToolNames = getAvailableTools().map((t) => t.name);
-      const invalidTools = body.tools.filter(
-        (t: string) => !availableToolNames.includes(t)
-      );
+      const invalidTools = body.tools.filter((t: string) => !availableToolNames.includes(t));
       if (invalidTools.length > 0) {
         return NextResponse.json(
           { error: `Invalid tools: ${invalidTools.join(', ')}` },

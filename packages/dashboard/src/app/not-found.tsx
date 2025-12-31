@@ -40,11 +40,7 @@ function GlitchText({ text }: { text: string }) {
     return () => clearInterval(glitchInterval);
   }, [text]);
 
-  return (
-    <span className={isGlitching ? 'text-[#00ff88]' : ''}>
-      {displayText}
-    </span>
-  );
+  return <span className={isGlitching ? 'text-[#00ff88]' : ''}>{displayText}</span>;
 }
 
 export default function NotFound() {
@@ -64,7 +60,10 @@ export default function NotFound() {
       />
 
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#00ff88]/5 rounded-full blur-[100px] animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#00aaff]/5 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '1s' }} />
+      <div
+        className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#00aaff]/5 rounded-full blur-[80px] animate-pulse"
+        style={{ animationDelay: '1s' }}
+      />
 
       <div className="relative z-10 text-center px-6">
         <motion.div
@@ -104,11 +103,10 @@ export default function NotFound() {
             transition={{ delay: 0.3 }}
             className="space-y-4 mb-12"
           >
-            <h2 className="text-2xl md:text-3xl font-bold text-[#fafafa]">
-              Page Not Found
-            </h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#fafafa]">Page Not Found</h2>
             <p className="text-[#a1a1a1] max-w-md mx-auto font-mono text-sm">
-              <span className="text-[#ff4444]">Error:</span> The requested resource could not be located.
+              <span className="text-[#ff4444]">Error:</span> The requested resource could not be
+              located.
               <br />
               <span className="text-[#666]">// Check the URL or navigate back home</span>
             </p>

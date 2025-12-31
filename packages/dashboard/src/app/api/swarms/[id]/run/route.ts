@@ -3,7 +3,13 @@ import { getSwarm, getAgent, createSwarmRun, updateSwarmRun } from '@/lib/cogita
 import { getCogitator } from '@/lib/cogitator';
 import { Swarm } from '@cogitator-ai/swarms';
 import { Agent } from '@cogitator-ai/core';
-import type { SwarmConfig, SwarmStrategy, DebateConfig, RoundRobinConfig, ConsensusConfig } from '@cogitator-ai/types';
+import type {
+  SwarmConfig,
+  SwarmStrategy,
+  DebateConfig,
+  RoundRobinConfig,
+  ConsensusConfig,
+} from '@cogitator-ai/types';
 import { withAuth } from '@/lib/auth/middleware';
 import { swarmRunSchema } from '@/lib/validation';
 
@@ -17,7 +23,7 @@ export const POST = withAuth(async (request, context) => {
       return NextResponse.json(
         {
           error: 'Validation failed',
-          details: parsed.error.errors.map(e => ({
+          details: parsed.error.errors.map((e) => ({
             path: e.path.join('.'),
             message: e.message,
           })),
@@ -39,10 +45,7 @@ export const POST = withAuth(async (request, context) => {
     const validAgentData = agentDataList.filter(Boolean);
 
     if (validAgentData.length === 0) {
-      return NextResponse.json(
-        { error: 'No valid agents found for this swarm' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No valid agents found for this swarm' }, { status: 400 });
     }
 
     const run = await createSwarmRun({
@@ -60,14 +63,16 @@ export const POST = withAuth(async (request, context) => {
 
       const agents = validAgentData
         .filter((d): d is NonNullable<typeof d> => d !== null)
-        .map((agentData) =>
-          new Agent({
-            id: agentData.id,
-            name: agentData.name,
-            model: agentData.model,
-            instructions: agentData.instructions || `You are ${agentData.name}, a helpful assistant.`,
-            tools: [],
-          })
+        .map(
+          (agentData) =>
+            new Agent({
+              id: agentData.id,
+              name: agentData.name,
+              model: agentData.model,
+              instructions:
+                agentData.instructions || `You are ${agentData.name}, a helpful assistant.`,
+              tools: [],
+            })
         );
 
       const strategy = swarmData.strategy as SwarmStrategy;
@@ -85,11 +90,12 @@ export const POST = withAuth(async (request, context) => {
           }
           swarmConfig.agents = agents.map((agent, i) => {
             const newAgent = agent.clone({
-              instructions: i === 0
-                ? `${agent.instructions}\n\nYou are an ADVOCATE. Argue IN FAVOR of propositions.`
-                : i === 1
-                ? `${agent.instructions}\n\nYou are a CRITIC. Argue AGAINST propositions and find weaknesses.`
-                : `${agent.instructions}\n\nYou are a MODERATOR. Synthesize arguments fairly.`,
+              instructions:
+                i === 0
+                  ? `${agent.instructions}\n\nYou are an ADVOCATE. Argue IN FAVOR of propositions.`
+                  : i === 1
+                    ? `${agent.instructions}\n\nYou are a CRITIC. Argue AGAINST propositions and find weaknesses.`
+                    : `${agent.instructions}\n\nYou are a MODERATOR. Synthesize arguments fairly.`,
             });
             return newAgent;
           });
@@ -186,9 +192,8 @@ export const POST = withAuth(async (request, context) => {
         totalTokens += agentResult.usage?.totalTokens || 0;
       }
 
-      const output = typeof result.output === 'string'
-        ? result.output
-        : JSON.stringify(result.output, null, 2);
+      const output =
+        typeof result.output === 'string' ? result.output : JSON.stringify(result.output, null, 2);
 
       await updateSwarmRun(run.id, {
         status: 'completed',

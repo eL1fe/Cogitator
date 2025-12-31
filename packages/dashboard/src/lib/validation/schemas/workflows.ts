@@ -3,10 +3,12 @@ import { z } from 'zod';
 const workflowNodeSchema = z.object({
   id: z.string(),
   type: z.enum(['agent', 'condition', 'parallel', 'loop', 'transform', 'input', 'output']),
-  position: z.object({
-    x: z.number(),
-    y: z.number(),
-  }).optional(),
+  position: z
+    .object({
+      x: z.number(),
+      y: z.number(),
+    })
+    .optional(),
   data: z.record(z.unknown()).optional(),
 });
 
@@ -30,10 +32,7 @@ export const createWorkflowSchema = z.object({
 export const updateWorkflowSchema = createWorkflowSchema.partial();
 
 export const workflowRunSchema = z.object({
-  input: z.union([
-    z.string(),
-    z.record(z.unknown()),
-  ]),
+  input: z.union([z.string(), z.record(z.unknown())]),
   context: z.record(z.unknown()).optional(),
   checkpointId: z.string().optional(),
 });

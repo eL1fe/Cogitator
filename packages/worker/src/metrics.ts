@@ -104,10 +104,7 @@ export class DurationHistogram {
           .join(',')
       : '';
 
-    const lines: string[] = [
-      `# HELP ${this.name} ${this.help}`,
-      `# TYPE ${this.name} histogram`,
-    ];
+    const lines: string[] = [`# HELP ${this.name} ${this.help}`, `# TYPE ${this.name} histogram`];
 
     let cumulative = 0;
     for (const bucket of DURATION_BUCKETS) {
@@ -165,17 +162,16 @@ export class MetricsCollector {
    * Format all metrics
    */
   format(queueMetrics: QueueMetrics, labels?: Record<string, string>): string {
-    const parts = [
-      formatPrometheusMetrics(queueMetrics, labels),
-      this.jobDuration.format(labels),
-    ];
+    const parts = [formatPrometheusMetrics(queueMetrics, labels), this.jobDuration.format(labels)];
 
     if (this.jobsByType.size > 0) {
       parts.push('# HELP cogitator_jobs_by_type_total Jobs processed by type');
       parts.push('# TYPE cogitator_jobs_by_type_total counter');
       for (const [type, count] of this.jobsByType) {
         const typeLabels = labels
-          ? `${Object.entries(labels).map(([k, v]) => `${k}="${v}"`).join(',')},type="${type}"`
+          ? `${Object.entries(labels)
+              .map(([k, v]) => `${k}="${v}"`)
+              .join(',')},type="${type}"`
           : `type="${type}"`;
         parts.push(`cogitator_jobs_by_type_total{${typeLabels}} ${count}`);
       }

@@ -83,10 +83,7 @@ interface IoRedis {
 /**
  * Create a standalone Redis client
  */
-function createStandaloneClient(
-  ioredis: IoRedis,
-  config: RedisStandaloneConfig
-): RedisClient {
+function createStandaloneClient(ioredis: IoRedis, config: RedisStandaloneConfig): RedisClient {
   const url = config.url ?? buildUrl(config.host, config.port);
 
   const client = new ioredis(url, {
@@ -105,10 +102,7 @@ function createStandaloneClient(
 /**
  * Create a Redis Cluster client
  */
-function createClusterClient(
-  ioredis: IoRedis,
-  config: RedisClusterConfig
-): RedisClient {
+function createClusterClient(ioredis: IoRedis, config: RedisClusterConfig): RedisClient {
   const cluster = new ioredis.Cluster(config.nodes, {
     scaleReads: config.scaleReads ?? 'master',
     redisOptions: {

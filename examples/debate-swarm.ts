@@ -168,9 +168,7 @@ Topic: ${topic}`,
 
     if (result.trace?.spans) {
       console.log('\n🎤 Speaker Activity:');
-      const agentSpans = result.trace.spans.filter((s) =>
-        s.name.startsWith('agent.')
-      );
+      const agentSpans = result.trace.spans.filter((s) => s.name.startsWith('agent.'));
       for (const span of agentSpans) {
         const name = span.attributes?.agentName || span.name.replace('agent.', '');
         console.log(`   ${name}: ${span.duration}ms`);
@@ -185,4 +183,3 @@ Topic: ${topic}`,
 }
 
 main().catch(console.error);
-

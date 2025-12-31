@@ -148,7 +148,6 @@ export class CircuitBreaker {
         this.transitionTo('closed');
       }
     } else if (this.state === 'closed') {
-
       this.failures = 0;
     }
   }
@@ -161,7 +160,6 @@ export class CircuitBreaker {
     this.lastFailure = new Date();
 
     if (this.state === 'half-open') {
-
       this.transitionTo('open');
     } else if (this.state === 'closed') {
       if (this.failures >= this.options.failureThreshold) {

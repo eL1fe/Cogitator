@@ -60,9 +60,7 @@ export interface Embedding {
   metadata?: Record<string, unknown>;
 }
 
-export type MemoryResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
+export type MemoryResult<T> = { success: true; data: T } | { success: false; error: string };
 
 export type MemoryProvider = 'memory' | 'redis' | 'postgres';
 
@@ -129,20 +127,12 @@ export interface SemanticSearchOptions {
 export interface MemoryAdapter {
   readonly provider: MemoryProvider;
 
-  createThread(
-    agentId: string,
-    metadata?: Record<string, unknown>
-  ): Promise<MemoryResult<Thread>>;
+  createThread(agentId: string, metadata?: Record<string, unknown>): Promise<MemoryResult<Thread>>;
   getThread(threadId: string): Promise<MemoryResult<Thread | null>>;
-  updateThread(
-    threadId: string,
-    metadata: Record<string, unknown>
-  ): Promise<MemoryResult<Thread>>;
+  updateThread(threadId: string, metadata: Record<string, unknown>): Promise<MemoryResult<Thread>>;
   deleteThread(threadId: string): Promise<MemoryResult<void>>;
 
-  addEntry(
-    entry: Omit<MemoryEntry, 'id' | 'createdAt'>
-  ): Promise<MemoryResult<MemoryEntry>>;
+  addEntry(entry: Omit<MemoryEntry, 'id' | 'createdAt'>): Promise<MemoryResult<MemoryEntry>>;
   getEntries(options: MemoryQueryOptions): Promise<MemoryResult<MemoryEntry[]>>;
   getEntry(entryId: string): Promise<MemoryResult<MemoryEntry | null>>;
   deleteEntry(entryId: string): Promise<MemoryResult<void>>;
@@ -156,9 +146,7 @@ export interface MemoryAdapter {
  * Extended adapter for long-term facts (Postgres)
  */
 export interface FactAdapter {
-  addFact(
-    fact: Omit<Fact, 'id' | 'createdAt' | 'updatedAt'>
-  ): Promise<MemoryResult<Fact>>;
+  addFact(fact: Omit<Fact, 'id' | 'createdAt' | 'updatedAt'>): Promise<MemoryResult<Fact>>;
   getFacts(agentId: string, category?: string): Promise<MemoryResult<Fact[]>>;
   updateFact(
     factId: string,
@@ -172,12 +160,8 @@ export interface FactAdapter {
  * Extended adapter for semantic search (pgvector)
  */
 export interface EmbeddingAdapter {
-  addEmbedding(
-    embedding: Omit<Embedding, 'id' | 'createdAt'>
-  ): Promise<MemoryResult<Embedding>>;
-  search(
-    options: SemanticSearchOptions
-  ): Promise<MemoryResult<(Embedding & { score: number })[]>>;
+  addEmbedding(embedding: Omit<Embedding, 'id' | 'createdAt'>): Promise<MemoryResult<Embedding>>;
+  search(options: SemanticSearchOptions): Promise<MemoryResult<(Embedding & { score: number })[]>>;
   deleteEmbedding(embeddingId: string): Promise<MemoryResult<void>>;
   deleteBySource(sourceId: string): Promise<MemoryResult<void>>;
 }

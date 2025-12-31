@@ -49,14 +49,18 @@ export class ConsensusStrategy extends BaseStrategy {
     const supervisors = this.coordinator.getAgentsByRole('supervisor');
     const supervisor = supervisors.length > 0 ? supervisors[0] : null;
 
-    this.coordinator.blackboard.write('consensus', {
-      topic: options.input,
-      maxRounds: this.config.maxRounds,
-      currentRound: 0,
-      votes: [],
-      resolution: this.config.resolution,
-      threshold: this.config.threshold,
-    }, 'system');
+    this.coordinator.blackboard.write(
+      'consensus',
+      {
+        topic: options.input,
+        maxRounds: this.config.maxRounds,
+        currentRound: 0,
+        votes: [],
+        resolution: this.config.resolution,
+        threshold: this.config.threshold,
+      },
+      'system'
+    );
 
     let consensusReached = false;
     let winningDecision: string | null = null;
@@ -67,10 +71,14 @@ export class ConsensusStrategy extends BaseStrategy {
       this.coordinator.events.emit('consensus:round', { round, total: this.config.maxRounds });
 
       const consensusState = this.coordinator.blackboard.read<{ votes: Vote[] }>('consensus');
-      this.coordinator.blackboard.write('consensus', {
-        ...consensusState,
-        currentRound: round,
-      }, 'system');
+      this.coordinator.blackboard.write(
+        'consensus',
+        {
+          ...consensusState,
+          currentRound: round,
+        },
+        'system'
+      );
 
       const roundVotes: Vote[] = [];
 
@@ -86,26 +94,27 @@ export class ConsensusStrategy extends BaseStrategy {
             totalRounds: this.config.maxRounds,
             resolution: this.config.resolution,
             threshold: this.config.threshold,
-            previousVotes: this.summarizeVotes(allVotes.filter(v => v.round < round)),
+            previousVotes: this.summarizeVotes(allVotes.filter((v) => v.round < round)),
             previousDiscussion,
           },
           consensusInstructions: this.buildConsensusInstructions(swarmAgent, round),
         };
 
-        const input = round === 1
-          ? `Consider the following and provide your decision:\n\n${options.input}\n\nProvide your vote as: VOTE: [your decision]\nFollowed by your reasoning.`
-          : `Continue the consensus discussion on: ${options.input}\n\nPrevious votes and discussion:\n${previousDiscussion}\n\nProvide your updated vote as: VOTE: [your decision]\nFollowed by your reasoning.`;
+        const input =
+          round === 1
+            ? `Consider the following and provide your decision:\n\n${options.input}\n\nProvide your vote as: VOTE: [your decision]\nFollowed by your reasoning.`
+            : `Continue the consensus discussion on: ${options.input}\n\nPrevious votes and discussion:\n${previousDiscussion}\n\nProvide your updated vote as: VOTE: [your decision]\nFollowed by your reasoning.`;
 
-        this.coordinator.events.emit('consensus:turn', {
-          round,
-          agent: swarmAgent.agent.name,
-        }, swarmAgent.agent.name);
-
-        const result = await this.coordinator.runAgent(
-          swarmAgent.agent.name,
-          input,
-          agentContext
+        this.coordinator.events.emit(
+          'consensus:turn',
+          {
+            round,
+            agent: swarmAgent.agent.name,
+          },
+          swarmAgent.agent.name
         );
+
+        const result = await this.coordinator.runAgent(swarmAgent.agent.name, input, agentContext);
         agentResults.set(`${swarmAgent.agent.name}_round${round}`, result);
 
         const vote = this.extractVote(result.output, swarmAgent, round);
@@ -132,7 +141,10 @@ export class ConsensusStrategy extends BaseStrategy {
       updatedState.votes = allVotes;
       this.coordinator.blackboard.write('consensus', updatedState, 'system');
 
-      const consensusResult = this.checkConsensus(roundVotes, agents.filter(a => a.metadata.role !== 'supervisor'));
+      const consensusResult = this.checkConsensus(
+        roundVotes,
+        agents.filter((a) => a.metadata.role !== 'supervisor')
+      );
       if (consensusResult.reached) {
         consensusReached = true;
         winningDecision = consensusResult.decision;
@@ -309,15 +321,11 @@ export class ConsensusStrategy extends BaseStrategy {
   }
 
   private getPreviousDiscussion(transcript: SwarmMessage[], currentRound: number): string {
-    const previousMessages = transcript.filter(
-      (m) => (m.metadata?.round as number) < currentRound
-    );
+    const previousMessages = transcript.filter((m) => (m.metadata?.round as number) < currentRound);
 
     if (previousMessages.length === 0) return '';
 
-    return previousMessages
-      .map((m) => `[${m.from}]: ${m.content}`)
-      .join('\n\n');
+    return previousMessages.map((m) => `[${m.from}]: ${m.content}`).join('\n\n');
   }
 
   private buildConsensusInstructions(agent: SwarmAgent, round: number): string {
@@ -395,9 +403,7 @@ Provide your decision as: FINAL DECISION: [your decision]
       votesByRound.set(vote.round, existing);
     }
 
-    let output = reached
-      ? `CONSENSUS REACHED\n\nDecision: ${decision}\n\n`
-      : `NO CONSENSUS\n\n`;
+    let output = reached ? `CONSENSUS REACHED\n\nDecision: ${decision}\n\n` : `NO CONSENSUS\n\n`;
 
     output += `Rounds: ${rounds}\nResolution method: ${this.config.resolution}\nThreshold: ${Math.round(this.config.threshold * 100)}%\n\n`;
 
@@ -410,7 +416,7 @@ Provide your decision as: FINAL DECISION: [your decision]
       output += '\n';
     }
 
-    const finalVotes = votes.filter(v => v.round === rounds);
+    const finalVotes = votes.filter((v) => v.round === rounds);
     const voteCounts = new Map<string, number>();
     for (const vote of finalVotes) {
       const key = vote.decision.toLowerCase().trim();

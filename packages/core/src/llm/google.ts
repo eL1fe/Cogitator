@@ -216,8 +216,7 @@ export class GoogleBackend extends BaseLLMBackend {
                   yield streamChunk;
                 }
               }
-            } catch {
-            }
+            } catch {}
           }
         }
       }
@@ -401,9 +400,7 @@ export class GoogleBackend extends BaseLLMBackend {
     };
   }
 
-  private mapFinishReason(
-    reason: string
-  ): 'stop' | 'tool_calls' | 'length' | 'error' {
+  private mapFinishReason(reason: string): 'stop' | 'tool_calls' | 'length' | 'error' {
     switch (reason) {
       case 'STOP':
         return 'stop';

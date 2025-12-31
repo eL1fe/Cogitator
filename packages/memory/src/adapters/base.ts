@@ -33,9 +33,7 @@ export abstract class BaseMemoryAdapter implements MemoryAdapter {
     entry: Omit<MemoryEntry, 'id' | 'createdAt'>
   ): Promise<MemoryResult<MemoryEntry>>;
 
-  abstract getEntries(
-    options: MemoryQueryOptions
-  ): Promise<MemoryResult<MemoryEntry[]>>;
+  abstract getEntries(options: MemoryQueryOptions): Promise<MemoryResult<MemoryEntry[]>>;
 
   abstract getEntry(entryId: string): Promise<MemoryResult<MemoryEntry | null>>;
 

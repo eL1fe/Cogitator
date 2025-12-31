@@ -39,19 +39,11 @@ export class ContainerPool {
     this.maxSize = options.maxSize ?? 5;
     this.idleTimeoutMs = options.idleTimeoutMs ?? 60_000;
 
-    this.cleanupInterval = setInterval(
-      () => void this.cleanup(),
-      this.idleTimeoutMs / 2
-    );
+    this.cleanupInterval = setInterval(() => void this.cleanup(), this.idleTimeoutMs / 2);
   }
 
-  async acquire(
-    image: string,
-    options: ContainerCreateOptions
-  ): Promise<DockerContainer> {
-    const available = this.containers.find(
-      (c) => !c.inUse && c.image === image
-    );
+  async acquire(image: string, options: ContainerCreateOptions): Promise<DockerContainer> {
+    const available = this.containers.find((c) => !c.inUse && c.image === image);
 
     if (available) {
       available.inUse = true;
@@ -102,9 +94,7 @@ export class ContainerPool {
       });
     }
 
-    const binds = options.mounts?.map(
-      (m) => `${m.source}:${m.target}${m.readOnly ? ':ro' : ''}`
-    );
+    const binds = options.mounts?.map((m) => `${m.source}:${m.target}${m.readOnly ? ':ro' : ''}`);
 
     const container = await this.docker.createContainer({
       Image: image,
@@ -131,12 +121,10 @@ export class ContainerPool {
   private async destroyContainer(container: DockerContainer): Promise<void> {
     try {
       await container.stop({ t: 1 });
-    } catch {
-    }
+    } catch {}
     try {
       await container.remove({ force: true });
-    } catch {
-    }
+    } catch {}
   }
 
   private async cleanup(): Promise<void> {
@@ -160,9 +148,7 @@ export class ContainerPool {
       clearInterval(this.cleanupInterval);
     }
 
-    await Promise.all(
-      this.containers.map((c) => this.destroyContainer(c.container))
-    );
+    await Promise.all(this.containers.map((c) => this.destroyContainer(c.container)));
     this.containers = [];
   }
 }

@@ -238,9 +238,7 @@ export function PlaygroundChat() {
                 fullContent += data.content;
                 setMessages((prev) =>
                   prev.map((m) =>
-                    m.id === assistantMessageId
-                      ? { ...m, content: fullContent }
-                      : m
+                    m.id === assistantMessageId ? { ...m, content: fullContent } : m
                   )
                 );
               }
@@ -254,25 +252,19 @@ export function PlaygroundChat() {
                 toolCalls.push(tc);
                 setMessages((prev) =>
                   prev.map((m) =>
-                    m.id === assistantMessageId
-                      ? { ...m, toolCalls: [...toolCalls] }
-                      : m
+                    m.id === assistantMessageId ? { ...m, toolCalls: [...toolCalls] } : m
                   )
                 );
               }
 
               if (data.toolResult) {
-                const idx = toolCalls.findIndex(
-                  (tc) => tc.id === data.toolResult.callId
-                );
+                const idx = toolCalls.findIndex((tc) => tc.id === data.toolResult.callId);
                 if (idx !== -1) {
                   toolCalls[idx].result = data.toolResult.result;
                   toolCalls[idx].error = data.toolResult.error;
                   setMessages((prev) =>
                     prev.map((m) =>
-                      m.id === assistantMessageId
-                        ? { ...m, toolCalls: [...toolCalls] }
-                        : m
+                      m.id === assistantMessageId ? { ...m, toolCalls: [...toolCalls] } : m
                     )
                   );
                 }
@@ -310,9 +302,7 @@ export function PlaygroundChat() {
       console.error('Chat error:', error);
       setError(error instanceof Error ? error.message : 'Failed to get response');
 
-      setMessages((prev) =>
-        prev.filter((m) => m.id !== assistantMessageId || m.content)
-      );
+      setMessages((prev) => prev.filter((m) => m.id !== assistantMessageId || m.content));
     } finally {
       setIsLoading(false);
       abortControllerRef.current = null;
@@ -375,9 +365,7 @@ export function PlaygroundChat() {
             {messages.length === 0 ? (
               <div className="text-center py-20">
                 <Bot className="w-12 h-12 text-accent mx-auto mb-4" />
-                <h2 className="text-xl font-semibold text-text-primary mb-2">
-                  Agent Playground
-                </h2>
+                <h2 className="text-xl font-semibold text-text-primary mb-2">Agent Playground</h2>
                 <p className="text-text-secondary max-w-md mx-auto">
                   {selectedModel
                     ? `Ready to chat with ${selectedModel.name}`
@@ -387,8 +375,7 @@ export function PlaygroundChat() {
                   <div className="flex items-center justify-center gap-2 mt-4">
                     <Wrench className="w-4 h-4 text-text-muted" />
                     <span className="text-sm text-text-muted">
-                      {enabledTools.size} tool{enabledTools.size !== 1 ? 's' : ''}{' '}
-                      enabled
+                      {enabledTools.size} tool{enabledTools.size !== 1 ? 's' : ''} enabled
                     </span>
                   </div>
                 )}
@@ -405,9 +392,7 @@ export function PlaygroundChat() {
                   <div
                     className={cn(
                       'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
-                      message.role === 'user'
-                        ? 'bg-chart-2/10'
-                        : 'bg-accent/10'
+                      message.role === 'user' ? 'bg-chart-2/10' : 'bg-accent/10'
                     )}
                   >
                     {message.role === 'user' ? (
@@ -417,10 +402,7 @@ export function PlaygroundChat() {
                     )}
                   </div>
                   <div
-                    className={cn(
-                      'flex-1 max-w-[80%]',
-                      message.role === 'user' && 'text-right'
-                    )}
+                    className={cn('flex-1 max-w-[80%]', message.role === 'user' && 'text-right')}
                   >
                     <div
                       className={cn(
@@ -463,9 +445,7 @@ export function PlaygroundChat() {
                               </button>
                               {expandedToolCalls.has(tc.id) && (
                                 <div className="p-2 border-t border-border-primary">
-                                  <div className="text-xs text-text-muted mb-1">
-                                    Arguments:
-                                  </div>
+                                  <div className="text-xs text-text-muted mb-1">Arguments:</div>
                                   <pre className="text-xs bg-bg-primary p-2 rounded overflow-x-auto">
                                     {JSON.stringify(tc.arguments, null, 2)}
                                   </pre>
@@ -518,8 +498,7 @@ export function PlaygroundChat() {
                         )}
                         {message.cost !== undefined && message.cost > 0 && (
                           <span className="flex items-center gap-1">
-                            <DollarSign className="w-3 h-3" />$
-                            {message.cost.toFixed(4)}
+                            <DollarSign className="w-3 h-3" />${message.cost.toFixed(4)}
                           </span>
                         )}
                         {message.duration && (
@@ -542,11 +521,7 @@ export function PlaygroundChat() {
         <div className="border-t border-border-subtle p-4 bg-bg-secondary">
           <div className="max-w-3xl mx-auto flex gap-3">
             <Input
-              placeholder={
-                selectedModel
-                  ? 'Type a message...'
-                  : 'Select a model first...'
-              }
+              placeholder={selectedModel ? 'Type a message...' : 'Select a model first...'}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
@@ -637,9 +612,7 @@ export function PlaygroundChat() {
                       >
                         <span>{model.id}</span>
                         {!model.available && (
-                          <span className="text-xs text-error ml-2">
-                            (no API key)
-                          </span>
+                          <span className="text-xs text-error ml-2">(no API key)</span>
                         )}
                       </button>
                     ))}
@@ -651,9 +624,7 @@ export function PlaygroundChat() {
                 <div className="text-center py-4 text-text-muted text-sm">
                   <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p>No models available</p>
-                  <p className="text-xs mt-1">
-                    Start Ollama or configure API keys
-                  </p>
+                  <p className="text-xs mt-1">Start Ollama or configure API keys</p>
                 </div>
               )}
             </div>
@@ -702,16 +673,10 @@ export function PlaygroundChat() {
               >
                 <div className="flex-1 min-w-0 mr-2">
                   <div className="flex items-center gap-1">
-                    <span className="text-sm text-text-primary truncate">
-                      {tool.name}
-                    </span>
-                    {tool.requiresApproval && (
-                      <span className="text-xs text-warning">⚠️</span>
-                    )}
+                    <span className="text-sm text-text-primary truncate">{tool.name}</span>
+                    {tool.requiresApproval && <span className="text-xs text-warning">⚠️</span>}
                   </div>
-                  <p className="text-xs text-text-muted truncate">
-                    {tool.description}
-                  </p>
+                  <p className="text-xs text-text-muted truncate">{tool.description}</p>
                 </div>
                 <input
                   type="checkbox"
@@ -722,9 +687,7 @@ export function PlaygroundChat() {
               </label>
             ))}
             {availableTools.length === 0 && (
-              <p className="text-sm text-text-muted text-center py-2">
-                No tools available
-              </p>
+              <p className="text-sm text-text-muted text-center py-2">No tools available</p>
             )}
           </div>
         </Card>
@@ -735,9 +698,7 @@ export function PlaygroundChat() {
             <CardHeader>
               <CardTitle className="text-sm">Thread</CardTitle>
             </CardHeader>
-            <p className="text-xs text-text-muted font-mono truncate">
-              {threadId}
-            </p>
+            <p className="text-xs text-text-muted font-mono truncate">{threadId}</p>
           </Card>
         )}
 

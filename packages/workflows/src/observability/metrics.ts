@@ -12,15 +12,9 @@
 
 import type { MetricsConfig, WorkflowMetrics, NodeMetrics } from '@cogitator-ai/types';
 
-const DEFAULT_LATENCY_BUCKETS = [
-  10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000,
-];
-const DEFAULT_TOKEN_BUCKETS = [
-  100, 500, 1000, 5000, 10000, 50000, 100000,
-];
-const DEFAULT_COST_BUCKETS = [
-  0.001, 0.01, 0.1, 0.5, 1, 5, 10, 50,
-];
+const DEFAULT_LATENCY_BUCKETS = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
+const DEFAULT_TOKEN_BUCKETS = [100, 500, 1000, 5000, 10000, 50000, 100000];
+const DEFAULT_COST_BUCKETS = [0.001, 0.01, 0.1, 0.5, 1, 5, 10, 50];
 
 interface HistogramData {
   buckets: Map<number, number>;
@@ -178,11 +172,7 @@ export class WorkflowMetricsCollector {
   /**
    * Record token usage
    */
-  recordTokenUsage(
-    workflowName: string,
-    inputTokens: number,
-    outputTokens: number
-  ): void {
+  recordTokenUsage(workflowName: string, inputTokens: number, outputTokens: number): void {
     if (!this.tokenUsage.has(workflowName)) {
       this.tokenUsage.set(workflowName, {
         input: 0,
@@ -240,9 +230,7 @@ export class WorkflowMetricsCollector {
     if (workflowNodes) {
       for (const [nodeName, data] of workflowNodes) {
         const sortedDurations = [...data.durations].sort((a, b) => a - b);
-        const avg =
-          sortedDurations.reduce((sum, d) => sum + d, 0) /
-          sortedDurations.length;
+        const avg = sortedDurations.reduce((sum, d) => sum + d, 0) / sortedDurations.length;
 
         nodeMetricsMap.set(nodeName, {
           executionCount: data.executionCount,
@@ -291,11 +279,7 @@ export class WorkflowMetricsCollector {
   /**
    * Increment counter
    */
-  private incrementCounter(
-    name: string,
-    labels?: Record<string, string>,
-    value = 1
-  ): void {
+  private incrementCounter(name: string, labels?: Record<string, string>, value = 1): void {
     const key = this.labeledKey(name, labels);
     const current = this.counters.get(key);
 
@@ -312,11 +296,7 @@ export class WorkflowMetricsCollector {
   /**
    * Set gauge value
    */
-  private setGauge(
-    name: string,
-    value: number,
-    labels?: Record<string, string>
-  ): void {
+  private setGauge(name: string, value: number, labels?: Record<string, string>): void {
     const key = this.labeledKey(name, labels);
     this.gauges.set(key, {
       value,
@@ -345,11 +325,7 @@ export class WorkflowMetricsCollector {
   /**
    * Record histogram value
    */
-  private recordHistogram(
-    name: string,
-    value: number,
-    labels?: Record<string, string>
-  ): void {
+  private recordHistogram(name: string, value: number, labels?: Record<string, string>): void {
     const key = this.labeledKey(name, labels);
     let histogram = this.histograms.get(key);
 
@@ -543,9 +519,7 @@ export class WorkflowMetricsCollector {
 /**
  * Create a metrics collector instance
  */
-export function createMetricsCollector(
-  config?: Partial<MetricsConfig>
-): WorkflowMetricsCollector {
+export function createMetricsCollector(config?: Partial<MetricsConfig>): WorkflowMetricsCollector {
   return new WorkflowMetricsCollector(config);
 }
 

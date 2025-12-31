@@ -25,9 +25,7 @@ export function Footer() {
             </div>
             <div>
               <span className="font-semibold text-[#fafafa]">Cogitator</span>
-              <p className="text-xs text-[#666666]">
-                Built for engineers who trust their agents
-              </p>
+              <p className="text-xs text-[#666666]">Built for engineers who trust their agents</p>
             </div>
           </div>
 
@@ -46,9 +44,7 @@ export function Footer() {
             ))}
           </div>
 
-          <div className="text-sm text-[#666666]">
-            © {new Date().getFullYear()} • MIT License
-          </div>
+          <div className="text-sm text-[#666666]">© {new Date().getFullYear()} • MIT License</div>
         </motion.div>
       </div>
     </footer>

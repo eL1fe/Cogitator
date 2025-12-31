@@ -7,18 +7,8 @@
  * - Tool registry with built-in tools
  */
 
-import {
-  Cogitator,
-  Agent,
-  tool,
-  ToolRegistry,
-  builtinTools,
-} from '@cogitator-ai/core';
-import type {
-  CogitatorConfig,
-  AgentConfig,
-  LLMProvider,
-} from '@cogitator-ai/types';
+import { Cogitator, Agent, tool, ToolRegistry, builtinTools } from '@cogitator-ai/core';
+import type { CogitatorConfig, AgentConfig, LLMProvider } from '@cogitator-ai/types';
 
 let cogitatorInstance: Cogitator | null = null;
 let isInitializing = false;
@@ -128,7 +118,9 @@ export async function getCogitator(): Promise<Cogitator> {
       cogitatorInstance = new Cogitator(config);
 
       for (const t of builtinTools) {
-        cogitatorInstance.tools.register(t as Parameters<typeof cogitatorInstance.tools.register>[0]);
+        cogitatorInstance.tools.register(
+          t as Parameters<typeof cogitatorInstance.tools.register>[0]
+        );
       }
 
       console.log('[cogitator] Singleton initialized with config:', {

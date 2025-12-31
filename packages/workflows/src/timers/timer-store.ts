@@ -113,8 +113,7 @@ export class InMemoryTimerStore implements TimerStore {
       for (const callback of this.fireCallbacks) {
         try {
           callback(timer);
-        } catch {
-        }
+        } catch {}
       }
     }
   }
@@ -220,10 +219,8 @@ export class FileTimerStore implements TimerStore {
         for (const timer of timers) {
           this.cache.set(timer.id, timer);
         }
-      } catch {
-      }
-    } catch {
-    }
+      } catch {}
+    } catch {}
 
     this.initialized = true;
   }
@@ -328,8 +325,7 @@ export class FileTimerStore implements TimerStore {
       for (const callback of this.fireCallbacks) {
         try {
           callback(timer);
-        } catch {
-        }
+        } catch {}
       }
     }
   }

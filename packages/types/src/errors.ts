@@ -8,12 +8,10 @@
  * - Cause chaining for root cause analysis
  */
 
-
 /**
  * Error codes organized by domain
  */
 export enum ErrorCode {
-
   LLM_UNAVAILABLE = 'LLM_UNAVAILABLE',
   LLM_RATE_LIMITED = 'LLM_RATE_LIMITED',
   LLM_TIMEOUT = 'LLM_TIMEOUT',
@@ -58,7 +56,6 @@ export enum ErrorCode {
  * Maps error codes to HTTP status codes
  */
 export const ERROR_STATUS_CODES: Record<ErrorCode, number> = {
-
   [ErrorCode.LLM_UNAVAILABLE]: 503,
   [ErrorCode.LLM_RATE_LIMITED]: 429,
   [ErrorCode.LLM_TIMEOUT]: 504,

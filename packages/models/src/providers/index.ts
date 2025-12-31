@@ -18,7 +18,11 @@ export const BUILTIN_PROVIDERS = [
   { id: 'anthropic', name: 'Anthropic', website: 'https://anthropic.com' },
   { id: 'google', name: 'Google', website: 'https://ai.google.dev' },
   { id: 'ollama', name: 'Ollama', website: 'https://ollama.com' },
-  { id: 'azure', name: 'Azure OpenAI', website: 'https://azure.microsoft.com/products/ai-services/openai-service' },
+  {
+    id: 'azure',
+    name: 'Azure OpenAI',
+    website: 'https://azure.microsoft.com/products/ai-services/openai-service',
+  },
   { id: 'aws', name: 'AWS Bedrock', website: 'https://aws.amazon.com/bedrock' },
   { id: 'mistral', name: 'Mistral AI', website: 'https://mistral.ai' },
   { id: 'cohere', name: 'Cohere', website: 'https://cohere.com' },

@@ -25,10 +25,10 @@ export interface ToolNodeOptions<S = WorkflowState, TArgs = unknown> {
 /**
  * Create a workflow node that runs a single tool
  */
-export function toolNode<
-  S extends WorkflowState = WorkflowState,
-  TArgs = unknown,
->(tool: Tool<TArgs, unknown>, options: ToolNodeOptions<S, TArgs>): WorkflowNode<S> {
+export function toolNode<S extends WorkflowState = WorkflowState, TArgs = unknown>(
+  tool: Tool<TArgs, unknown>,
+  options: ToolNodeOptions<S, TArgs>
+): WorkflowNode<S> {
   return {
     name: tool.name,
     fn: async (ctx): Promise<NodeResult<S>> => {

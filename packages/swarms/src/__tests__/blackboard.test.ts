@@ -41,9 +41,7 @@ describe('InMemoryBlackboard', () => {
         enabled: false,
         sections: {},
       });
-      expect(() => disabled.write('test', {}, 'agent')).toThrow(
-        'Blackboard is not enabled'
-      );
+      expect(() => disabled.write('test', {}, 'agent')).toThrow('Blackboard is not enabled');
     });
   });
 

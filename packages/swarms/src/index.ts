@@ -24,7 +24,11 @@ export {
 } from './communication/index';
 
 export { ResourceTracker } from './resources/tracker';
-export { CircuitBreaker, type CircuitState, type CircuitBreakerConfig } from './resources/circuit-breaker';
+export {
+  CircuitBreaker,
+  type CircuitState,
+  type CircuitBreakerConfig,
+} from './resources/circuit-breaker';
 
 export {
   createSwarmTools,

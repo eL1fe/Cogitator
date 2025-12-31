@@ -23,7 +23,6 @@ interface HealthResponse {
 }
 
 async function checkWasmAvailable(): Promise<boolean> {
-
   return process.env.COGITATOR_WASM_ENABLED === 'true';
 }
 
@@ -101,8 +100,7 @@ export async function GET() {
     health.status = 'unhealthy';
   }
 
-  const statusCode = health.status === 'healthy' ? 200 :
-                     health.status === 'degraded' ? 200 : 503;
+  const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 200 : 503;
 
   return NextResponse.json(health, { status: statusCode });
 }

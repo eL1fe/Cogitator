@@ -6,15 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { cn } from '@/lib/cn';
-import {
-  Bot,
-  Plus,
-  Search,
-  Zap,
-  DollarSign,
-  Activity,
-  MoreVertical,
-} from 'lucide-react';
+import { Bot, Plus, Search, Zap, DollarSign, Activity, MoreVertical } from 'lucide-react';
 
 interface Agent {
   id: string;
@@ -99,9 +91,7 @@ export function AgentsList() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-text-primary">Agents</h1>
-          <p className="text-text-secondary mt-1">
-            Manage and monitor your AI agents
-          </p>
+          <p className="text-text-secondary mt-1">Manage and monitor your AI agents</p>
         </div>
         <Button variant="primary" className="gap-2">
           <Plus className="w-4 h-4" />
@@ -112,10 +102,7 @@ export function AgentsList() {
       {/* Search and Filters */}
       <div className="flex items-center gap-4">
         <div className="flex-1 max-w-md">
-          <Input
-            placeholder="Search agents..."
-            icon={<Search className="w-4 h-4" />}
-          />
+          <Input placeholder="Search agents..." icon={<Search className="w-4 h-4" />} />
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
@@ -162,9 +149,7 @@ export function AgentsList() {
                       />
                     </div>
                     <div>
-                      <h3 className="font-medium text-text-primary">
-                        {agent.name}
-                      </h3>
+                      <h3 className="font-medium text-text-primary">{agent.name}</h3>
                       <p className="text-xs text-text-tertiary">{agent.model}</p>
                     </div>
                   </div>
@@ -183,9 +168,7 @@ export function AgentsList() {
                 </div>
 
                 {/* Description */}
-                <p className="text-sm text-text-secondary mb-4 line-clamp-2">
-                  {agent.description}
-                </p>
+                <p className="text-sm text-text-secondary mb-4 line-clamp-2">{agent.description}</p>
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-3 pt-4 border-t border-border-subtle">
@@ -193,9 +176,7 @@ export function AgentsList() {
                     <div className="flex items-center justify-center gap-1 text-text-tertiary mb-1">
                       <Activity className="w-3.5 h-3.5" />
                     </div>
-                    <p className="text-sm font-medium text-text-primary">
-                      {agent.totalRuns}
-                    </p>
+                    <p className="text-sm font-medium text-text-primary">{agent.totalRuns}</p>
                     <p className="text-xs text-text-muted">runs</p>
                   </div>
                   <div className="text-center">

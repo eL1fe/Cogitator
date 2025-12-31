@@ -68,9 +68,12 @@ export function TerminalDemo() {
 
     if (currentText.length < currentLine.text.length) {
       const speed = currentLine.type === 'command' ? 30 : 15;
-      const timeout = setTimeout(() => {
-        setCurrentText(currentLine.text.slice(0, currentText.length + 1));
-      }, speed + Math.random() * 20);
+      const timeout = setTimeout(
+        () => {
+          setCurrentText(currentLine.text.slice(0, currentText.length + 1));
+        },
+        speed + Math.random() * 20
+      );
       return () => clearTimeout(timeout);
     } else {
       const delay = currentLine.type === 'command' ? 800 : 300;
@@ -97,15 +100,15 @@ export function TerminalDemo() {
           <div className="w-3 h-3 rounded-full bg-[#ff4444]" />
           <div className="w-3 h-3 rounded-full bg-[#ffaa00]" />
           <div className="w-3 h-3 rounded-full bg-[#00ff88]" />
-          <span className="ml-2 text-xs text-[#666666] font-mono">
-            cogitator — bash
-          </span>
+          <span className="ml-2 text-xs text-[#666666] font-mono">cogitator — bash</span>
         </div>
 
         <div className="p-4 font-mono text-sm leading-relaxed h-[320px] overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          <div
+            className="absolute inset-0 pointer-events-none opacity-[0.03]"
             style={{
-              backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.03) 2px, rgba(0,255,136,0.03) 4px)',
+              backgroundImage:
+                'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.03) 2px, rgba(0,255,136,0.03) 4px)',
             }}
           />
 

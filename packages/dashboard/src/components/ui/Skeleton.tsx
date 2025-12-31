@@ -6,11 +6,7 @@ export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'circular' | 'text';
 }
 
-export function Skeleton({
-  className,
-  variant = 'default',
-  ...props
-}: SkeletonProps) {
+export function Skeleton({ className, variant = 'default', ...props }: SkeletonProps) {
   return (
     <div
       className={cn(

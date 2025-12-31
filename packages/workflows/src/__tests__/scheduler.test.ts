@@ -96,11 +96,9 @@ describe('WorkflowScheduler', () => {
       const workflow = new WorkflowBuilder<TestState>('conditional')
         .initialState({ value: 0 })
         .addNode('start', async () => ({}))
-        .addConditional(
-          'router',
-          (state: TestState) => (state.value > 5 ? 'high' : 'low'),
-          { after: ['start'] }
-        )
+        .addConditional('router', (state: TestState) => (state.value > 5 ? 'high' : 'low'), {
+          after: ['start'],
+        })
         .addNode('high', async () => ({}), { after: ['router'] })
         .addNode('low', async () => ({}), { after: ['router'] })
         .build();
@@ -136,13 +134,11 @@ describe('WorkflowScheduler', () => {
   describe('runParallel', () => {
     it('runs tasks in parallel with concurrency limit', async () => {
       const results: number[] = [];
-      const tasks = [1, 2, 3, 4, 5].map(
-        (n) => async () => {
-          await new Promise((r) => setTimeout(r, 10));
-          results.push(n);
-          return n;
-        }
-      );
+      const tasks = [1, 2, 3, 4, 5].map((n) => async () => {
+        await new Promise((r) => setTimeout(r, 10));
+        results.push(n);
+        return n;
+      });
 
       const output = await scheduler.runParallel(tasks, 2);
 
@@ -154,15 +150,13 @@ describe('WorkflowScheduler', () => {
       let concurrent = 0;
       let maxConcurrent = 0;
 
-      const tasks = [1, 2, 3, 4].map(
-        () => async () => {
-          concurrent++;
-          maxConcurrent = Math.max(maxConcurrent, concurrent);
-          await new Promise((r) => setTimeout(r, 20));
-          concurrent--;
-          return true;
-        }
-      );
+      const tasks = [1, 2, 3, 4].map(() => async () => {
+        concurrent++;
+        maxConcurrent = Math.max(maxConcurrent, concurrent);
+        await new Promise((r) => setTimeout(r, 20));
+        concurrent--;
+        return true;
+      });
 
       await scheduler.runParallel(tasks, 2);
 

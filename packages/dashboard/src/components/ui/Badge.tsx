@@ -10,17 +10,7 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
-  (
-    {
-      className,
-      variant = 'default',
-      size = 'md',
-      pulse = false,
-      children,
-      ...props
-    },
-    ref
-  ) => {
+  ({ className, variant = 'default', size = 'md', pulse = false, children, ...props }, ref) => {
     return (
       <span
         ref={ref}

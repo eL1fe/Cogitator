@@ -35,12 +35,9 @@ export class ConsoleSpanExporter implements SpanExporterInstance {
 
   async export(spans: WorkflowSpan[]): Promise<void> {
     for (const span of spans) {
-      const duration = span.endTime
-        ? `${(span.endTime - span.startTime).toString()}ms`
-        : 'ongoing';
+      const duration = span.endTime ? `${(span.endTime - span.startTime).toString()}ms` : 'ongoing';
 
-      const statusIcon =
-        span.status === 'ok' ? '✓' : span.status === 'error' ? '✗' : '○';
+      const statusIcon = span.status === 'ok' ? '✓' : span.status === 'error' ? '✗' : '○';
       const indent = span.parentSpanId ? '  └─' : '';
 
       console.log(
@@ -59,8 +56,7 @@ export class ConsoleSpanExporter implements SpanExporterInstance {
     }
   }
 
-  async shutdown(): Promise<void> {
-  }
+  async shutdown(): Promise<void> {}
 }
 
 /**
@@ -81,8 +77,7 @@ export class OTLPSpanExporter implements SpanExporterInstance {
     batchSize?: number;
     flushInterval?: number;
   }) {
-    this.endpoint =
-      config.endpoint ?? 'http://localhost:4318/v1/traces';
+    this.endpoint = config.endpoint ?? 'http://localhost:4318/v1/traces';
     this.headers = {
       'Content-Type': 'application/json',
       ...config.headers,
@@ -117,9 +112,7 @@ export class OTLPSpanExporter implements SpanExporterInstance {
       });
 
       if (!response.ok) {
-        console.error(
-          `OTLP export failed: ${response.status.toString()} ${response.statusText}`
-        );
+        console.error(`OTLP export failed: ${response.status.toString()} ${response.statusText}`);
         this.pendingSpans.unshift(...spansToExport);
       }
     } catch (error) {
@@ -150,8 +143,7 @@ export class OTLPSpanExporter implements SpanExporterInstance {
   }
 
   private spanToOTLP(span: WorkflowSpan): OTLPSpan {
-    const statusCode =
-      span.status === 'ok' ? 1 : span.status === 'error' ? 2 : 0;
+    const statusCode = span.status === 'ok' ? 1 : span.status === 'error' ? 2 : 0;
 
     return {
       traceId: span.traceId,
@@ -160,9 +152,7 @@ export class OTLPSpanExporter implements SpanExporterInstance {
       name: span.name,
       kind: this.kindToOTLP(span.kind),
       startTimeUnixNano: (span.startTime * 1_000_000).toString(),
-      endTimeUnixNano: span.endTime
-        ? (span.endTime * 1_000_000).toString()
-        : undefined,
+      endTimeUnixNano: span.endTime ? (span.endTime * 1_000_000).toString() : undefined,
       attributes: Object.entries(span.attributes).map(([key, value]) => ({
         key,
         value: this.valueToOTLP(value),
@@ -250,8 +240,7 @@ export class ZipkinSpanExporter implements SpanExporterInstance {
     headers?: Record<string, string>;
     serviceName?: string;
   }) {
-    this.endpoint =
-      config.endpoint ?? 'http://localhost:9411/api/v2/spans';
+    this.endpoint = config.endpoint ?? 'http://localhost:9411/api/v2/spans';
     this.headers = {
       'Content-Type': 'application/json',
       ...config.headers,
@@ -270,9 +259,7 @@ export class ZipkinSpanExporter implements SpanExporterInstance {
       });
 
       if (!response.ok) {
-        console.error(
-          `Zipkin export failed: ${response.status.toString()} ${response.statusText}`
-        );
+        console.error(`Zipkin export failed: ${response.status.toString()} ${response.statusText}`);
       }
     } catch (error) {
       console.error('Zipkin export error:', error);
@@ -287,9 +274,7 @@ export class ZipkinSpanExporter implements SpanExporterInstance {
       id: span.spanId,
       name: span.name,
       timestamp: span.startTime * 1000,
-      duration: span.endTime
-        ? (span.endTime - span.startTime) * 1000
-        : undefined,
+      duration: span.endTime ? (span.endTime - span.startTime) * 1000 : undefined,
       localEndpoint: {
         serviceName: this.serviceName,
       },
@@ -326,13 +311,8 @@ export class ZipkinSpanExporter implements SpanExporterInstance {
     return result;
   }
 
-  private kindToZipkin(
-    kind: string
-  ): 'CLIENT' | 'SERVER' | 'PRODUCER' | 'CONSUMER' | undefined {
-    const kindMap: Record<
-      string,
-      'CLIENT' | 'SERVER' | 'PRODUCER' | 'CONSUMER' | undefined
-    > = {
+  private kindToZipkin(kind: string): 'CLIENT' | 'SERVER' | 'PRODUCER' | 'CONSUMER' | undefined {
+    const kindMap: Record<string, 'CLIENT' | 'SERVER' | 'PRODUCER' | 'CONSUMER' | undefined> = {
       client: 'CLIENT',
       server: 'SERVER',
       producer: 'PRODUCER',
@@ -342,8 +322,7 @@ export class ZipkinSpanExporter implements SpanExporterInstance {
     return kindMap[kind];
   }
 
-  async shutdown(): Promise<void> {
-  }
+  async shutdown(): Promise<void> {}
 }
 
 /**
@@ -357,15 +336,11 @@ export class CompositeSpanExporter implements SpanExporterInstance {
   }
 
   async export(spans: WorkflowSpan[]): Promise<void> {
-    await Promise.allSettled(
-      this.exporters.map((exporter) => exporter.export(spans))
-    );
+    await Promise.allSettled(this.exporters.map((exporter) => exporter.export(spans)));
   }
 
   async shutdown(): Promise<void> {
-    await Promise.allSettled(
-      this.exporters.map((exporter) => exporter.shutdown())
-    );
+    await Promise.allSettled(this.exporters.map((exporter) => exporter.shutdown()));
   }
 }
 
@@ -373,11 +348,9 @@ export class CompositeSpanExporter implements SpanExporterInstance {
  * No-op exporter for when tracing is disabled
  */
 export class NoopSpanExporter implements SpanExporterInstance {
-  async export(): Promise<void> {
-  }
+  async export(): Promise<void> {}
 
-  async shutdown(): Promise<void> {
-  }
+  async shutdown(): Promise<void> {}
 }
 
 /**

@@ -9,11 +9,15 @@ const datetimeParams = z.object({
   timezone: z
     .string()
     .optional()
-    .describe('IANA timezone (e.g., "America/New_York", "Europe/London"). Defaults to system timezone.'),
+    .describe(
+      'IANA timezone (e.g., "America/New_York", "Europe/London"). Defaults to system timezone.'
+    ),
   format: z
     .enum(['iso', 'unix', 'readable', 'date', 'time'])
     .optional()
-    .describe('Output format: iso (ISO 8601), unix (timestamp), readable, date, time. Defaults to iso.'),
+    .describe(
+      'Output format: iso (ISO 8601), unix (timestamp), readable, date, time. Defaults to iso.'
+    ),
 });
 
 type DatetimeParams = z.infer<typeof datetimeParams>;
@@ -65,7 +69,8 @@ function formatDate(date: Date, format: DatetimeParams['format'], timezone?: str
           hour12: false,
         });
         const parts = formatter.formatToParts(date);
-        const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? '';
+        const get = (type: Intl.DateTimeFormatPartTypes) =>
+          parts.find((p) => p.type === type)?.value ?? '';
         return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}:${get('second')}`;
       }
       return date.toISOString();

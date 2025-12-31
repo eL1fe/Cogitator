@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import {
-  getThreads,
-  createThread,
-  initializeExtendedSchema,
-} from '@/lib/cogitator/db';
+import { getThreads, createThread, initializeExtendedSchema } from '@/lib/cogitator/db';
 import { initializeSchema } from '@/lib/db';
 import { nanoid } from 'nanoid';
 import { withAuth } from '@/lib/auth/middleware';

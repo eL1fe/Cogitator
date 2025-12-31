@@ -2,18 +2,17 @@
  * Resource tracking for swarm execution
  */
 
-import type {
-  SwarmResourceConfig,
-  SwarmResourceUsage,
-  RunResult,
-} from '@cogitator-ai/types';
+import type { SwarmResourceConfig, SwarmResourceUsage, RunResult } from '@cogitator-ai/types';
 
 export class ResourceTracker {
   private config: SwarmResourceConfig;
   private startTime: number;
   private totalTokens = 0;
   private totalCost = 0;
-  private agentUsage = new Map<string, { tokens: number; cost: number; runs: number; duration: number }>();
+  private agentUsage = new Map<
+    string,
+    { tokens: number; cost: number; runs: number; duration: number }
+  >();
 
   constructor(config: SwarmResourceConfig = {}) {
     this.config = config;
@@ -75,9 +74,7 @@ export class ResourceTracker {
       tokens: this.config.tokenBudget
         ? Math.max(0, this.config.tokenBudget - this.totalTokens)
         : undefined,
-      cost: this.config.costLimit
-        ? Math.max(0, this.config.costLimit - this.totalCost)
-        : undefined,
+      cost: this.config.costLimit ? Math.max(0, this.config.costLimit - this.totalCost) : undefined,
       time: this.config.timeout
         ? Math.max(0, this.config.timeout - this.getElapsedTime())
         : undefined,
@@ -93,7 +90,9 @@ export class ResourceTracker {
     };
   }
 
-  getAgentUsage(agentName: string): { tokens: number; cost: number; runs: number; duration: number } | undefined {
+  getAgentUsage(
+    agentName: string
+  ): { tokens: number; cost: number; runs: number; duration: number } | undefined {
     return this.agentUsage.get(agentName);
   }
 

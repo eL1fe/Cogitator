@@ -66,8 +66,6 @@ export class OpenAIEmbeddingService implements EmbeddingService {
       data: { embedding: number[]; index: number }[];
     };
 
-    return data.data
-      .sort((a, b) => a.index - b.index)
-      .map((d) => d.embedding);
+    return data.data.sort((a, b) => a.index - b.index).map((d) => d.embedding);
   }
 }

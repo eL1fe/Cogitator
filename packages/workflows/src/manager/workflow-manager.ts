@@ -480,10 +480,7 @@ export class DefaultWorkflowManager implements IWorkflowManager {
     this.activeRuns.set(runId, active);
 
     try {
-      const result = await this.executor.execute(
-        workflow,
-        run.input as Partial<WorkflowState>
-      );
+      const result = await this.executor.execute(workflow, run.input as Partial<WorkflowState>);
 
       await this.runStore.update(runId, {
         status: 'completed',
@@ -544,8 +541,7 @@ export class DefaultWorkflowManager implements IWorkflowManager {
     for (const callback of this.stateChangeCallbacks) {
       try {
         callback(run);
-      } catch {
-      }
+      } catch {}
     }
   }
 }
@@ -553,8 +549,6 @@ export class DefaultWorkflowManager implements IWorkflowManager {
 /**
  * Create a workflow manager
  */
-export function createWorkflowManager(
-  config: WorkflowManagerConfig
-): DefaultWorkflowManager {
+export function createWorkflowManager(config: WorkflowManagerConfig): DefaultWorkflowManager {
   return new DefaultWorkflowManager(config);
 }

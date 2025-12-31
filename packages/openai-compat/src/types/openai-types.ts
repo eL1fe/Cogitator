@@ -138,8 +138,20 @@ export interface TextContent {
 }
 
 export type TextAnnotation =
-  | { type: 'file_citation'; text: string; file_citation: { file_id: string; quote?: string }; start_index: number; end_index: number }
-  | { type: 'file_path'; text: string; file_path: { file_id: string }; start_index: number; end_index: number };
+  | {
+      type: 'file_citation';
+      text: string;
+      file_citation: { file_id: string; quote?: string };
+      start_index: number;
+      end_index: number;
+    }
+  | {
+      type: 'file_path';
+      text: string;
+      file_path: { file_id: string };
+      start_index: number;
+      end_index: number;
+    };
 
 export interface ImageFileContent {
   file_id: string;

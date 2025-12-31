@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCogitatorConfig, setCogitatorConfig, getAllConfig } from '@/lib/db/config';
 import { initializeSchema } from '@/lib/db';
-import {
-  loadConfig,
-  CogitatorConfigSchema,
-  loadEnvConfig,
-} from '@cogitator-ai/config';
+import { loadConfig, CogitatorConfigSchema, loadEnvConfig } from '@cogitator-ai/config';
 import * as yaml from 'js-yaml';
 import { withRole } from '@/lib/auth/middleware';
 

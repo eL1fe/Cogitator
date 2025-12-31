@@ -119,10 +119,7 @@ export class MCPServer {
   /**
    * Execute a tool and return MCP-formatted result
    */
-  private async executeTool(
-    tool: Tool,
-    args: Record<string, unknown>
-  ): Promise<MCPCallToolResult> {
+  private async executeTool(tool: Tool, args: Record<string, unknown>): Promise<MCPCallToolResult> {
     const context: ToolContext = {
       agentId: 'mcp-server',
       runId: `mcp_${Date.now()}`,
@@ -215,9 +212,8 @@ export class MCPServer {
    */
   private async startHttpServer(): Promise<void> {
     const { createServer } = await import('node:http');
-    const { StreamableHTTPServerTransport } = await import(
-      '@modelcontextprotocol/sdk/server/streamableHttp.js'
-    );
+    const { StreamableHTTPServerTransport } =
+      await import('@modelcontextprotocol/sdk/server/streamableHttp.js');
 
     const port = this.config.port ?? 3000;
     const host = this.config.host ?? 'localhost';
@@ -299,10 +295,7 @@ export class MCPServer {
  * });
  * ```
  */
-export async function serveMCPTools(
-  tools: Tool[],
-  config: MCPServerConfig
-): Promise<MCPServer> {
+export async function serveMCPTools(tools: Tool[], config: MCPServerConfig): Promise<MCPServer> {
   const server = new MCPServer(config);
   server.registerTools(tools);
   await server.start();

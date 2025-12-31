@@ -87,7 +87,7 @@ const cog = new Cogitator({
 // 2. Create an agent
 const assistant = new Agent({
   name: 'assistant',
-  model: 'llama3.1:8b',  // or 'gpt-4o', 'claude-3-5-sonnet'
+  model: 'llama3.1:8b', // or 'gpt-4o', 'claude-3-5-sonnet'
   instructions: `You are a helpful assistant. Be concise and friendly.`,
 });
 
@@ -142,7 +142,8 @@ const getWeather = tool({
 const weatherBot = new Agent({
   name: 'weather-bot',
   model: 'llama3.1:8b',
-  instructions: 'You are a weather assistant. Use the get_weather tool to answer questions about weather.',
+  instructions:
+    'You are a weather assistant. Use the get_weather tool to answer questions about weather.',
   tools: [getWeather],
 });
 
@@ -153,7 +154,10 @@ const result = await cog.run(weatherBot, {
 });
 
 console.log('Response:', result.output);
-console.log('Tools used:', result.toolCalls.map(t => t.name));
+console.log(
+  'Tools used:',
+  result.toolCalls.map((t) => t.name)
+);
 
 await cog.close();
 ```
@@ -164,18 +168,18 @@ Cogitator includes 20+ ready-to-use tools:
 
 ```typescript
 import {
-  calculator,      // Math expressions
-  datetime,        // Current time with timezone
-  uuid,            // Generate UUIDs
-  hash,            // MD5, SHA256, etc.
-  base64,          // Encode/decode
-  json,            // Parse/stringify
-  regex,           // Pattern matching
-  fileRead,        // Read files
-  fileWrite,       // Write files
-  fileList,        // List directory
-  httpRequest,     // HTTP calls
-  exec,            // Shell commands (sandboxed)
+  calculator, // Math expressions
+  datetime, // Current time with timezone
+  uuid, // Generate UUIDs
+  hash, // MD5, SHA256, etc.
+  base64, // Encode/decode
+  json, // Parse/stringify
+  regex, // Pattern matching
+  fileRead, // Read files
+  fileWrite, // Write files
+  fileList, // List directory
+  httpRequest, // HTTP calls
+  exec, // Shell commands (sandboxed)
 } from '@cogitator-ai/core';
 
 const agent = new Agent({
@@ -201,7 +205,7 @@ const cog = new Cogitator({
   },
   // Enable memory
   memory: {
-    adapter: 'memory',  // In-memory (for development)
+    adapter: 'memory', // In-memory (for development)
     // adapter: 'redis',   // Redis (for production short-term)
     // adapter: 'postgres', // Postgres (for production long-term)
   },
@@ -216,27 +220,27 @@ const assistant = new Agent({
 // First conversation
 await cog.run(assistant, {
   input: 'My name is Alex and I live in Berlin.',
-  threadId: 'user-123',  // Unique thread ID
+  threadId: 'user-123', // Unique thread ID
 });
 
 // Later conversation (agent remembers!)
 const result = await cog.run(assistant, {
   input: 'What is my name and where do I live?',
-  threadId: 'user-123',  // Same thread ID
+  threadId: 'user-123', // Same thread ID
 });
 
-console.log(result.output);  // "Your name is Alex and you live in Berlin."
+console.log(result.output); // "Your name is Alex and you live in Berlin."
 
 await cog.close();
 ```
 
 ### Memory Adapters
 
-| Adapter | Use Case | Persistence |
-|---------|----------|-------------|
-| `memory` | Development, testing | None (RAM only) |
-| `redis` | Production short-term | Session-based |
-| `postgres` | Production long-term | Permanent |
+| Adapter    | Use Case              | Persistence     |
+| ---------- | --------------------- | --------------- |
+| `memory`   | Development, testing  | None (RAM only) |
+| `redis`    | Production short-term | Session-based   |
+| `postgres` | Production long-term  | Permanent       |
 
 For production with semantic search, use Postgres with pgvector:
 
@@ -266,7 +270,7 @@ const result = await cog.run(assistant, {
   input: 'Write a short poem about coding.',
   stream: true,
   onToken: (token) => {
-    process.stdout.write(token);  // Print each token as it arrives
+    process.stdout.write(token); // Print each token as it arrives
   },
 });
 
@@ -294,7 +298,7 @@ const cog = new Cogitator({
 });
 
 const agent = new Agent({
-  model: 'llama3.1:8b',        // or 'codellama:13b', 'mistral:7b'
+  model: 'llama3.1:8b', // or 'codellama:13b', 'mistral:7b'
   // ...
 });
 ```
@@ -314,7 +318,7 @@ const cog = new Cogitator({
 });
 
 const agent = new Agent({
-  model: 'gpt-4o',             // or 'gpt-4o-mini', 'o1-preview'
+  model: 'gpt-4o', // or 'gpt-4o-mini', 'o1-preview'
   // ...
 });
 ```
@@ -334,7 +338,7 @@ const cog = new Cogitator({
 });
 
 const agent = new Agent({
-  model: 'claude-3-5-sonnet-20241022',  // or 'claude-3-opus'
+  model: 'claude-3-5-sonnet-20241022', // or 'claude-3-opus'
   // ...
 });
 ```
@@ -406,7 +410,7 @@ Load it automatically:
 import { Cogitator } from '@cogitator-ai/core';
 import { loadConfig } from '@cogitator-ai/config';
 
-const config = await loadConfig();  // Loads cogitator.yml
+const config = await loadConfig(); // Loads cogitator.yml
 const cog = new Cogitator(config);
 ```
 
@@ -425,6 +429,7 @@ docker-compose up -d
 ```
 
 This starts:
+
 - **Redis** (port 6379) — Short-term memory
 - **Postgres + pgvector** (port 5432) — Long-term memory with semantic search
 - **Ollama** (port 11434) — Local LLM inference
@@ -441,12 +446,12 @@ ollama pull llama3.1:8b
 
 Check out the `examples/` directory for more:
 
-| Example | Description |
-|---------|-------------|
-| `basic-agent.ts` | Simple agent with tools |
-| `research-agent.ts` | Web search and summarization |
-| `code-assistant.ts` | Code generation and execution |
-| `dev-team-swarm.ts` | Multi-agent development team |
+| Example                   | Description                    |
+| ------------------------- | ------------------------------ |
+| `basic-agent.ts`          | Simple agent with tools        |
+| `research-agent.ts`       | Web search and summarization   |
+| `code-assistant.ts`       | Code generation and execution  |
+| `dev-team-swarm.ts`       | Multi-agent development team   |
 | `workflow-code-review.ts` | DAG-based code review workflow |
 
 Run an example:
@@ -461,14 +466,14 @@ npx tsx examples/basic-agent.ts
 
 Now that you have a working agent, explore more advanced features:
 
-| Topic | Description | Guide |
-|-------|-------------|-------|
-| **Agents** | Agent patterns, configuration, lifecycle | [AGENTS.md](./AGENTS.md) |
-| **Tools** | Building custom tools, MCP compatibility | [TOOLS.md](./TOOLS.md) |
-| **Memory** | Hybrid memory, semantic search | [MEMORY.md](./MEMORY.md) |
-| **Workflows** | DAG-based orchestration, human-in-the-loop | [WORKFLOWS.md](./WORKFLOWS.md) |
-| **Swarms** | Multi-agent coordination strategies | [SWARMS.md](./SWARMS.md) |
-| **Architecture** | System design deep dive | [ARCHITECTURE.md](./ARCHITECTURE.md) |
+| Topic            | Description                                | Guide                                |
+| ---------------- | ------------------------------------------ | ------------------------------------ |
+| **Agents**       | Agent patterns, configuration, lifecycle   | [AGENTS.md](./AGENTS.md)             |
+| **Tools**        | Building custom tools, MCP compatibility   | [TOOLS.md](./TOOLS.md)               |
+| **Memory**       | Hybrid memory, semantic search             | [MEMORY.md](./MEMORY.md)             |
+| **Workflows**    | DAG-based orchestration, human-in-the-loop | [WORKFLOWS.md](./WORKFLOWS.md)       |
+| **Swarms**       | Multi-agent coordination strategies        | [SWARMS.md](./SWARMS.md)             |
+| **Architecture** | System design deep dive                    | [ARCHITECTURE.md](./ARCHITECTURE.md) |
 
 ---
 
@@ -543,4 +548,3 @@ OPENAI_API_KEY=sk-...
 [Explore Agents →](./AGENTS.md)
 
 </div>
-

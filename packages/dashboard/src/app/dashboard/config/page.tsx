@@ -226,329 +226,282 @@ export default function ConfigPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between animate-fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between animate-fade-in">
+        <div>
+          <h1 className="text-2xl font-semibold text-text-primary">Configuration</h1>
+          <p className="text-text-secondary mt-1">
+            Manage Cogitator runtime settings and providers
+          </p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-border-subtle pb-4">
+        <Button
+          variant={activeTab === 'providers' ? 'primary' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveTab('providers')}
+          className="gap-2"
+        >
+          <Key className="w-4 h-4" />
+          Providers
+        </Button>
+        <Button
+          variant={activeTab === 'config' ? 'primary' : 'ghost'}
+          size="sm"
+          onClick={() => setActiveTab('config')}
+          className="gap-2"
+        >
+          <Settings className="w-4 h-4" />
+          Runtime Config
+        </Button>
+      </div>
+
+      {/* Providers Tab */}
+      {activeTab === 'providers' && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Provider Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {providers.map((provider) => (
+              <Card key={provider.id} className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`p-2 rounded-lg ${
+                        provider.configured ? 'bg-success/10' : 'bg-bg-tertiary'
+                      }`}
+                    >
+                      <provider.icon
+                        className={`w-5 h-5 ${
+                          provider.configured ? 'text-success' : 'text-text-muted'
+                        }`}
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-text-primary">{provider.name}</h3>
+                      <Badge variant={provider.configured ? 'success' : 'outline'} size="sm">
+                        {provider.configured ? 'Configured' : 'Not configured'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                {provider.id !== 'ollama' && (
+                  <div className="space-y-2">
+                    <label className="text-sm text-text-secondary">API Key</label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          type={showKeys[provider.id] ? 'text' : 'password'}
+                          value={apiKeys[provider.id] || ''}
+                          onChange={(e) => handleKeyChange(provider.id, e.target.value)}
+                          placeholder={
+                            provider.configured ? '••••••••••••••••' : 'Enter API key...'
+                          }
+                        />
+                        <button
+                          type="button"
+                          onClick={() => toggleShowKey(provider.id)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+                        >
+                          {showKeys[provider.id] ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => saveApiKey(provider.id)}
+                        disabled={!apiKeys[provider.id] || savingKeys}
+                      >
+                        Save
+                      </Button>
+                    </div>
+                    <p className="text-xs text-text-muted">
+                      API keys are stored as environment variables
+                    </p>
+                  </div>
+                )}
+
+                {provider.id === 'ollama' && (
+                  <div className="space-y-2">
+                    <label className="text-sm text-text-secondary">Base URL</label>
+                    <Input
+                      value={config?.environment?.OLLAMA_URL || 'http://localhost:11434'}
+                      disabled
+                      className="bg-bg-tertiary"
+                    />
+                    <p className="text-xs text-text-muted">
+                      Set OLLAMA_URL environment variable to change
+                    </p>
+                  </div>
+                )}
+              </Card>
+            ))}
+          </div>
+
+          {/* Database Config */}
+          <Card>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-accent/10 rounded-lg">
+                <Database className="w-5 h-5 text-accent" />
+              </div>
               <div>
-                <h1 className="text-2xl font-semibold text-text-primary">
-                  Configuration
-                </h1>
-                <p className="text-text-secondary mt-1">
-                  Manage Cogitator runtime settings and providers
-                </p>
+                <h3 className="font-medium text-text-primary">Database & Memory</h3>
+                <p className="text-sm text-text-secondary">PostgreSQL and Redis connections</p>
               </div>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-2 border-b border-border-subtle pb-4">
-              <Button
-                variant={activeTab === 'providers' ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => setActiveTab('providers')}
-                className="gap-2"
-              >
-                <Key className="w-4 h-4" />
-                Providers
-              </Button>
-              <Button
-                variant={activeTab === 'config' ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => setActiveTab('config')}
-                className="gap-2"
-              >
-                <Settings className="w-4 h-4" />
-                Runtime Config
-              </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">PostgreSQL</label>
+                <Input
+                  value={config?.environment?.DATABASE_URL || 'Not configured'}
+                  disabled
+                  className="bg-bg-tertiary font-mono text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-text-secondary mb-1">Redis</label>
+                <Input
+                  value={config?.environment?.REDIS_URL || 'Not configured'}
+                  disabled
+                  className="bg-bg-tertiary font-mono text-xs"
+                />
+              </div>
             </div>
 
-            {/* Providers Tab */}
-            {activeTab === 'providers' && (
-              <div className="space-y-6 animate-fade-in">
-                {/* Provider Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {providers.map((provider) => (
-                    <Card key={provider.id} className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`p-2 rounded-lg ${
-                              provider.configured
-                                ? 'bg-success/10'
-                                : 'bg-bg-tertiary'
-                            }`}
-                          >
-                            <provider.icon
-                              className={`w-5 h-5 ${
-                                provider.configured
-                                  ? 'text-success'
-                                  : 'text-text-muted'
-                              }`}
-                            />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-text-primary">
-                              {provider.name}
-                            </h3>
-                            <Badge
-                              variant={provider.configured ? 'success' : 'outline'}
-                              size="sm"
-                            >
-                              {provider.configured ? 'Configured' : 'Not configured'}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
+            <p className="text-xs text-text-muted mt-4">
+              Set DATABASE_URL and REDIS_URL environment variables to configure connections.
+            </p>
+          </Card>
+        </div>
+      )}
 
-                      {provider.id !== 'ollama' && (
-                        <div className="space-y-2">
-                          <label className="text-sm text-text-secondary">
-                            API Key
-                          </label>
-                          <div className="flex gap-2">
-                            <div className="relative flex-1">
-                              <Input
-                                type={showKeys[provider.id] ? 'text' : 'password'}
-                                value={apiKeys[provider.id] || ''}
-                                onChange={(e) =>
-                                  handleKeyChange(provider.id, e.target.value)
-                                }
-                                placeholder={
-                                  provider.configured
-                                    ? '••••••••••••••••'
-                                    : 'Enter API key...'
-                                }
-                              />
-                              <button
-                                type="button"
-                                onClick={() => toggleShowKey(provider.id)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
-                              >
-                                {showKeys[provider.id] ? (
-                                  <EyeOff className="w-4 h-4" />
-                                ) : (
-                                  <Eye className="w-4 h-4" />
-                                )}
-                              </button>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => saveApiKey(provider.id)}
-                              disabled={!apiKeys[provider.id] || savingKeys}
-                            >
-                              Save
-                            </Button>
-                          </div>
-                          <p className="text-xs text-text-muted">
-                            API keys are stored as environment variables
-                          </p>
-                        </div>
-                      )}
+      {/* Config Tab */}
+      {activeTab === 'config' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+          {/* Editor */}
+          <div className="lg:col-span-2">
+            <Card className="p-0 overflow-hidden">
+              <div className="border-b border-border-primary p-3 flex items-center justify-between bg-bg-secondary">
+                <span className="text-sm font-medium text-text-secondary">cogitator.yaml</span>
+                <div className="flex items-center gap-2">
+                  {error && (
+                    <Badge variant="error" size="sm" className="gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      {error}
+                    </Badge>
+                  )}
+                  {hasChanges && !error && (
+                    <Badge variant="warning" size="sm">
+                      Unsaved changes
+                    </Badge>
+                  )}
+                  {hasChanges && (
+                    <Button variant="ghost" size="sm" onClick={handleReset} className="gap-1">
+                      <RotateCcw className="w-3 h-3" />
+                      Reset
+                    </Button>
+                  )}
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={saving || !hasChanges}
+                    className="gap-1"
+                  >
+                    {saving ? (
+                      <>Saving...</>
+                    ) : saved ? (
+                      <>
+                        <Check className="w-3 h-3" />
+                        Saved
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-3 h-3" />
+                        Save
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+              {loading ? (
+                <Skeleton className="h-96 w-full" />
+              ) : (
+                <MonacoEditor
+                  height="500px"
+                  language="yaml"
+                  theme="vs-dark"
+                  value={yaml}
+                  onChange={handleEditorChange}
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    lineNumbers: 'on',
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    tabSize: 2,
+                    padding: { top: 16 },
+                  }}
+                />
+              )}
+            </Card>
+          </div>
 
-                      {provider.id === 'ollama' && (
-                        <div className="space-y-2">
-                          <label className="text-sm text-text-secondary">
-                            Base URL
-                          </label>
-                          <Input
-                            value={
-                              config?.environment?.OLLAMA_URL ||
-                              'http://localhost:11434'
-                            }
-                            disabled
-                            className="bg-bg-tertiary"
-                          />
-                          <p className="text-xs text-text-muted">
-                            Set OLLAMA_URL environment variable to change
-                          </p>
-                        </div>
-                      )}
-                    </Card>
+          {/* Sidebar */}
+          <div className="space-y-4">
+            <Card>
+              <h3 className="text-lg font-medium text-text-primary mb-4 flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Environment
+              </h3>
+              {loading ? (
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex justify-between">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-16" />
+                    </div>
                   ))}
                 </div>
-
-                {/* Database Config */}
-                <Card>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-accent/10 rounded-lg">
-                      <Database className="w-5 h-5 text-accent" />
+              ) : (
+                <div className="space-y-3">
+                  {Object.entries(config?.environment || {}).map(([key, value]) => (
+                    <div key={key} className="flex items-center justify-between text-sm">
+                      <span className="text-text-secondary font-mono text-xs">{key}</span>
+                      {value ? (
+                        <Badge variant="success" size="sm">
+                          Set
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" size="sm">
+                          Not set
+                        </Badge>
+                      )}
                     </div>
-                    <div>
-                      <h3 className="font-medium text-text-primary">
-                        Database & Memory
-                      </h3>
-                      <p className="text-sm text-text-secondary">
-                        PostgreSQL and Redis connections
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm text-text-secondary mb-1">
-                        PostgreSQL
-                      </label>
-                      <Input
-                        value={config?.environment?.DATABASE_URL || 'Not configured'}
-                        disabled
-                        className="bg-bg-tertiary font-mono text-xs"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-text-secondary mb-1">
-                        Redis
-                      </label>
-                      <Input
-                        value={config?.environment?.REDIS_URL || 'Not configured'}
-                        disabled
-                        className="bg-bg-tertiary font-mono text-xs"
-                      />
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-text-muted mt-4">
-                    Set DATABASE_URL and REDIS_URL environment variables to configure
-                    connections.
-                  </p>
-                </Card>
-              </div>
-            )}
-
-            {/* Config Tab */}
-            {activeTab === 'config' && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
-                {/* Editor */}
-                <div className="lg:col-span-2">
-                  <Card className="p-0 overflow-hidden">
-                    <div className="border-b border-border-primary p-3 flex items-center justify-between bg-bg-secondary">
-                      <span className="text-sm font-medium text-text-secondary">
-                        cogitator.yaml
-                      </span>
-                      <div className="flex items-center gap-2">
-                        {error && (
-                          <Badge variant="error" size="sm" className="gap-1">
-                            <AlertCircle className="w-3 h-3" />
-                            {error}
-                          </Badge>
-                        )}
-                        {hasChanges && !error && (
-                          <Badge variant="warning" size="sm">
-                            Unsaved changes
-                          </Badge>
-                        )}
-                        {hasChanges && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleReset}
-                            className="gap-1"
-                          >
-                            <RotateCcw className="w-3 h-3" />
-                            Reset
-                          </Button>
-                        )}
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={handleSave}
-                          disabled={saving || !hasChanges}
-                          className="gap-1"
-                        >
-                          {saving ? (
-                            <>Saving...</>
-                          ) : saved ? (
-                            <>
-                              <Check className="w-3 h-3" />
-                              Saved
-                            </>
-                          ) : (
-                            <>
-                              <Save className="w-3 h-3" />
-                              Save
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                    {loading ? (
-                      <Skeleton className="h-96 w-full" />
-                    ) : (
-                      <MonacoEditor
-                        height="500px"
-                        language="yaml"
-                        theme="vs-dark"
-                        value={yaml}
-                        onChange={handleEditorChange}
-                        options={{
-                          minimap: { enabled: false },
-                          fontSize: 14,
-                          lineNumbers: 'on',
-                          scrollBeyondLastLine: false,
-                          wordWrap: 'on',
-                          tabSize: 2,
-                          padding: { top: 16 },
-                        }}
-                      />
-                    )}
-                  </Card>
+                  ))}
                 </div>
+              )}
+            </Card>
 
-                {/* Sidebar */}
-                <div className="space-y-4">
-                  <Card>
-                    <h3 className="text-lg font-medium text-text-primary mb-4 flex items-center gap-2">
-                      <Settings className="w-5 h-5" />
-                      Environment
-                    </h3>
-                    {loading ? (
-                      <div className="space-y-3">
-                        {[...Array(5)].map((_, i) => (
-                          <div key={i} className="flex justify-between">
-                            <Skeleton className="h-4 w-32" />
-                            <Skeleton className="h-4 w-16" />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {Object.entries(config?.environment || {}).map(
-                          ([key, value]) => (
-                            <div
-                              key={key}
-                              className="flex items-center justify-between text-sm"
-                            >
-                              <span className="text-text-secondary font-mono text-xs">
-                                {key}
-                              </span>
-                              {value ? (
-                                <Badge variant="success" size="sm">
-                                  Set
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" size="sm">
-                                  Not set
-                                </Badge>
-                              )}
-                            </div>
-                          )
-                        )}
-                      </div>
-                    )}
-                  </Card>
-
-                  <Card>
-                    <h3 className="text-sm font-medium text-text-secondary mb-2">
-                      Quick Tips
-                    </h3>
-                    <ul className="text-xs text-text-muted space-y-1.5">
-                      <li>• Use YAML format for configuration</li>
-                      <li>• Changes require restart to take effect</li>
-                      <li>• Set API keys in environment variables</li>
-                      <li>• Use Ctrl+S to save quickly</li>
-                    </ul>
-                  </Card>
-                </div>
-              </div>
-            )}
+            <Card>
+              <h3 className="text-sm font-medium text-text-secondary mb-2">Quick Tips</h3>
+              <ul className="text-xs text-text-muted space-y-1.5">
+                <li>• Use YAML format for configuration</li>
+                <li>• Changes require restart to take effect</li>
+                <li>• Set API keys in environment variables</li>
+                <li>• Use Ctrl+S to save quickly</li>
+              </ul>
+            </Card>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

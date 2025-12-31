@@ -36,9 +36,7 @@ export interface NodeResult<S = WorkflowState> {
   next?: string | string[];
 }
 
-export type NodeFn<S = WorkflowState> = (
-  ctx: NodeContext<S>
-) => Promise<NodeResult<S>>;
+export type NodeFn<S = WorkflowState> = (ctx: NodeContext<S>) => Promise<NodeResult<S>>;
 
 export interface WorkflowNode<S = WorkflowState> {
   name: string;
@@ -46,11 +44,7 @@ export interface WorkflowNode<S = WorkflowState> {
   config?: NodeConfig;
 }
 
-export type Edge =
-  | SequentialEdge
-  | ConditionalEdge
-  | ParallelEdge
-  | LoopEdge;
+export type Edge = SequentialEdge | ConditionalEdge | ParallelEdge | LoopEdge;
 
 export interface SequentialEdge {
   type: 'sequential';
@@ -145,11 +139,7 @@ export interface AddLoopOptions {
   after?: string[];
 }
 
-export type ApprovalType =
-  | 'approve-reject'
-  | 'multi-choice'
-  | 'free-form'
-  | 'numeric-rating';
+export type ApprovalType = 'approve-reject' | 'multi-choice' | 'free-form' | 'numeric-rating';
 
 export interface ApprovalChoice {
   id: string;
@@ -220,21 +210,14 @@ export interface ApprovalStore {
   submitResponse(response: ApprovalResponse): Promise<void>;
   getResponse(requestId: string): Promise<ApprovalResponse | null>;
   deleteRequest(id: string): Promise<void>;
-  onResponse(
-    requestId: string,
-    callback: (response: ApprovalResponse) => void
-  ): () => void;
+  onResponse(requestId: string, callback: (response: ApprovalResponse) => void): () => void;
 }
 
 export interface ApprovalNotifier {
   notify(request: ApprovalRequest): Promise<void>;
   notifyEscalation(request: ApprovalRequest, reason: string): Promise<void>;
   notifyTimeout(request: ApprovalRequest): Promise<void>;
-  notifyDelegation(
-    request: ApprovalRequest,
-    from: string,
-    to: string
-  ): Promise<void>;
+  notifyDelegation(request: ApprovalRequest, from: string, to: string): Promise<void>;
 }
 
 export type BackoffStrategy = 'constant' | 'linear' | 'exponential';
@@ -309,7 +292,11 @@ export interface DeadLetterEntry {
 export interface DeadLetterQueue {
   add(entry: DeadLetterEntry): Promise<string>;
   get(id: string): Promise<DeadLetterEntry | null>;
-  list(filters?: { workflowId?: string; nodeId?: string; limit?: number }): Promise<DeadLetterEntry[]>;
+  list(filters?: {
+    workflowId?: string;
+    nodeId?: string;
+    limit?: number;
+  }): Promise<DeadLetterEntry[]>;
   retry(id: string): Promise<boolean>;
   remove(id: string): Promise<boolean>;
   count(filters?: { workflowId?: string; nodeId?: string }): Promise<number>;
@@ -337,8 +324,7 @@ export interface IdempotencyStore {
   clear(): Promise<void>;
 }
 
-export interface MapNodeConfig<S = WorkflowState, T = unknown>
-  extends NodeConfig {
+export interface MapNodeConfig<S = WorkflowState, T = unknown> extends NodeConfig {
   items: (state: S) => T[];
   concurrency?: number;
   continueOnError?: boolean;
@@ -347,11 +333,7 @@ export interface MapNodeConfig<S = WorkflowState, T = unknown>
   onItemError?: (item: T, error: Error, index: number) => void;
 }
 
-export interface ReduceNodeConfig<
-  S = WorkflowState,
-  T = unknown,
-  R = unknown,
-> extends NodeConfig {
+export interface ReduceNodeConfig<S = WorkflowState, T = unknown, R = unknown> extends NodeConfig {
   initial: R | ((state: S) => R);
   reducer: (accumulator: R, result: T, index: number, state: S) => R;
   streaming?: boolean;
@@ -396,9 +378,7 @@ export interface TimerEntry {
 }
 
 export interface TimerStore {
-  schedule(
-    entry: Omit<TimerEntry, 'id' | 'cancelled' | 'fired' | 'createdAt'>
-  ): Promise<string>;
+  schedule(entry: Omit<TimerEntry, 'id' | 'cancelled' | 'fired' | 'createdAt'>): Promise<string>;
   cancel(id: string): Promise<void>;
   get(id: string): Promise<TimerEntry | null>;
   getByWorkflow(workflowId: string): Promise<TimerEntry[]>;
@@ -419,14 +399,9 @@ export interface CronSchedule {
   iterate(count: number): Date[];
 }
 
-export type SubworkflowErrorStrategy =
-  | 'propagate'
-  | 'catch'
-  | 'retry'
-  | 'ignore';
+export type SubworkflowErrorStrategy = 'propagate' | 'catch' | 'retry' | 'ignore';
 
-export interface SubworkflowConfig<S = WorkflowState, CS = WorkflowState>
-  extends NodeConfig {
+export interface SubworkflowConfig<S = WorkflowState, CS = WorkflowState> extends NodeConfig {
   workflow: Workflow<CS>;
   inputMapper?: (parentState: S, input?: unknown) => Partial<CS>;
   outputMapper?: (childResult: WorkflowResult<CS>, parentState: S) => Partial<S>;
@@ -515,7 +490,9 @@ export interface WorkflowTrigger {
 }
 
 export interface TriggerManager {
-  register(trigger: Omit<WorkflowTrigger, 'id' | 'createdAt' | 'triggerCount' | 'errorCount'>): Promise<string>;
+  register(
+    trigger: Omit<WorkflowTrigger, 'id' | 'createdAt' | 'triggerCount' | 'errorCount'>
+  ): Promise<string>;
   unregister(id: string): Promise<void>;
   enable(id: string): Promise<void>;
   disable(id: string): Promise<void>;
@@ -523,9 +500,7 @@ export interface TriggerManager {
   list(workflowName?: string): Promise<WorkflowTrigger[]>;
   listEnabled(): Promise<WorkflowTrigger[]>;
   fire(id: string, context?: Partial<TriggerContext>): Promise<string>;
-  onTrigger(
-    callback: (trigger: WorkflowTrigger, context: TriggerContext) => void
-  ): () => void;
+  onTrigger(callback: (trigger: WorkflowTrigger, context: TriggerContext) => void): () => void;
 }
 
 export type SpanExporter = 'console' | 'otlp' | 'jaeger' | 'zipkin';

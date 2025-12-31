@@ -2,13 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import {
-  BackgroundGrid,
-  Hero,
-  FeaturesGrid,
-  AuthSection,
-  Footer,
-} from '@/components/landing';
+import { BackgroundGrid, Hero, FeaturesGrid, AuthSection, Footer } from '@/components/landing';
 
 function LandingContent() {
   const [showAuth, setShowAuth] = useState(false);
@@ -44,7 +38,8 @@ export default function LandingPage() {
 
       <style jsx global>{`
         @keyframes gradient {
-          0%, 100% {
+          0%,
+          100% {
             background-position: 0% 50%;
           }
           50% {

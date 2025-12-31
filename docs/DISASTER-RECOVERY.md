@@ -8,23 +8,23 @@ Cogitator's architecture is designed for resilience with stateless workers and p
 
 ### Recovery Time Objectives (RTO)
 
-| Scenario | Target RTO | Priority |
-|----------|------------|----------|
-| Single worker failure | < 1 minute | Low |
-| Redis failure | < 5 minutes | High |
-| Postgres failure | < 15 minutes | Critical |
+| Scenario                 | Target RTO   | Priority |
+| ------------------------ | ------------ | -------- |
+| Single worker failure    | < 1 minute   | Low      |
+| Redis failure            | < 5 minutes  | High     |
+| Postgres failure         | < 15 minutes | Critical |
 | Complete cluster failure | < 30 minutes | Critical |
-| Data corruption | < 1 hour | Critical |
+| Data corruption          | < 1 hour     | Critical |
 
 ### Recovery Point Objectives (RPO)
 
-| Data Type | Target RPO | Backup Frequency |
-|-----------|------------|------------------|
-| Agent runs (in-progress) | 0 (real-time) | Continuous |
-| Agent definitions | < 5 minutes | Every 5 min |
-| Memory store | < 1 hour | Hourly |
-| Vector embeddings | < 24 hours | Daily |
-| Audit logs | 0 (real-time) | Continuous |
+| Data Type                | Target RPO    | Backup Frequency |
+| ------------------------ | ------------- | ---------------- |
+| Agent runs (in-progress) | 0 (real-time) | Continuous       |
+| Agent definitions        | < 5 minutes   | Every 5 min      |
+| Memory store             | < 1 hour      | Hourly           |
+| Vector embeddings        | < 24 hours    | Daily            |
+| Audit logs               | 0 (real-time) | Continuous       |
 
 ---
 
@@ -120,6 +120,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
 ### Scenario 1: Single Worker Failure
 
 **Symptoms:**
+
 - Worker process exits unexpectedly
 - Health check fails for one instance
 - Load balancer removes instance from pool
@@ -131,6 +132,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    - systemd will restart the service if configured with `Restart=always`
 
 2. **Manual verification**
+
    ```bash
    # Check worker status
    kubectl get pods -l app=cogitator-worker
@@ -150,6 +152,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
 ### Scenario 2: Redis Failure
 
 **Symptoms:**
+
 - Connection refused to Redis
 - Memory operations failing
 - Job queue stalled
@@ -157,6 +160,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
 **Recovery Steps:**
 
 1. **Identify failure type**
+
    ```bash
    # Check Redis status
    redis-cli ping
@@ -169,6 +173,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 2. **Restart Redis**
+
    ```bash
    # Kubernetes
    kubectl rollout restart statefulset/redis
@@ -178,6 +183,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 3. **Restore from backup (if data lost)**
+
    ```bash
    # Stop Redis
    systemctl stop redis
@@ -191,6 +197,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 4. **Failover to replica (Redis Cluster)**
+
    ```bash
    # Check cluster status
    redis-cli CLUSTER INFO
@@ -208,6 +215,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
 ### Scenario 3: PostgreSQL Failure
 
 **Symptoms:**
+
 - Database connection errors
 - Agent definitions not loading
 - Long-term memory unavailable
@@ -215,6 +223,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
 **Recovery Steps:**
 
 1. **Check database status**
+
    ```bash
    # Check if Postgres is running
    pg_isready -h localhost -p 5432
@@ -227,6 +236,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 2. **Restart PostgreSQL**
+
    ```bash
    # Kubernetes
    kubectl rollout restart statefulset/postgres
@@ -236,6 +246,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 3. **Recover from backup**
+
    ```bash
    # Stop Postgres
    systemctl stop postgresql
@@ -249,6 +260,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 4. **Point-in-time recovery**
+
    ```bash
    # Create recovery.conf
    cat > /var/lib/postgresql/data/recovery.conf << EOF
@@ -261,6 +273,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 5. **Verify data integrity**
+
    ```bash
    # Check tables
    psql -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';"
@@ -275,6 +288,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
 ### Scenario 4: Complete Cluster Failure
 
 **Symptoms:**
+
 - All nodes unreachable
 - No workers processing requests
 - Complete service outage
@@ -282,6 +296,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
 **Recovery Steps:**
 
 1. **Assess infrastructure status**
+
    ```bash
    # Check Kubernetes cluster
    kubectl cluster-info
@@ -292,6 +307,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 2. **Restore infrastructure**
+
    ```bash
    # Terraform/Pulumi rebuild
    cd infrastructure/
@@ -302,6 +318,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 3. **Restore data stores first**
+
    ```bash
    # 1. Restore PostgreSQL
    ./scripts/restore-postgres.sh latest
@@ -311,6 +328,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 4. **Deploy application**
+
    ```bash
    # Apply Kubernetes manifests
    kubectl apply -f k8s/
@@ -320,6 +338,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 5. **Verify recovery**
+
    ```bash
    # Check all pods running
    kubectl get pods
@@ -336,6 +355,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
 ### Scenario 5: Data Corruption
 
 **Symptoms:**
+
 - JSON parse errors from database
 - Inconsistent agent state
 - Vector search returning invalid results
@@ -343,6 +363,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
 **Recovery Steps:**
 
 1. **Identify corruption scope**
+
    ```bash
    # Check for invalid JSON in runs
    psql -c "SELECT id FROM runs WHERE NOT (result IS NULL OR result::text <> '');"
@@ -352,6 +373,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 2. **Isolate affected data**
+
    ```bash
    # Mark corrupted runs
    psql -c "UPDATE runs SET status = 'corrupted' WHERE id IN (SELECT id FROM corrupted_runs_view);"
@@ -361,6 +383,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
    ```
 
 3. **Restore from known good backup**
+
    ```bash
    # Find last good backup
    aws s3 ls s3://cogitator-backups/postgres/ | tail -10
@@ -384,6 +407,7 @@ aws s3 cp "${BACKUP_DIR}/config_${TIMESTAMP}.tar.gz" \
 ### Docker Sandbox Failures
 
 **Container stuck or unresponsive:**
+
 ```bash
 # List stuck containers
 docker ps --filter "label=cogitator.sandbox=true" --filter "status=running"
@@ -396,6 +420,7 @@ curl -X POST http://localhost:3000/admin/sandbox/reset
 ```
 
 **Image corruption:**
+
 ```bash
 # Remove and repull sandbox image
 docker rmi cogitator/sandbox:latest
@@ -405,6 +430,7 @@ docker pull cogitator/sandbox:latest
 ### WASM Sandbox Failures
 
 **Plugin cache corruption:**
+
 ```bash
 # Clear WASM plugin cache
 rm -rf /var/cache/cogitator/wasm/*
@@ -414,6 +440,7 @@ kubectl rollout restart deployment/cogitator-worker
 ```
 
 **Extism runtime issues:**
+
 ```bash
 # Check Extism version
 node -e "console.log(require('@extism/extism').version)"
@@ -441,7 +468,7 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "PostgreSQL is down"
+          summary: 'PostgreSQL is down'
 
       - alert: RedisDown
         expr: redis_up == 0
@@ -464,13 +491,13 @@ groups:
 
 ### Health Check Endpoints
 
-| Endpoint | Purpose | Expected Response |
-|----------|---------|-------------------|
-| `/health` | Overall health | `200 OK` |
-| `/health/ready` | Ready to accept traffic | `200 OK` |
-| `/health/live` | Process is alive | `200 OK` |
-| `/health/db` | Database connectivity | `200 OK` |
-| `/health/redis` | Redis connectivity | `200 OK` |
+| Endpoint        | Purpose                 | Expected Response |
+| --------------- | ----------------------- | ----------------- |
+| `/health`       | Overall health          | `200 OK`          |
+| `/health/ready` | Ready to accept traffic | `200 OK`          |
+| `/health/live`  | Process is alive        | `200 OK`          |
+| `/health/db`    | Database connectivity   | `200 OK`          |
+| `/health/redis` | Redis connectivity      | `200 OK`          |
 
 ---
 
@@ -496,9 +523,11 @@ After recovery, document:
 **Severity:** P1/P2/P3
 
 ## Summary
+
 Brief description of what happened.
 
 ## Timeline
+
 - HH:MM - Issue detected
 - HH:MM - Team alerted
 - HH:MM - Root cause identified
@@ -506,20 +535,25 @@ Brief description of what happened.
 - HH:MM - Service restored
 
 ## Root Cause
+
 Detailed explanation of why this happened.
 
 ## Impact
+
 - X runs failed
 - Y users affected
 - Z minutes of downtime
 
 ## Recovery Actions
+
 Steps taken to restore service.
 
 ## Prevention
+
 Changes to prevent recurrence.
 
 ## Action Items
+
 - [ ] Implement fix for root cause
 - [ ] Add monitoring for early detection
 - [ ] Update runbooks
@@ -529,17 +563,18 @@ Changes to prevent recurrence.
 
 ## Emergency Contacts
 
-| Role | Contact | Escalation Path |
-|------|---------|-----------------|
-| On-call Engineer | PagerDuty | Auto-escalate after 15m |
-| Platform Lead | @platform-lead | If P1 not resolved in 30m |
-| Security | security@cogitator.dev | Any security incident |
+| Role             | Contact                | Escalation Path           |
+| ---------------- | ---------------------- | ------------------------- |
+| On-call Engineer | PagerDuty              | Auto-escalate after 15m   |
+| Platform Lead    | @platform-lead         | If P1 not resolved in 30m |
+| Security         | security@cogitator.dev | Any security incident     |
 
 ---
 
 ## Runbook Maintenance
 
 This document should be:
+
 - Reviewed quarterly
 - Updated after each incident
 - Tested via disaster recovery drills (quarterly)

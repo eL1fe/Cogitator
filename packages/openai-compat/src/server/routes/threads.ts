@@ -13,27 +13,22 @@ import type {
   Message,
 } from '../../types/openai-types';
 
-export function registerThreadRoutes(
-  fastify: FastifyInstance,
-  adapter: OpenAIAdapter
-) {
-  fastify.post<{ Body: CreateThreadRequest }>(
-    '/v1/threads',
-    async (request, reply) => {
-      const thread = adapter.createThread(request.body?.metadata);
+export function registerThreadRoutes(fastify: FastifyInstance, adapter: OpenAIAdapter) {
+  fastify.post<{ Body: CreateThreadRequest }>('/v1/threads', async (request, reply) => {
+    const thread = adapter.createThread(request.body?.metadata);
 
-      if (request.body?.messages) {
-        for (const msg of request.body.messages) {
-          const content = typeof msg.content === 'string'
+    if (request.body?.messages) {
+      for (const msg of request.body.messages) {
+        const content =
+          typeof msg.content === 'string'
             ? msg.content
-            : msg.content.map((c) => c.type === 'text' ? c.text : '').join('');
-          adapter.addMessage(thread.id, { role: msg.role, content, metadata: msg.metadata });
-        }
+            : msg.content.map((c) => (c.type === 'text' ? c.text : '')).join('');
+        adapter.addMessage(thread.id, { role: msg.role, content, metadata: msg.metadata });
       }
-
-      return reply.status(201).send(thread);
     }
-  );
+
+    return reply.status(201).send(thread);
+  });
 
   fastify.get<{ Params: { thread_id: string } }>(
     '/v1/threads/:thread_id',
@@ -115,9 +110,10 @@ export function registerThreadRoutes(
         });
       }
 
-      const content = typeof request.body.content === 'string'
-        ? request.body.content
-        : request.body.content.map((c) => c.type === 'text' ? c.text : '').join('');
+      const content =
+        typeof request.body.content === 'string'
+          ? request.body.content
+          : request.body.content.map((c) => (c.type === 'text' ? c.text : '')).join('');
       const message = adapter.addMessage(request.params.thread_id, {
         role: request.body.role,
         content,
@@ -140,45 +136,48 @@ export function registerThreadRoutes(
 
   fastify.get<{
     Params: { thread_id: string };
-    Querystring: { limit?: number; order?: 'asc' | 'desc'; after?: string; before?: string; run_id?: string };
-  }>(
-    '/v1/threads/:thread_id/messages',
-    async (request, reply) => {
-      const thread = adapter.getThread(request.params.thread_id);
+    Querystring: {
+      limit?: number;
+      order?: 'asc' | 'desc';
+      after?: string;
+      before?: string;
+      run_id?: string;
+    };
+  }>('/v1/threads/:thread_id/messages', async (request, reply) => {
+    const thread = adapter.getThread(request.params.thread_id);
 
-      if (!thread) {
-        return reply.status(404).send({
-          error: {
-            message: `No thread found with id '${request.params.thread_id}'`,
-            type: 'invalid_request_error',
-            code: 'not_found',
-          },
-        });
-      }
-
-      const { limit = 20, order = 'desc', after, before, run_id } = request.query;
-      const messages = adapter.listMessages(request.params.thread_id, {
-        limit: limit + 1,
-        order,
-        after,
-        before,
-        run_id,
+    if (!thread) {
+      return reply.status(404).send({
+        error: {
+          message: `No thread found with id '${request.params.thread_id}'`,
+          type: 'invalid_request_error',
+          code: 'not_found',
+        },
       });
-
-      const hasMore = messages.length > limit;
-      const data = messages.slice(0, limit);
-
-      const response: ListResponse<Message> = {
-        object: 'list',
-        data,
-        first_id: data[0]?.id,
-        last_id: data[data.length - 1]?.id,
-        has_more: hasMore,
-      };
-
-      return reply.send(response);
     }
-  );
+
+    const { limit = 20, order = 'desc', after, before, run_id } = request.query;
+    const messages = adapter.listMessages(request.params.thread_id, {
+      limit: limit + 1,
+      order,
+      after,
+      before,
+      run_id,
+    });
+
+    const hasMore = messages.length > limit;
+    const data = messages.slice(0, limit);
+
+    const response: ListResponse<Message> = {
+      object: 'list',
+      data,
+      first_id: data[0]?.id,
+      last_id: data[data.length - 1]?.id,
+      has_more: hasMore,
+    };
+
+    return reply.send(response);
+  });
 
   fastify.get<{ Params: { thread_id: string; message_id: string } }>(
     '/v1/threads/:thread_id/messages/:message_id',
@@ -195,10 +194,7 @@ export function registerThreadRoutes(
         });
       }
 
-      const message = adapter.getMessage(
-        request.params.thread_id,
-        request.params.message_id
-      );
+      const message = adapter.getMessage(request.params.thread_id, request.params.message_id);
 
       if (!message) {
         return reply.status(404).send({

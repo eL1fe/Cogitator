@@ -49,9 +49,7 @@ export function Hero({ onGetStarted }: HeroProps) {
         </h1>
 
         <p className="text-xl md:text-2xl text-[#a1a1a1] mb-10 font-light">
-          Self-hosted.{' '}
-          <span className="text-[#fafafa]">Production-grade.</span>{' '}
-          TypeScript-native.
+          Self-hosted. <span className="text-[#fafafa]">Production-grade.</span> TypeScript-native.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

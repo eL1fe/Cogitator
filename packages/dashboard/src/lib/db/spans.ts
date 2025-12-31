@@ -109,16 +109,18 @@ export async function createSpan(data: {
   return id;
 }
 
-export async function endSpan(id: string, data: {
-  status: 'ok' | 'error' | 'unset';
-  endTime: number;
-  attributes?: Record<string, unknown>;
-  events?: { name: string; timestamp: number; attributes?: Record<string, unknown> }[];
-}): Promise<void> {
-  const span = await queryOne<SpanRow>(
-    'SELECT start_time FROM dashboard_spans WHERE id = $1',
-    [id]
-  );
+export async function endSpan(
+  id: string,
+  data: {
+    status: 'ok' | 'error' | 'unset';
+    endTime: number;
+    attributes?: Record<string, unknown>;
+    events?: { name: string; timestamp: number; attributes?: Record<string, unknown> }[];
+  }
+): Promise<void> {
+  const span = await queryOne<SpanRow>('SELECT start_time FROM dashboard_spans WHERE id = $1', [
+    id,
+  ]);
 
   if (!span) return;
 
@@ -141,11 +143,14 @@ export async function endSpan(id: string, data: {
   );
 }
 
-export async function addSpanEvent(id: string, event: {
-  name: string;
-  timestamp: number;
-  attributes?: Record<string, unknown>;
-}): Promise<void> {
+export async function addSpanEvent(
+  id: string,
+  event: {
+    name: string;
+    timestamp: number;
+    attributes?: Record<string, unknown>;
+  }
+): Promise<void> {
   await execute(
     `UPDATE dashboard_spans
      SET events = COALESCE(events, '[]'::jsonb) || $1::jsonb

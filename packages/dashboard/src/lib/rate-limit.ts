@@ -14,10 +14,7 @@ interface RateLimitResult {
   resetAt: number;
 }
 
-async function checkRateLimit(
-  key: string,
-  config: RateLimitConfig
-): Promise<RateLimitResult> {
+async function checkRateLimit(key: string, config: RateLimitConfig): Promise<RateLimitResult> {
   const { windowMs, maxRequests } = config;
   const now = Date.now();
   const windowKey = Math.floor(now / windowMs);
@@ -59,15 +56,12 @@ async function checkRateLimit(
 }
 
 function getClientKey(request: AuthenticatedRequest): string {
-
   if (request.user?.id) {
     return `user:${request.user.id}`;
   }
 
   const forwarded = request.headers.get('x-forwarded-for');
-  const ip = forwarded?.split(',')[0]?.trim() ||
-    request.headers.get('x-real-ip') ||
-    'unknown';
+  const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
 
   return `ip:${ip}`;
 }
@@ -119,9 +113,7 @@ export async function rateLimit(
   const { keyPrefix = 'default' } = config;
 
   const forwarded = request.headers.get('x-forwarded-for');
-  const ip = forwarded?.split(',')[0]?.trim() ||
-    request.headers.get('x-real-ip') ||
-    'unknown';
+  const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
   const clientKey = `ip:${ip}`;
   const rateLimitKey = `${keyPrefix}:${clientKey}`;
 
@@ -152,7 +144,6 @@ export async function rateLimit(
 }
 
 export const RATE_LIMITS = {
-
   auth: {
     windowMs: 15 * 60 * 1000,
     maxRequests: 10,

@@ -7,10 +7,7 @@ import { tool } from '../tool';
 
 const base64EncodeParams = z.object({
   data: z.string().describe('The string to encode'),
-  urlSafe: z
-    .boolean()
-    .optional()
-    .describe('Use URL-safe base64 encoding (default: false)'),
+  urlSafe: z.boolean().optional().describe('Use URL-safe base64 encoding (default: false)'),
 });
 
 export const base64Encode = tool({
@@ -28,10 +25,7 @@ export const base64Encode = tool({
 
 const base64DecodeParams = z.object({
   data: z.string().describe('The base64 string to decode'),
-  urlSafe: z
-    .boolean()
-    .optional()
-    .describe('Input uses URL-safe base64 encoding (default: false)'),
+  urlSafe: z.boolean().optional().describe('Input uses URL-safe base64 encoding (default: false)'),
 });
 
 export const base64Decode = tool({

@@ -39,8 +39,79 @@ const extractKeywords = tool({
   execute: async ({ text, maxKeywords }) => {
     console.log('  🔑 Extracting keywords...');
     const words = text.toLowerCase().split(/\W+/);
-    const stopWords = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought', 'used', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'under', 'again', 'further', 'then', 'once', 'and', 'but', 'or', 'nor', 'so', 'yet', 'both', 'either', 'neither', 'not', 'only', 'own', 'same', 'than', 'too', 'very', 'just', 'also']);
-    const filtered = words.filter(w => w.length > 3 && !stopWords.has(w));
+    const stopWords = new Set([
+      'the',
+      'a',
+      'an',
+      'is',
+      'are',
+      'was',
+      'were',
+      'be',
+      'been',
+      'being',
+      'have',
+      'has',
+      'had',
+      'do',
+      'does',
+      'did',
+      'will',
+      'would',
+      'could',
+      'should',
+      'may',
+      'might',
+      'must',
+      'shall',
+      'can',
+      'need',
+      'dare',
+      'ought',
+      'used',
+      'to',
+      'of',
+      'in',
+      'for',
+      'on',
+      'with',
+      'at',
+      'by',
+      'from',
+      'as',
+      'into',
+      'through',
+      'during',
+      'before',
+      'after',
+      'above',
+      'below',
+      'between',
+      'under',
+      'again',
+      'further',
+      'then',
+      'once',
+      'and',
+      'but',
+      'or',
+      'nor',
+      'so',
+      'yet',
+      'both',
+      'either',
+      'neither',
+      'not',
+      'only',
+      'own',
+      'same',
+      'than',
+      'too',
+      'very',
+      'just',
+      'also',
+    ]);
+    const filtered = words.filter((w) => w.length > 3 && !stopWords.has(w));
     const unique = [...new Set(filtered)].slice(0, maxKeywords);
     return { keywords: unique };
   },
@@ -237,9 +308,7 @@ Requirements:
 
     if (result.trace?.spans) {
       console.log('\n⏱️  Stage Timings:');
-      const stages = result.trace.spans.filter((s) =>
-        s.name.startsWith('agent.')
-      );
+      const stages = result.trace.spans.filter((s) => s.name.startsWith('agent.'));
       stages.forEach((span, i) => {
         const name = span.attributes?.agentName || `Stage ${i + 1}`;
         console.log(`   ${i + 1}. ${name}: ${span.duration}ms`);
@@ -254,4 +323,3 @@ Requirements:
 }
 
 main().catch(console.error);
-

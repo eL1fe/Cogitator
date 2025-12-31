@@ -132,10 +132,7 @@ const jsonLd = {
         '@type': 'ImageObject',
         url: `${siteUrl}/favicon.svg`,
       },
-      sameAs: [
-        'https://github.com/eL1Fe/cogitator',
-        'https://discord.gg/SkmRsYvA',
-      ],
+      sameAs: ['https://github.com/eL1Fe/cogitator', 'https://discord.gg/SkmRsYvA'],
     },
     {
       '@type': 'SoftwareApplication',

@@ -8,10 +8,9 @@ import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/cn';
 import { Save, RotateCcw, Check, AlertTriangle, FileCode, Eye } from 'lucide-react';
 
-const Editor = dynamic(
-  () => import('@monaco-editor/react').then((mod) => mod.default),
-  { ssr: false }
-);
+const Editor = dynamic(() => import('@monaco-editor/react').then((mod) => mod.default), {
+  ssr: false,
+});
 
 const DEFAULT_CONFIG = `# Cogitator Configuration
 # Documentation: https://cogitator.app/docs/config
@@ -126,12 +125,7 @@ export function ConfigEditor() {
                 Unsaved changes
               </Badge>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReset}
-              disabled={!hasChanges}
-            >
+            <Button variant="ghost" size="sm" onClick={handleReset} disabled={!hasChanges}>
               <RotateCcw className="w-4 h-4" />
             </Button>
             <Button

@@ -12,11 +12,7 @@
  * - Audit trail via checkpoint store
  */
 
-export {
-  InMemoryApprovalStore,
-  FileApprovalStore,
-  withDelegation,
-} from './approval-store';
+export { InMemoryApprovalStore, FileApprovalStore, withDelegation } from './approval-store';
 
 export {
   ConsoleNotifier,

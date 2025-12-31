@@ -245,11 +245,7 @@ export class WorkflowBuilder<S extends WorkflowState = WorkflowState> {
     };
   }
 
-  private validate(
-    nodes: Map<string, WorkflowNode<S>>,
-    edges: Edge[],
-    entryPoint: string
-  ): void {
+  private validate(nodes: Map<string, WorkflowNode<S>>, edges: Edge[], entryPoint: string): void {
     if (!nodes.has(entryPoint)) {
       throw new Error(`Entry point '${entryPoint}' not found in nodes`);
     }

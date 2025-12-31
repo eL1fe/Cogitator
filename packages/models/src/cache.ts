@@ -61,8 +61,7 @@ export class ModelCache {
     if (this.options.storage === 'file') {
       try {
         await writeFile(this.options.filePath, '', 'utf-8');
-      } catch {
-      }
+      } catch {}
     }
   }
 
@@ -107,11 +106,7 @@ export class ModelCache {
   private async writeToFile(entry: CacheEntry): Promise<void> {
     try {
       await mkdir(dirname(this.options.filePath), { recursive: true });
-      await writeFile(
-        this.options.filePath,
-        JSON.stringify(entry, null, 2),
-        'utf-8'
-      );
+      await writeFile(this.options.filePath, JSON.stringify(entry, null, 2), 'utf-8');
     } catch (error) {
       console.warn('Failed to write model cache to file:', error);
     }

@@ -4,15 +4,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import {
-  X,
-  Users,
-  Play,
-  Bot,
-  MessageSquare,
-  Activity,
-  Clock,
-} from 'lucide-react';
+import { X, Users, Play, Bot, MessageSquare, Activity, Clock } from 'lucide-react';
 
 interface Swarm {
   id: string;
@@ -61,8 +53,7 @@ export function SwarmDetailModal({
   const [output, setOutput] = useState<string | null>(null);
 
   const strategy =
-    strategyConfig[swarm.strategy as keyof typeof strategyConfig] ||
-    strategyConfig.hierarchical;
+    strategyConfig[swarm.strategy as keyof typeof strategyConfig] || strategyConfig.hierarchical;
 
   const swarmAgents = agents.filter((a) => swarm.agentIds.includes(a.id));
 
@@ -98,10 +89,7 @@ export function SwarmDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       <Card className="relative w-full max-w-2xl mx-4 z-10 animate-fade-in max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
@@ -110,25 +98,18 @@ export function SwarmDetailModal({
               <Users className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-text-primary">
-                {swarm.name}
-              </h2>
+              <h2 className="text-lg font-semibold text-text-primary">{swarm.name}</h2>
               <Badge variant="outline" size="sm" className={strategy.color}>
                 {strategy.label}
               </Badge>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg hover:bg-bg-hover transition-colors"
-          >
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-bg-hover transition-colors">
             <X className="w-5 h-5 text-text-muted" />
           </button>
         </div>
 
-        {swarm.description && (
-          <p className="text-text-secondary mb-6">{swarm.description}</p>
-        )}
+        {swarm.description && <p className="text-text-secondary mb-6">{swarm.description}</p>}
 
         {/* Agents */}
         <div className="mb-6">
@@ -144,9 +125,7 @@ export function SwarmDetailModal({
               >
                 <div className="flex items-center gap-2">
                   <Bot className="w-4 h-4 text-accent" />
-                  <span className="font-medium text-text-primary">
-                    {agent.name}
-                  </span>
+                  <span className="font-medium text-text-primary">{agent.name}</span>
                 </div>
                 <p className="text-xs text-text-muted mt-1">{agent.model}</p>
               </div>
@@ -161,9 +140,7 @@ export function SwarmDetailModal({
               <Activity className="w-4 h-4" />
               <span className="text-sm">Total Runs</span>
             </div>
-            <p className="text-2xl font-semibold text-text-primary">
-              {swarm.totalRuns}
-            </p>
+            <p className="text-2xl font-semibold text-text-primary">{swarm.totalRuns}</p>
           </div>
           <div className="p-3 bg-bg-tertiary rounded-lg">
             <div className="flex items-center gap-2 text-text-muted mb-1">
@@ -171,9 +148,7 @@ export function SwarmDetailModal({
               <span className="text-sm">Last Run</span>
             </div>
             <p className="text-sm text-text-primary">
-              {swarm.lastRunAt
-                ? new Date(swarm.lastRunAt).toLocaleString()
-                : 'Never'}
+              {swarm.lastRunAt ? new Date(swarm.lastRunAt).toLocaleString() : 'Never'}
             </p>
           </div>
         </div>
@@ -215,9 +190,7 @@ export function SwarmDetailModal({
 
           {output && (
             <div className="mt-4">
-              <h4 className="text-sm font-medium text-text-secondary mb-2">
-                Output
-              </h4>
+              <h4 className="text-sm font-medium text-text-secondary mb-2">Output</h4>
               <pre className="p-3 bg-bg-primary rounded-lg text-sm text-text-primary whitespace-pre-wrap overflow-x-auto max-h-64">
                 {output}
               </pre>

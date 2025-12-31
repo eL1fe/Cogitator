@@ -268,14 +268,12 @@ export class ModelRegistry {
         this.cache.set(allModels);
         this.loadModels(allModels);
       })
-      .catch(() => {
-      });
+      .catch(() => {});
   }
 
   private startAutoRefresh(): void {
     this.refreshTimer = setInterval(() => {
-      this.refresh().catch(() => {
-      });
+      this.refresh().catch(() => {});
     }, this.options.refreshInterval);
   }
 }

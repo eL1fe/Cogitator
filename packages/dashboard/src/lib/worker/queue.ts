@@ -9,7 +9,16 @@ export async function createJob(input: CreateJobInput): Promise<Job> {
   await query(
     `INSERT INTO cogitator_jobs (id, type, target_id, input, status, user_id, metadata, created_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-    [id, input.type, input.targetId, input.input, 'pending', input.userId, JSON.stringify(input.metadata || {}), now]
+    [
+      id,
+      input.type,
+      input.targetId,
+      input.input,
+      'pending',
+      input.userId,
+      JSON.stringify(input.metadata || {}),
+      now,
+    ]
   );
 
   return {
@@ -107,7 +116,7 @@ export async function getJobs(options?: {
     [...params, limit, offset]
   );
 
-  return rows.map(row => ({
+  return rows.map((row) => ({
     id: row.id,
     type: row.type as Job['type'],
     targetId: row.target_id,
@@ -157,10 +166,7 @@ export async function updateJob(id: string, update: JobUpdate): Promise<void> {
   if (fields.length === 0) return;
 
   params.push(id);
-  await query(
-    `UPDATE cogitator_jobs SET ${fields.join(', ')} WHERE id = $${paramIndex}`,
-    params
-  );
+  await query(`UPDATE cogitator_jobs SET ${fields.join(', ')} WHERE id = $${paramIndex}`, params);
 }
 
 export async function cancelJob(id: string): Promise<boolean> {

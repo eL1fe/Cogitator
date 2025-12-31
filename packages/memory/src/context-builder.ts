@@ -50,8 +50,7 @@ export class ContextBuilder {
   }
 
   async build(options: BuildContextOptions): Promise<BuiltContext> {
-    const availableTokens =
-      this.config.maxTokens - this.config.reserveTokens;
+    const availableTokens = this.config.maxTokens - this.config.reserveTokens;
     let usedTokens = 0;
     const messages: Message[] = [];
     const facts: Fact[] = [];
@@ -117,9 +116,7 @@ export class ContextBuilder {
         }
 
         if (semanticResults.length > 0 && messages.length > 0 && messages[0].role === 'system') {
-          const contextStr = semanticResults
-            .map((r) => `- ${r.content}`)
-            .join('\n');
+          const contextStr = semanticResults.map((r) => `- ${r.content}`).join('\n');
           messages[0] = {
             ...messages[0],
             content: `${messages[0].content}\n\nRelevant context:\n${contextStr}`,
@@ -142,10 +139,7 @@ export class ContextBuilder {
       originalMessageCount = entries.length;
 
       if (this.config.strategy === 'recent') {
-        const selectedEntries = this.selectRecentEntries(
-          entries,
-          availableTokens - usedTokens
-        );
+        const selectedEntries = this.selectRecentEntries(entries, availableTokens - usedTokens);
 
         truncated = selectedEntries.length < entries.length;
 
@@ -154,10 +148,7 @@ export class ContextBuilder {
           usedTokens += entry.tokenCount;
         }
       } else if (this.config.strategy === 'relevant') {
-        const selectedEntries = this.selectRecentEntries(
-          entries,
-          availableTokens - usedTokens
-        );
+        const selectedEntries = this.selectRecentEntries(entries, availableTokens - usedTokens);
         truncated = selectedEntries.length < entries.length;
 
         for (const entry of selectedEntries) {
@@ -165,10 +156,7 @@ export class ContextBuilder {
           usedTokens += entry.tokenCount;
         }
       } else if (this.config.strategy === 'hybrid') {
-        const selectedEntries = this.selectRecentEntries(
-          entries,
-          availableTokens - usedTokens
-        );
+        const selectedEntries = this.selectRecentEntries(entries, availableTokens - usedTokens);
         truncated = selectedEntries.length < entries.length;
 
         for (const entry of selectedEntries) {
@@ -194,10 +182,7 @@ export class ContextBuilder {
     };
   }
 
-  private selectRecentEntries(
-    entries: MemoryEntry[],
-    availableTokens: number
-  ): MemoryEntry[] {
+  private selectRecentEntries(entries: MemoryEntry[], availableTokens: number): MemoryEntry[] {
     const reversed = [...entries].reverse();
     const selected: MemoryEntry[] = [];
     let usedTokens = 0;

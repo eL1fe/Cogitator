@@ -65,6 +65,7 @@ npx @anthropic/extism-js tool.ts -o tool.wasm
 ## Security
 
 WASM tools run in a secure sandbox:
+
 - No filesystem access
 - No network access
 - Memory limits enforced

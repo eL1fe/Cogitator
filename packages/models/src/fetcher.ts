@@ -13,7 +13,7 @@ export async function fetchLiteLLMData(): Promise<LiteLLMModelData> {
     const response = await fetch(LITELLM_URL, {
       signal: controller.signal,
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'User-Agent': 'Cogitator/1.0',
       },
     });
@@ -22,7 +22,7 @@ export async function fetchLiteLLMData(): Promise<LiteLLMModelData> {
       throw new Error(`Failed to fetch LiteLLM data: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json() as LiteLLMModelData;
+    const data = (await response.json()) as LiteLLMModelData;
     return data;
   } finally {
     clearTimeout(timeoutId);
@@ -30,42 +30,42 @@ export async function fetchLiteLLMData(): Promise<LiteLLMModelData> {
 }
 
 const PROVIDER_MAPPINGS: Record<string, string> = {
-  'openai': 'openai',
-  'azure': 'azure',
-  'azure_ai': 'azure',
-  'anthropic': 'anthropic',
-  'bedrock': 'aws',
-  'vertex_ai': 'google',
+  openai: 'openai',
+  azure: 'azure',
+  azure_ai: 'azure',
+  anthropic: 'anthropic',
+  bedrock: 'aws',
+  vertex_ai: 'google',
   'vertex_ai-': 'google',
-  'gemini': 'google',
-  'palm': 'google',
-  'cohere': 'cohere',
-  'cohere_chat': 'cohere',
-  'replicate': 'replicate',
-  'huggingface': 'huggingface',
-  'together_ai': 'together',
-  'together': 'together',
-  'ollama': 'ollama',
-  'ollama_chat': 'ollama',
-  'deepinfra': 'deepinfra',
-  'perplexity': 'perplexity',
-  'groq': 'groq',
-  'mistral': 'mistral',
+  gemini: 'google',
+  palm: 'google',
+  cohere: 'cohere',
+  cohere_chat: 'cohere',
+  replicate: 'replicate',
+  huggingface: 'huggingface',
+  together_ai: 'together',
+  together: 'together',
+  ollama: 'ollama',
+  ollama_chat: 'ollama',
+  deepinfra: 'deepinfra',
+  perplexity: 'perplexity',
+  groq: 'groq',
+  mistral: 'mistral',
   'text-completion-codestral': 'mistral',
-  'codestral': 'mistral',
-  'fireworks_ai': 'fireworks',
-  'anyscale': 'anyscale',
-  'cloudflare': 'cloudflare',
-  'databricks': 'databricks',
-  'ai21': 'ai21',
-  'nlp_cloud': 'nlp_cloud',
-  'aleph_alpha': 'aleph_alpha',
-  'voyage': 'voyage',
-  'sagemaker': 'aws',
-  'xinference': 'xinference',
-  'friendliai': 'friendliai',
-  'github': 'github',
-  'xai': 'xai',
+  codestral: 'mistral',
+  fireworks_ai: 'fireworks',
+  anyscale: 'anyscale',
+  cloudflare: 'cloudflare',
+  databricks: 'databricks',
+  ai21: 'ai21',
+  nlp_cloud: 'nlp_cloud',
+  aleph_alpha: 'aleph_alpha',
+  voyage: 'voyage',
+  sagemaker: 'aws',
+  xinference: 'xinference',
+  friendliai: 'friendliai',
+  github: 'github',
+  xai: 'xai',
 };
 
 function normalizeProvider(litellmProvider: string | undefined, modelId: string): string {
@@ -86,7 +86,13 @@ function normalizeProvider(litellmProvider: string | undefined, modelId: string)
     return PROVIDER_MAPPINGS[prefix] ?? prefix;
   }
 
-  if (modelId.startsWith('gpt-') || modelId.startsWith('o1') || modelId.startsWith('o3') || modelId.includes('davinci') || modelId.includes('curie')) {
+  if (
+    modelId.startsWith('gpt-') ||
+    modelId.startsWith('o1') ||
+    modelId.startsWith('o3') ||
+    modelId.includes('davinci') ||
+    modelId.includes('curie')
+  ) {
     return 'openai';
   }
   if (modelId.startsWith('claude')) {
@@ -95,7 +101,11 @@ function normalizeProvider(litellmProvider: string | undefined, modelId: string)
   if (modelId.startsWith('gemini') || modelId.startsWith('palm')) {
     return 'google';
   }
-  if (modelId.startsWith('llama') || modelId.startsWith('mistral') || modelId.startsWith('mixtral')) {
+  if (
+    modelId.startsWith('llama') ||
+    modelId.startsWith('mistral') ||
+    modelId.startsWith('mixtral')
+  ) {
     return 'meta';
   }
 

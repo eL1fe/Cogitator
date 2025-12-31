@@ -15,13 +15,7 @@ export function useSSE(url: string, options: SSEOptions = {}) {
   const [error, setError] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
   const retriesRef = useRef(0);
-  const {
-    onMessage,
-    onError,
-    onOpen,
-    reconnectInterval = 5000,
-    maxRetries = 10,
-  } = options;
+  const { onMessage, onError, onOpen, reconnectInterval = 5000, maxRetries = 10 } = options;
 
   const connect = useCallback(() => {
     if (eventSourceRef.current) {

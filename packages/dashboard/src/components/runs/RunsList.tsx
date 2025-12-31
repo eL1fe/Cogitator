@@ -111,9 +111,7 @@ export function RunsList() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-text-primary">Runs</h1>
-          <p className="text-text-secondary mt-1">
-            View and analyze agent execution history
-          </p>
+          <p className="text-text-secondary mt-1">View and analyze agent execution history</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="success" pulse>
@@ -125,10 +123,7 @@ export function RunsList() {
       {/* Filters */}
       <div className="flex items-center gap-4">
         <div className="flex-1 max-w-md">
-          <Input
-            placeholder="Search runs..."
-            icon={<Search className="w-4 h-4" />}
-          />
+          <Input placeholder="Search runs..." icon={<Search className="w-4 h-4" />} />
         </div>
         <Button variant="outline" size="sm" className="gap-2">
           <Filter className="w-4 h-4" />
@@ -169,16 +164,12 @@ export function RunsList() {
                 {/* Main content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-sm text-text-primary">
-                      {run.id}
-                    </span>
+                    <span className="font-medium text-sm text-text-primary">{run.id}</span>
                     <Badge variant={config.variant} size="sm" pulse={config.pulse}>
                       {config.label}
                     </Badge>
                   </div>
-                  <p className="text-sm text-text-secondary truncate">
-                    {run.input}
-                  </p>
+                  <p className="text-sm text-text-secondary truncate">{run.input}</p>
                 </div>
 
                 {/* Agent */}

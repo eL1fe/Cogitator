@@ -145,9 +145,7 @@ export function RecentRuns() {
                       {run.agentName || run.agentId}
                     </span>
                     {run.model && (
-                      <span className="text-xs text-text-muted truncate">
-                        {run.model}
-                      </span>
+                      <span className="text-xs text-text-muted truncate">{run.model}</span>
                     )}
                   </div>
                   <p className="text-xs text-text-secondary truncate">
@@ -161,9 +159,7 @@ export function RecentRuns() {
                     <p className="text-xs text-text-secondary">
                       {run.totalTokens.toLocaleString()} tokens
                     </p>
-                    <p className="text-xs text-text-muted">
-                      ${run.cost.toFixed(4)}
-                    </p>
+                    <p className="text-xs text-text-muted">${run.cost.toFixed(4)}</p>
                   </div>
                   <div>
                     <Badge variant={config.variant} size="sm">

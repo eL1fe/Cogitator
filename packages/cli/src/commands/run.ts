@@ -129,8 +129,7 @@ export const runCommand = new Command('run')
         } else {
           config = loadConfig();
         }
-      } catch {
-      }
+      } catch {}
     }
 
     let model: string | undefined = options.model;
@@ -151,8 +150,7 @@ export const runCommand = new Command('run')
       id: 'cli-agent',
       name: 'CLI Agent',
       model,
-      instructions:
-        'You are a helpful AI assistant. Respond concisely and accurately.',
+      instructions: 'You are a helpful AI assistant. Respond concisely and accurately.',
     });
 
     if (options.interactive || !message) {

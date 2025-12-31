@@ -54,8 +54,7 @@ export class FileCheckpointStore implements CheckpointStore {
   private async ensureDirectory(): Promise<void> {
     try {
       await fs.mkdir(this.directory, { recursive: true });
-    } catch {
-    }
+    } catch {}
   }
 
   private getFilePath(id: string): string {
@@ -95,8 +94,7 @@ export class FileCheckpointStore implements CheckpointStore {
           if (checkpoint.workflowName === workflowName) {
             checkpoints.push(checkpoint);
           }
-        } catch {
-        }
+        } catch {}
       }
 
       return checkpoints.sort((a, b) => b.timestamp - a.timestamp);
@@ -109,8 +107,7 @@ export class FileCheckpointStore implements CheckpointStore {
     try {
       const filePath = this.getFilePath(id);
       await fs.unlink(filePath);
-    } catch {
-    }
+    } catch {}
   }
 }
 

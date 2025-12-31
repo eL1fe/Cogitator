@@ -21,7 +21,7 @@ console.log(model.contextWindow); // 128000
 
 // Get pricing
 const price = await getPrice('claude-sonnet-4-20250514');
-console.log(price.inputPerMillion);  // $3.00
+console.log(price.inputPerMillion); // $3.00
 console.log(price.outputPerMillion); // $15.00
 
 // List all models

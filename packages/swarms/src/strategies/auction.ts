@@ -40,30 +40,38 @@ export class AuctionStrategy extends BaseStrategy {
 
     this.coordinator.events.emit('auction:start', {
       task: options.input.slice(0, 100),
-      participants: agents.map(a => a.agent.name),
+      participants: agents.map((a) => a.agent.name),
     });
 
-    this.coordinator.blackboard.write('auction', {
-      task: options.input,
-      participants: agents.map(a => a.agent.name),
-      bids: [],
-      status: 'bidding',
-    }, 'system');
+    this.coordinator.blackboard.write(
+      'auction',
+      {
+        task: options.input,
+        participants: agents.map((a) => a.agent.name),
+        bids: [],
+        status: 'bidding',
+      },
+      'system'
+    );
 
     const bids = await this.collectBids(agents, options);
 
-    const validBids = bids.filter(b => b.score >= (this.config.minBid ?? 0));
+    const validBids = bids.filter((b) => b.score >= (this.config.minBid ?? 0));
 
     if (validBids.length === 0) {
       throw new Error('No valid bids received (all below minimum threshold)');
     }
 
     const auctionState = this.coordinator.blackboard.read<{ bids: Bid[] }>('auction');
-    this.coordinator.blackboard.write('auction', {
-      ...auctionState,
-      bids: validBids,
-      status: 'selecting',
-    }, 'system');
+    this.coordinator.blackboard.write(
+      'auction',
+      {
+        ...auctionState,
+        bids: validBids,
+        status: 'selecting',
+      },
+      'system'
+    );
 
     const winner = this.selectWinner(validBids);
 
@@ -73,15 +81,20 @@ export class AuctionStrategy extends BaseStrategy {
       totalBids: validBids.length,
     });
 
-    const currentAuctionState = this.coordinator.blackboard.read<Record<string, unknown>>('auction') ?? {};
-    this.coordinator.blackboard.write('auction', {
-      ...currentAuctionState,
-      winner: winner.agentName,
-      winningBid: winner.score,
-      status: 'executing',
-    }, 'system');
+    const currentAuctionState =
+      this.coordinator.blackboard.read<Record<string, unknown>>('auction') ?? {};
+    this.coordinator.blackboard.write(
+      'auction',
+      {
+        ...currentAuctionState,
+        winner: winner.agentName,
+        winningBid: winner.score,
+        status: 'executing',
+      },
+      'system'
+    );
 
-    const winningAgent = agents.find(a => a.agent.name === winner.agentName)!;
+    const winningAgent = agents.find((a) => a.agent.name === winner.agentName)!;
 
     const winnerContext = {
       ...options.context,
@@ -89,7 +102,7 @@ export class AuctionStrategy extends BaseStrategy {
         wonBid: true,
         bidScore: winner.score,
         totalParticipants: agents.length,
-        competingBids: validBids.filter(b => b.agentName !== winner.agentName).length,
+        competingBids: validBids.filter((b) => b.agentName !== winner.agentName).length,
       },
       auctionInstructions: `You won the bid for this task with a score of ${winner.score.toFixed(2)}. Execute the task to the best of your abilities.`,
     };
@@ -101,12 +114,17 @@ export class AuctionStrategy extends BaseStrategy {
     );
     agentResults.set(winningAgent.agent.name, result);
 
-    const finalAuctionState = this.coordinator.blackboard.read<Record<string, unknown>>('auction') ?? {};
-    this.coordinator.blackboard.write('auction', {
-      ...finalAuctionState,
-      status: 'completed',
-      result: String(result.output).slice(0, 200),
-    }, 'system');
+    const finalAuctionState =
+      this.coordinator.blackboard.read<Record<string, unknown>>('auction') ?? {};
+    this.coordinator.blackboard.write(
+      'auction',
+      {
+        ...finalAuctionState,
+        status: 'completed',
+        result: String(result.output).slice(0, 200),
+      },
+      'system'
+    );
 
     this.coordinator.events.emit('auction:complete', {
       winner: winner.agentName,
@@ -127,10 +145,7 @@ export class AuctionStrategy extends BaseStrategy {
     };
   }
 
-  private async collectBids(
-    agents: SwarmAgent[],
-    options: SwarmRunOptions
-  ): Promise<Bid[]> {
+  private async collectBids(agents: SwarmAgent[], options: SwarmRunOptions): Promise<Bid[]> {
     const bids: Bid[] = [];
 
     if (this.config.bidding === 'custom' && this.config.bidFunction) {
@@ -156,7 +171,7 @@ export class AuctionStrategy extends BaseStrategy {
       }
     } else {
       const bidResults = await this.coordinator.runAgentsParallel(
-        agents.map(agent => ({
+        agents.map((agent) => ({
           name: agent.agent.name,
           input: this.buildBidPrompt(options.input),
           context: {
@@ -170,7 +185,11 @@ export class AuctionStrategy extends BaseStrategy {
       );
 
       for (const [agentName, result] of bidResults) {
-        const bid = this.parseBidResponse(agentName, result.output, agents.find(a => a.agent.name === agentName)!);
+        const bid = this.parseBidResponse(
+          agentName,
+          result.output,
+          agents.find((a) => a.agent.name === agentName)!
+        );
         bids.push(bid);
         this.coordinator.events.emit('auction:bid', {
           agent: agentName,
@@ -216,7 +235,10 @@ Be honest in your assessment. Only bid high if you're truly well-suited for the 
     let capabilities = agent.metadata.expertise ?? [];
 
     if (capMatch) {
-      capabilities = capMatch[1].split(',').map(c => c.trim()).filter(Boolean);
+      capabilities = capMatch[1]
+        .split(',')
+        .map((c) => c.trim())
+        .filter(Boolean);
     }
 
     const reasonMatch = /REASONING:\s*(.+)/is.exec(output);
@@ -239,9 +261,7 @@ Be honest in your assessment. Only bid high if you're truly well-suited for the 
       return this.weightedRandomSelect(bids);
     }
 
-    return bids.reduce((best, current) =>
-      current.score > best.score ? current : best
-    );
+    return bids.reduce((best, current) => (current.score > best.score ? current : best));
   }
 
   private weightedRandomSelect(bids: Bid[]): Bid {

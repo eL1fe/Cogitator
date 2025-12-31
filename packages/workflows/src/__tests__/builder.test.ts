@@ -59,11 +59,9 @@ describe('WorkflowBuilder', () => {
       const workflow = new WorkflowBuilder<TestState>('conditional')
         .initialState({ value: 0 })
         .addNode('start', async () => ({ state: { value: 10 } }))
-        .addConditional(
-          'router',
-          (state) => (state.value > 5 ? 'high' : 'low'),
-          { after: ['start'] }
-        )
+        .addConditional('router', (state) => (state.value > 5 ? 'high' : 'low'), {
+          after: ['start'],
+        })
         .addNode('high', async () => ({ output: 'high path' }), {
           after: ['router'],
         })
@@ -73,9 +71,7 @@ describe('WorkflowBuilder', () => {
         .build();
 
       expect(workflow.nodes.size).toBe(4);
-      const conditionalEdge = workflow.edges.find(
-        (e) => e.type === 'conditional'
-      );
+      const conditionalEdge = workflow.edges.find((e) => e.type === 'conditional');
       expect(conditionalEdge).toBeDefined();
       if (conditionalEdge?.type === 'conditional') {
         expect(conditionalEdge.targets).toContain('high');

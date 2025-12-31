@@ -6,9 +6,7 @@ import type { EmbeddingService, EmbeddingServiceConfig } from '@cogitator-ai/typ
 import { OpenAIEmbeddingService } from './openai';
 import { OllamaEmbeddingService } from './ollama';
 
-export function createEmbeddingService(
-  config: EmbeddingServiceConfig
-): EmbeddingService {
+export function createEmbeddingService(config: EmbeddingServiceConfig): EmbeddingService {
   switch (config.provider) {
     case 'openai':
       return new OpenAIEmbeddingService(config);

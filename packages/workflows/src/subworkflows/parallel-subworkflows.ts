@@ -8,11 +8,7 @@
  * - Partial failure handling
  */
 
-import type {
-  Workflow,
-  WorkflowState,
-  WorkflowResult,
-} from '@cogitator-ai/types';
+import type { Workflow, WorkflowState, WorkflowResult } from '@cogitator-ai/types';
 import {
   executeSubworkflow,
   type SubworkflowContext,
@@ -62,10 +58,7 @@ export interface ParallelSubworkflowsConfig<S extends WorkflowState> {
   /**
    * Aggregate results into parent state
    */
-  aggregator: (
-    results: Map<string, SubworkflowResult<S, WorkflowState>>,
-    parentState: S
-  ) => S;
+  aggregator: (results: Map<string, SubworkflowResult<S, WorkflowState>>, parentState: S) => S;
 
   /**
    * Maximum nesting depth for all subworkflows
@@ -172,8 +165,7 @@ async function executeWithConcurrency<T>(
 
   try {
     await Promise.all(pending);
-  } catch {
-  }
+  } catch {}
 
   return results;
 }
@@ -228,14 +220,10 @@ export async function executeParallelSubworkflows<S extends WorkflowState>(
 
       config.onSubworkflowStart?.(def.id, subConfig);
 
-      const result = await executeSubworkflow(
-        parentState,
-        subConfig,
-        {
-          ...context,
-          depth: context.depth + 1,
-        }
-      );
+      const result = await executeSubworkflow(parentState, subConfig, {
+        ...context,
+        depth: context.depth + 1,
+      });
 
       return result;
     },
@@ -278,9 +266,7 @@ export async function executeParallelSubworkflows<S extends WorkflowState>(
 
   const overallSuccess = failed === 0 || continueOnError;
 
-  const newParentState = overallSuccess
-    ? config.aggregator(results, parentState)
-    : parentState;
+  const newParentState = overallSuccess ? config.aggregator(results, parentState) : parentState;
 
   return {
     success: overallSuccess,
@@ -397,10 +383,7 @@ export function scatterGather<S extends WorkflowState, CS extends WorkflowState>
  * Create a race pattern
  * Executes multiple subworkflows and returns the first successful result
  */
-export async function raceSubworkflows<
-  PS extends WorkflowState,
-  CS extends WorkflowState
->(
+export async function raceSubworkflows<PS extends WorkflowState, CS extends WorkflowState>(
   parentState: PS,
   subworkflows: SubworkflowConfig<PS, CS>[],
   context: SubworkflowContext
@@ -438,10 +421,7 @@ export async function raceSubworkflows<
  * Create a fallback pattern
  * Tries subworkflows in order until one succeeds
  */
-export async function fallbackSubworkflows<
-  PS extends WorkflowState,
-  CS extends WorkflowState
->(
+export async function fallbackSubworkflows<PS extends WorkflowState, CS extends WorkflowState>(
   parentState: PS,
   subworkflows: SubworkflowConfig<PS, CS>[],
   context: SubworkflowContext

@@ -2,12 +2,7 @@
  * FunctionNode - Run a custom function as a workflow node
  */
 
-import type {
-  WorkflowNode,
-  WorkflowState,
-  NodeResult,
-  NodeContext,
-} from '@cogitator-ai/types';
+import type { WorkflowNode, WorkflowState, NodeResult, NodeContext } from '@cogitator-ai/types';
 
 /**
  * Simple function that takes state and returns output

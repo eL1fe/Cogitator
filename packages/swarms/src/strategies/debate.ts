@@ -27,21 +27,13 @@ export class DebateStrategy extends BaseStrategy {
     const agentResults = new Map<string, RunResult>();
     const debateTranscript: SwarmMessage[] = [];
 
-    const advocates = this.coordinator.getAgents().filter(
-      (a) => a.metadata.role === 'advocate'
-    );
-    const critics = this.coordinator.getAgents().filter(
-      (a) => a.metadata.role === 'critic'
-    );
-    const moderators = this.coordinator.getAgents().filter(
-      (a) => a.metadata.role === 'moderator'
-    );
+    const advocates = this.coordinator.getAgents().filter((a) => a.metadata.role === 'advocate');
+    const critics = this.coordinator.getAgents().filter((a) => a.metadata.role === 'critic');
+    const moderators = this.coordinator.getAgents().filter((a) => a.metadata.role === 'moderator');
 
     let debaters = [...advocates, ...critics];
     if (debaters.length === 0) {
-      debaters = this.coordinator.getAgents().filter(
-        (a) => a.metadata.role !== 'moderator'
-      );
+      debaters = this.coordinator.getAgents().filter((a) => a.metadata.role !== 'moderator');
     }
 
     if (debaters.length < 2) {
@@ -50,21 +42,29 @@ export class DebateStrategy extends BaseStrategy {
 
     const moderator = moderators.length > 0 ? moderators[0] : null;
 
-    this.coordinator.blackboard.write('debate', {
-      topic: options.input,
-      rounds: this.config.rounds,
-      currentRound: 0,
-      arguments: [],
-    }, 'system');
+    this.coordinator.blackboard.write(
+      'debate',
+      {
+        topic: options.input,
+        rounds: this.config.rounds,
+        currentRound: 0,
+        arguments: [],
+      },
+      'system'
+    );
 
     for (let round = 1; round <= this.config.rounds; round++) {
       this.coordinator.events.emit('debate:round', { round, total: this.config.rounds });
 
       const debateState = this.coordinator.blackboard.read<{ arguments: unknown[] }>('debate');
-      this.coordinator.blackboard.write('debate', {
-        ...debateState,
-        currentRound: round,
-      }, 'system');
+      this.coordinator.blackboard.write(
+        'debate',
+        {
+          ...debateState,
+          currentRound: round,
+        },
+        'system'
+      );
 
       for (const debater of debaters) {
         const previousArguments = this.getPreviousArguments(debateTranscript, round);
@@ -86,21 +86,22 @@ export class DebateStrategy extends BaseStrategy {
           ),
         };
 
-        const input = round === 1
-          ? options.input
-          : `Continue the debate on: ${options.input}\n\nPrevious arguments:\n${previousArguments}`;
+        const input =
+          round === 1
+            ? options.input
+            : `Continue the debate on: ${options.input}\n\nPrevious arguments:\n${previousArguments}`;
 
-        this.coordinator.events.emit('debate:turn', {
-          round,
-          agent: debater.agent.name,
-          role: debater.metadata.role,
-        }, debater.agent.name);
-
-        const result = await this.coordinator.runAgent(
-          debater.agent.name,
-          input,
-          debaterContext
+        this.coordinator.events.emit(
+          'debate:turn',
+          {
+            round,
+            agent: debater.agent.name,
+            role: debater.metadata.role,
+          },
+          debater.agent.name
         );
+
+        const result = await this.coordinator.runAgent(debater.agent.name, input, debaterContext);
         agentResults.set(`${debater.agent.name}_round${round}`, result);
 
         const message: SwarmMessage = {
@@ -144,18 +145,14 @@ Please provide:
 4. A final recommendation or conclusion
 `.trim();
 
-      moderatorResult = await this.coordinator.runAgent(
-        moderator.agent.name,
-        synthesisInput,
-        {
-          ...options.context,
-          moderatorContext: {
-            debateRounds: this.config.rounds,
-            participantCount: debaters.length,
-            format: this.config.format,
-          },
-        }
-      );
+      moderatorResult = await this.coordinator.runAgent(moderator.agent.name, synthesisInput, {
+        ...options.context,
+        moderatorContext: {
+          debateRounds: this.config.rounds,
+          participantCount: debaters.length,
+          format: this.config.format,
+        },
+      });
       agentResults.set(moderator.agent.name, moderatorResult);
       finalOutput = moderatorResult.output;
     } else {
@@ -170,13 +167,8 @@ Please provide:
     };
   }
 
-  private getPreviousArguments(
-    transcript: SwarmMessage[],
-    currentRound: number
-  ): string {
-    const previousMessages = transcript.filter(
-      (m) => (m.metadata?.round as number) < currentRound
-    );
+  private getPreviousArguments(transcript: SwarmMessage[], currentRound: number): string {
+    const previousMessages = transcript.filter((m) => (m.metadata?.round as number) < currentRound);
 
     if (previousMessages.length === 0) return '';
 
@@ -192,12 +184,14 @@ Please provide:
     previousArguments: string
   ): string {
     const roleInstructions = {
-      advocate: 'You are arguing IN FAVOR of the proposition. Find compelling reasons to support it.',
+      advocate:
+        'You are arguing IN FAVOR of the proposition. Find compelling reasons to support it.',
       critic: 'You are arguing AGAINST the proposition. Find weaknesses and raise objections.',
       debater: 'Present your perspective on the topic with well-reasoned arguments.',
     };
 
-    const instruction = roleInstructions[role as keyof typeof roleInstructions] ?? roleInstructions.debater;
+    const instruction =
+      roleInstructions[role as keyof typeof roleInstructions] ?? roleInstructions.debater;
 
     return `
 ${instruction}

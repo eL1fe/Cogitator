@@ -6,7 +6,12 @@ import { readFileSync, existsSync } from 'node:fs';
 import { parse } from 'yaml';
 import type { CogitatorConfigInput } from '../schema';
 
-const DEFAULT_CONFIG_NAMES = ['cogitator.yaml', 'cogitator.yml', '.cogitator.yaml', '.cogitator.yml'];
+const DEFAULT_CONFIG_NAMES = [
+  'cogitator.yaml',
+  'cogitator.yml',
+  '.cogitator.yaml',
+  '.cogitator.yml',
+];
 
 export function loadYamlConfig(configPath?: string): CogitatorConfigInput | null {
   if (configPath) {

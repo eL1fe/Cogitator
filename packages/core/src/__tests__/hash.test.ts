@@ -35,7 +35,10 @@ describe('hash tool', () => {
   });
 
   it('supports base64 encoding', async () => {
-    const result = await hash.execute({ data: 'hello', algorithm: 'sha256', encoding: 'base64' }, mockContext);
+    const result = await hash.execute(
+      { data: 'hello', algorithm: 'sha256', encoding: 'base64' },
+      mockContext
+    );
     expect((result as { hash: string }).hash).toBe('LPJNul+wow4m6DsqxbninhsWHlwfp0JecwQzYpOLmCQ=');
   });
 

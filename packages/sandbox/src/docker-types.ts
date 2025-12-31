@@ -39,10 +39,7 @@ export interface Docker {
   ping(): Promise<string>;
   createContainer(options: Record<string, unknown>): Promise<DockerContainer>;
   getImage(name: string): DockerImage;
-  pull(
-    image: string,
-    callback: (err: Error | null, stream: NodeJS.ReadableStream) => void
-  ): void;
+  pull(image: string, callback: (err: Error | null, stream: NodeJS.ReadableStream) => void): void;
   modem: {
     followProgress(
       stream: NodeJS.ReadableStream,

@@ -94,10 +94,7 @@ export async function createLog(data: {
     ]
   );
 
-  const row = await queryOne<LogRow>(
-    'SELECT * FROM dashboard_logs WHERE id = $1',
-    [id]
-  );
+  const row = await queryOne<LogRow>('SELECT * FROM dashboard_logs WHERE id = $1', [id]);
 
   return rowToLog(row!);
 }
@@ -120,10 +117,7 @@ export async function getRecentLogs(limit = 100): Promise<LogEntry[]> {
 }
 
 export async function clearOldLogs(olderThan: Date): Promise<number> {
-  return execute(
-    'DELETE FROM dashboard_logs WHERE timestamp < $1',
-    [olderThan.toISOString()]
-  );
+  return execute('DELETE FROM dashboard_logs WHERE timestamp < $1', [olderThan.toISOString()]);
 }
 
 export async function getLogStats(): Promise<{

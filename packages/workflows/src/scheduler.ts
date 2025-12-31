@@ -2,10 +2,7 @@
  * WorkflowScheduler - Manages DAG execution order and parallel scheduling
  */
 
-import type {
-  Workflow,
-  WorkflowState,
-} from '@cogitator-ai/types';
+import type { Workflow, WorkflowState } from '@cogitator-ai/types';
 
 interface DependencyGraph {
   dependencies: Map<string, Set<string>>;
@@ -16,9 +13,7 @@ export class WorkflowScheduler {
   /**
    * Build dependency graph from workflow edges
    */
-  buildDependencyGraph<S extends WorkflowState>(
-    workflow: Workflow<S>
-  ): DependencyGraph {
+  buildDependencyGraph<S extends WorkflowState>(workflow: Workflow<S>): DependencyGraph {
     const dependencies = new Map<string, Set<string>>();
     const dependents = new Map<string, Set<string>>();
 
@@ -45,11 +40,7 @@ export class WorkflowScheduler {
   /**
    * Get nodes ready to execute (all dependencies completed)
    */
-  getReadyNodes(
-    graph: DependencyGraph,
-    completed: Set<string>,
-    pending: Set<string>
-  ): string[] {
+  getReadyNodes(graph: DependencyGraph, completed: Set<string>, pending: Set<string>): string[] {
     const ready: string[] = [];
 
     for (const nodeName of pending) {
@@ -76,9 +67,7 @@ export class WorkflowScheduler {
    * Get topological order of nodes (grouped by execution level)
    * Returns array of arrays, where each inner array can be executed in parallel
    */
-  getExecutionLevels<S extends WorkflowState>(
-    workflow: Workflow<S>
-  ): string[][] {
+  getExecutionLevels<S extends WorkflowState>(workflow: Workflow<S>): string[][] {
     const graph = this.buildDependencyGraph(workflow);
     const levels: string[][] = [];
     const completed = new Set<string>();
@@ -146,10 +135,7 @@ export class WorkflowScheduler {
   /**
    * Run multiple async tasks with concurrency limit
    */
-  async runWithConcurrency<T>(
-    tasks: (() => Promise<T>)[],
-    maxConcurrency: number
-  ): Promise<T[]> {
+  async runWithConcurrency<T>(tasks: (() => Promise<T>)[], maxConcurrency: number): Promise<T[]> {
     const results: T[] = [];
     const executing: Promise<void>[] = [];
 
@@ -164,10 +150,7 @@ export class WorkflowScheduler {
         await Promise.race(executing);
         const newExecuting: Promise<void>[] = [];
         for (const p of executing) {
-          const pending = await Promise.race([
-            p.then(() => false),
-            Promise.resolve(true),
-          ]);
+          const pending = await Promise.race([p.then(() => false), Promise.resolve(true)]);
           if (pending) {
             newExecuting.push(p);
           }
@@ -184,10 +167,7 @@ export class WorkflowScheduler {
   /**
    * Simpler parallel execution with Promise.all and concurrency via chunking
    */
-  async runParallel<T>(
-    tasks: (() => Promise<T>)[],
-    maxConcurrency: number
-  ): Promise<T[]> {
+  async runParallel<T>(tasks: (() => Promise<T>)[], maxConcurrency: number): Promise<T[]> {
     const results: T[] = [];
 
     for (let i = 0; i < tasks.length; i += maxConcurrency) {

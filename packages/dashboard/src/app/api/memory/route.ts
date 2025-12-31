@@ -116,7 +116,8 @@ export const POST = withAuth(async (request) => {
           content: string;
           created_at: Date;
           similarity: number;
-        }>(`
+        }>(
+          `
           SELECT
             id,
             thread_id,
@@ -129,14 +130,15 @@ export const POST = withAuth(async (request) => {
           ${threadId ? 'AND thread_id = $3' : ''}
           ORDER BY embedding <=> $1::vector
           LIMIT $2
-        `, threadId
-          ? [`[${queryEmbedding.join(',')}]`, limit, threadId]
-          : [`[${queryEmbedding.join(',')}]`, limit]
+        `,
+          threadId
+            ? [`[${queryEmbedding.join(',')}]`, limit, threadId]
+            : [`[${queryEmbedding.join(',')}]`, limit]
         );
 
         return NextResponse.json({
           query: searchQuery,
-          results: results.map(r => ({
+          results: results.map((r) => ({
             id: r.id,
             threadId: r.thread_id,
             role: r.role,
@@ -158,13 +160,16 @@ export const POST = withAuth(async (request) => {
           role: string;
           content: string;
           created_at: Date;
-        }>(`
+        }>(
+          `
           SELECT role, content, created_at
           FROM dashboard_messages
           WHERE thread_id = $1
           ORDER BY created_at ${strategy === 'recent' ? 'DESC' : 'ASC'}
           LIMIT $2
-        `, [threadId, Math.floor(maxTokens / 100)]);
+        `,
+          [threadId, Math.floor(maxTokens / 100)]
+        );
 
         const orderedMessages = strategy === 'recent' ? messages.reverse() : messages;
 
@@ -219,10 +224,10 @@ export const POST = withAuth(async (request) => {
 
         const embedding = await embeddingService.embed(content);
 
-        await query(
-          `UPDATE dashboard_messages SET embedding = $1::vector WHERE id = $2`,
-          [`[${embedding.join(',')}]`, messageId]
-        );
+        await query(`UPDATE dashboard_messages SET embedding = $1::vector WHERE id = $2`, [
+          `[${embedding.join(',')}]`,
+          messageId,
+        ]);
 
         return NextResponse.json({ success: true, dimensions: embedding.length });
       }

@@ -36,7 +36,9 @@ describe('fileRead tool', () => {
       { path: join(TEST_DIR, 'test.txt'), encoding: 'base64' },
       mockContext
     );
-    expect((result as { content: string }).content).toBe(Buffer.from('Hello, World!').toString('base64'));
+    expect((result as { content: string }).content).toBe(
+      Buffer.from('Hello, World!').toString('base64')
+    );
   });
 
   it('returns error for non-existent file', async () => {

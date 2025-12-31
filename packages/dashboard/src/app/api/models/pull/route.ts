@@ -49,8 +49,7 @@ export const POST = withAuth(async (request) => {
               }
 
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(progress)}\n\n`));
-            } catch {
-            }
+            } catch {}
           }
         }
       },
@@ -60,7 +59,7 @@ export const POST = withAuth(async (request) => {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
       },
     });
   } catch (error) {

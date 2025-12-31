@@ -9,10 +9,7 @@
  * - Integration with timer store
  */
 
-import type {
-  TimerEntry,
-  TimerStore,
-} from '@cogitator-ai/types';
+import type { TimerEntry, TimerStore } from '@cogitator-ai/types';
 import { getNextCronOccurrence, isValidCronExpression } from './cron-parser';
 
 /**
@@ -171,10 +168,7 @@ export function untilNode<S>(
 /**
  * Calculate the delay for a timer node
  */
-export function calculateTimerDelay<S>(
-  config: AnyTimerNodeConfig<S>,
-  state: S
-): number {
+export function calculateTimerDelay<S>(config: AnyTimerNodeConfig<S>, state: S): number {
   const now = Date.now();
 
   switch (config.type) {

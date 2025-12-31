@@ -13,7 +13,12 @@ const createJobSchema = z.object({
 export const GET = withAuth(async (request: AuthenticatedRequest) => {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const status = searchParams.get('status') as 'pending' | 'running' | 'completed' | 'failed' | null;
+    const status = searchParams.get('status') as
+      | 'pending'
+      | 'running'
+      | 'completed'
+      | 'failed'
+      | null;
     const type = searchParams.get('type') as 'agent' | 'workflow' | 'swarm' | null;
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
@@ -51,7 +56,7 @@ export const POST = withAuth(async (request: AuthenticatedRequest) => {
       return NextResponse.json(
         {
           error: 'Validation failed',
-          details: parsed.error.errors.map(e => ({
+          details: parsed.error.errors.map((e) => ({
             path: e.path.join('.'),
             message: e.message,
           })),

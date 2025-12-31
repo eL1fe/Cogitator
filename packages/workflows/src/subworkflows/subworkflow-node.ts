@@ -22,11 +22,7 @@ import { WorkflowExecutor } from '../executor';
 /**
  * Error handling strategy for subworkflows
  */
-export type SubworkflowErrorStrategy =
-  | 'propagate'
-  | 'catch'
-  | 'retry'
-  | 'ignore';
+export type SubworkflowErrorStrategy = 'propagate' | 'catch' | 'retry' | 'ignore';
 
 /**
  * Subworkflow retry configuration
@@ -56,7 +52,11 @@ export interface SubworkflowConfig<PS extends WorkflowState, CS extends Workflow
   /**
    * Map child result back to parent state
    */
-  outputMapper: (childResult: WorkflowResult<CS>, parentState: PS, context: SubworkflowContext) => PS;
+  outputMapper: (
+    childResult: WorkflowResult<CS>,
+    parentState: PS,
+    context: SubworkflowContext
+  ) => PS;
 
   /**
    * Error handling strategy
@@ -151,10 +151,7 @@ export class MaxDepthExceededError extends Error {
 /**
  * Execute a subworkflow
  */
-export async function executeSubworkflow<
-  PS extends WorkflowState,
-  CS extends WorkflowState
->(
+export async function executeSubworkflow<PS extends WorkflowState, CS extends WorkflowState>(
   parentState: PS,
   config: SubworkflowConfig<PS, CS>,
   context: SubworkflowContext
@@ -199,9 +196,7 @@ export async function executeSubworkflow<
   let lastError: Error | undefined;
   let childResult: WorkflowResult<CS> | undefined;
   const maxAttempts =
-    config.onError === 'retry' && config.retryConfig
-      ? config.retryConfig.maxAttempts
-      : 1;
+    config.onError === 'retry' && config.retryConfig ? config.retryConfig.maxAttempts : 1;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
@@ -211,10 +206,7 @@ export async function executeSubworkflow<
         childResult = await Promise.race([
           executePromise,
           new Promise<never>((_, reject) =>
-            setTimeout(
-              () => reject(new Error('Subworkflow timeout exceeded')),
-              config.timeout
-            )
+            setTimeout(() => reject(new Error('Subworkflow timeout exceeded')), config.timeout)
           ),
         ]);
       } else {
@@ -279,10 +271,7 @@ export async function executeSubworkflow<
 /**
  * Create a subworkflow node factory
  */
-export function subworkflowNode<
-  PS extends WorkflowState,
-  CS extends WorkflowState
->(
+export function subworkflowNode<PS extends WorkflowState, CS extends WorkflowState>(
   name: string,
   config: Omit<SubworkflowConfig<PS, CS>, 'name'>
 ): SubworkflowConfig<PS, CS> {
@@ -295,7 +284,9 @@ export function subworkflowNode<
 export function simpleSubworkflow<S extends WorkflowState>(
   name: string,
   workflow: Workflow<S>,
-  options: Partial<Omit<SubworkflowConfig<S, S>, 'name' | 'workflow' | 'inputMapper' | 'outputMapper'>> = {}
+  options: Partial<
+    Omit<SubworkflowConfig<S, S>, 'name' | 'workflow' | 'inputMapper' | 'outputMapper'>
+  > = {}
 ): SubworkflowConfig<S, S> {
   return {
     name,
@@ -312,12 +303,14 @@ export function simpleSubworkflow<S extends WorkflowState>(
 export function nestedSubworkflow<
   PS extends WorkflowState,
   K extends keyof PS,
-  CS extends WorkflowState = PS[K] extends WorkflowState ? PS[K] : never
+  CS extends WorkflowState = PS[K] extends WorkflowState ? PS[K] : never,
 >(
   name: string,
   workflow: Workflow<CS>,
   stateKey: K,
-  options: Partial<Omit<SubworkflowConfig<PS, CS>, 'name' | 'workflow' | 'inputMapper' | 'outputMapper'>> = {}
+  options: Partial<
+    Omit<SubworkflowConfig<PS, CS>, 'name' | 'workflow' | 'inputMapper' | 'outputMapper'>
+  > = {}
 ): SubworkflowConfig<PS, CS> {
   return {
     name,
@@ -334,10 +327,7 @@ export function nestedSubworkflow<
 /**
  * Create a conditional subworkflow
  */
-export function conditionalSubworkflow<
-  PS extends WorkflowState,
-  CS extends WorkflowState
->(
+export function conditionalSubworkflow<PS extends WorkflowState, CS extends WorkflowState>(
   name: string,
   config: Omit<SubworkflowConfig<PS, CS>, 'name'> & {
     condition: (state: PS) => boolean;

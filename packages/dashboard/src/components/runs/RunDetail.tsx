@@ -123,9 +123,7 @@ export function RunDetail({ runId }: RunDetailProps) {
         </Link>
         <Card className="text-center py-12">
           <AlertCircle className="w-12 h-12 mx-auto mb-4 text-error" />
-          <h3 className="text-lg font-medium text-text-primary mb-2">
-            {error || 'Run not found'}
-          </h3>
+          <h3 className="text-lg font-medium text-text-primary mb-2">{error || 'Run not found'}</h3>
           <p className="text-text-secondary">
             The run you&apos;re looking for doesn&apos;t exist or couldn&apos;t be loaded.
           </p>
@@ -204,18 +202,12 @@ export function RunDetail({ runId }: RunDetailProps) {
         </Card>
         <Card className="text-center">
           <DollarSign className="w-5 h-5 text-chart-4 mx-auto mb-2" />
-          <p className="text-xl font-semibold text-text-primary">
-            ${run.cost.toFixed(4)}
-          </p>
+          <p className="text-xl font-semibold text-text-primary">${run.cost.toFixed(4)}</p>
           <p className="text-xs text-text-secondary">Cost</p>
         </Card>
         <Card className="text-center">
-          <div className="w-5 h-5 mx-auto mb-2 text-chart-3 font-mono text-sm font-bold">
-            #
-          </div>
-          <p className="text-xl font-semibold text-text-primary">
-            {toolCalls.length}
-          </p>
+          <div className="w-5 h-5 mx-auto mb-2 text-chart-3 font-mono text-sm font-bold">#</div>
+          <p className="text-xl font-semibold text-text-primary">{toolCalls.length}</p>
           <p className="text-xs text-text-secondary">Tool Calls</p>
         </Card>
       </div>
@@ -282,13 +274,17 @@ export function RunDetail({ runId }: RunDetailProps) {
                   )}
                   <Badge variant="outline">{tool.name}</Badge>
                   {tool.duration && (
-                    <span className="text-xs text-text-tertiary">
-                      {tool.duration}ms
-                    </span>
+                    <span className="text-xs text-text-tertiary">{tool.duration}ms</span>
                   )}
                 </div>
                 <Badge
-                  variant={tool.status === 'success' ? 'success' : tool.status === 'error' ? 'error' : 'warning'}
+                  variant={
+                    tool.status === 'success'
+                      ? 'success'
+                      : tool.status === 'error'
+                        ? 'error'
+                        : 'warning'
+                  }
                   size="sm"
                 >
                   {tool.status}

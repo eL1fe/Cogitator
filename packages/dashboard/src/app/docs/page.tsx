@@ -141,7 +141,13 @@ function CodeBlock({ children, language = 'typescript' }: { children: string; la
   );
 }
 
-function Callout({ type, children }: { type: 'info' | 'warning' | 'tip'; children: React.ReactNode }) {
+function Callout({
+  type,
+  children,
+}: {
+  type: 'info' | 'warning' | 'tip';
+  children: React.ReactNode;
+}) {
   const styles = {
     info: 'border-[#00aaff] bg-[#00aaff]/5 text-[#00aaff]',
     warning: 'border-[#ffaa00] bg-[#ffaa00]/5 text-[#ffaa00]',
@@ -163,8 +169,8 @@ function DocsContent({ activeSection }: { activeSection: string }) {
       <>
         <h1 className="text-4xl font-bold text-[#fafafa] mb-4">Getting Started</h1>
         <p className="text-[#a1a1a1] text-lg mb-8">
-          Cogitator is a self-hosted, production-grade AI agent orchestration platform.
-          Think of it as Kubernetes for AI agents.
+          Cogitator is a self-hosted, production-grade AI agent orchestration platform. Think of it
+          as Kubernetes for AI agents.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {[
@@ -184,9 +190,7 @@ function DocsContent({ activeSection }: { activeSection: string }) {
     installation: (
       <>
         <h2 className="text-3xl font-bold text-[#fafafa] mb-4">Installation</h2>
-        <p className="text-[#a1a1a1] mb-6">
-          Install Cogitator using npm, pnpm, or yarn.
-        </p>
+        <p className="text-[#a1a1a1] mb-6">Install Cogitator using npm, pnpm, or yarn.</p>
         <CodeBlock language="bash">{`# Using pnpm (recommended)
 pnpm add @cogitator-ai/core @cogitator-ai/dashboard
 
@@ -210,9 +214,7 @@ yarn add @cogitator-ai/core @cogitator-ai/dashboard`}</CodeBlock>
     quickstart: (
       <>
         <h2 className="text-3xl font-bold text-[#fafafa] mb-4">Quick Start</h2>
-        <p className="text-[#a1a1a1] mb-6">
-          Create your first AI agent in minutes.
-        </p>
+        <p className="text-[#a1a1a1] mb-6">Create your first AI agent in minutes.</p>
         <h3 className="text-xl font-bold text-[#fafafa] mt-6 mb-4">1. Initialize Cogitator</h3>
         <CodeBlock language="typescript">{`import { Cogitator } from '@cogitator-ai/core';
 
@@ -303,15 +305,28 @@ export default defineConfig({
       <>
         <h1 className="text-4xl font-bold text-[#fafafa] mb-4">Agents</h1>
         <p className="text-[#a1a1a1] text-lg mb-8">
-          Agents are autonomous AI entities that can use tools, maintain memory, and accomplish complex tasks.
+          Agents are autonomous AI entities that can use tools, maintain memory, and accomplish
+          complex tasks.
         </p>
         <div className="p-6 bg-gradient-to-br from-[#00ff88]/5 to-transparent border border-[#00ff88]/20 rounded-xl mb-8">
           <h3 className="text-[#00ff88] font-bold mb-2">Key Concepts</h3>
           <ul className="text-[#a1a1a1] space-y-1 text-sm">
-            <li>• <strong className="text-[#fafafa]">Model:</strong> The LLM powering the agent (Ollama, OpenAI, Anthropic, etc.)</li>
-            <li>• <strong className="text-[#fafafa]">Tools:</strong> Functions the agent can call to interact with the world</li>
-            <li>• <strong className="text-[#fafafa]">Memory:</strong> Persistent state across conversations</li>
-            <li>• <strong className="text-[#fafafa]">System Prompt:</strong> Instructions defining the agent&apos;s behavior</li>
+            <li>
+              • <strong className="text-[#fafafa]">Model:</strong> The LLM powering the agent
+              (Ollama, OpenAI, Anthropic, etc.)
+            </li>
+            <li>
+              • <strong className="text-[#fafafa]">Tools:</strong> Functions the agent can call to
+              interact with the world
+            </li>
+            <li>
+              • <strong className="text-[#fafafa]">Memory:</strong> Persistent state across
+              conversations
+            </li>
+            <li>
+              • <strong className="text-[#fafafa]">System Prompt:</strong> Instructions defining the
+              agent&apos;s behavior
+            </li>
           </ul>
         </div>
       </>
@@ -319,9 +334,7 @@ export default defineConfig({
     'agent-basics': (
       <>
         <h2 className="text-3xl font-bold text-[#fafafa] mb-4">Agent Basics</h2>
-        <p className="text-[#a1a1a1] mb-6">
-          Learn how to create and configure agents.
-        </p>
+        <p className="text-[#a1a1a1] mb-6">Learn how to create and configure agents.</p>
         <CodeBlock language="typescript">{`import { Agent } from '@cogitator-ai/core';
 
 const agent = new Agent({
@@ -390,10 +403,19 @@ const agent = new Agent({
         <h3 className="text-xl font-bold text-[#fafafa] mt-8 mb-4">Built-in Tools</h3>
         <div className="grid grid-cols-2 gap-2 text-sm">
           {[
-            'web_search', 'read_url', 'calculator', 'code_execute',
-            'file_read', 'file_write', 'json_parse', 'base64_encode',
+            'web_search',
+            'read_url',
+            'calculator',
+            'code_execute',
+            'file_read',
+            'file_write',
+            'json_parse',
+            'base64_encode',
           ].map((t) => (
-            <div key={t} className="px-3 py-2 bg-[#111] border border-[#222] rounded font-mono text-[#00ff88]">
+            <div
+              key={t}
+              className="px-3 py-2 bg-[#111] border border-[#222] rounded font-mono text-[#00ff88]"
+            >
               {t}
             </div>
           ))}
@@ -403,9 +425,7 @@ const agent = new Agent({
     'agent-memory': (
       <>
         <h2 className="text-3xl font-bold text-[#fafafa] mb-4">Agent Memory</h2>
-        <p className="text-[#a1a1a1] mb-6">
-          Persist agent state and enable long-term memory.
-        </p>
+        <p className="text-[#a1a1a1] mb-6">Persist agent state and enable long-term memory.</p>
         <CodeBlock language="typescript">{`const agent = new Agent({
   name: 'persistent-assistant',
   model: 'openai/gpt-4',
@@ -445,7 +465,7 @@ const response = await agent.run('What is my favorite color?');
         </p>
         <div className="p-6 bg-[#111] border border-[#222] rounded-xl mb-8">
           <pre className="text-[#00ff88] font-mono text-sm">
-{`┌─────────┐     ┌─────────┐     ┌─────────┐
+            {`┌─────────┐     ┌─────────┐     ┌─────────┐
 │  START  │────▶│ Agent A │────▶│ Agent B │
 └─────────┘     └─────────┘     └────┬────┘
                                      │
@@ -511,7 +531,10 @@ const result = await researchWorkflow.run({
             { type: 'parallel', desc: 'Execute nodes in parallel', color: '#aa00ff' },
             { type: 'loop', desc: 'Iterate over data', color: '#ff00aa' },
           ].map((node) => (
-            <div key={node.type} className="flex items-center gap-4 p-4 bg-[#111] border border-[#222] rounded-lg">
+            <div
+              key={node.type}
+              className="flex items-center gap-4 p-4 bg-[#111] border border-[#222] rounded-lg"
+            >
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: node.color }} />
               <code className="text-[#fafafa] font-mono">{node.type}</code>
               <span className="text-[#666]">—</span>
@@ -562,7 +585,8 @@ const result = await researchWorkflow.run({
           Coordinate multiple agents working together on complex tasks.
         </p>
         <Callout type="tip">
-          Swarms are ideal for tasks requiring diverse expertise, parallel processing, or consensus-based decisions.
+          Swarms are ideal for tasks requiring diverse expertise, parallel processing, or
+          consensus-based decisions.
         </Callout>
       </>
     ),
@@ -650,8 +674,13 @@ const decision = await debateSwarm.run({
             { name: 'Mistral', desc: 'Mistral/Mixtral', status: 'soon', done: false },
             { name: 'xAI', desc: 'Grok', status: 'soon', done: false },
           ].map((p) => (
-            <div key={p.name} className={`p-3 border rounded-lg text-center ${p.done ? 'bg-[#111] border-[#222]' : 'bg-[#0a0a0a] border-[#1a1a1a] opacity-60'}`}>
-              <span className={`text-xs ${p.done ? 'text-[#00ff88]' : 'text-[#666]'}`}>{p.status}</span>
+            <div
+              key={p.name}
+              className={`p-3 border rounded-lg text-center ${p.done ? 'bg-[#111] border-[#222]' : 'bg-[#0a0a0a] border-[#1a1a1a] opacity-60'}`}
+            >
+              <span className={`text-xs ${p.done ? 'text-[#00ff88]' : 'text-[#666]'}`}>
+                {p.status}
+              </span>
               <h3 className="text-[#fafafa] font-semibold">{p.name}</h3>
               <p className="text-[#666] text-xs">{p.desc}</p>
             </div>
@@ -694,9 +723,7 @@ const agent = new Agent({
   model: 'ollama/llama3.2:70b',  // Specify variant
   temperature: 0.7,
 });`}</CodeBlock>
-        <Callout type="info">
-          Ollama automatically manages GPU memory and model loading.
-        </Callout>
+        <Callout type="info">Ollama automatically manages GPU memory and model loading.</Callout>
       </>
     ),
     'model-pricing': (
@@ -719,7 +746,8 @@ console.log(result.usage);
 // }`}</CodeBlock>
         <div className="mt-6 p-4 bg-[#111] border border-[#222] rounded-lg">
           <p className="text-[#666] text-sm font-mono">
-            💡 Use <code className="text-[#00ff88]">ollama/*</code> models for unlimited free local inference
+            💡 Use <code className="text-[#00ff88]">ollama/*</code> models for unlimited free local
+            inference
           </p>
         </div>
       </>
@@ -742,12 +770,17 @@ console.log(result.usage);
             { type: 'Working', desc: 'Task-specific context', ttl: 'Task duration' },
             { type: 'Episodic', desc: 'Event-based memories', ttl: 'Configurable' },
           ].map((m) => (
-            <div key={m.type} className="flex items-center justify-between p-4 bg-[#111] border border-[#222] rounded-lg">
+            <div
+              key={m.type}
+              className="flex items-center justify-between p-4 bg-[#111] border border-[#222] rounded-lg"
+            >
               <div>
                 <h3 className="text-[#fafafa] font-semibold">{m.type}</h3>
                 <p className="text-[#666] text-sm">{m.desc}</p>
               </div>
-              <span className="px-2 py-1 text-xs bg-[#00ff88]/10 text-[#00ff88] rounded">{m.ttl}</span>
+              <span className="px-2 py-1 text-xs bg-[#00ff88]/10 text-[#00ff88] rounded">
+                {m.ttl}
+              </span>
             </div>
           ))}
         </div>
@@ -788,9 +821,7 @@ const agent = new Agent({
     'memory-vectors': (
       <>
         <h2 className="text-3xl font-bold text-[#fafafa] mb-4">Vector Storage</h2>
-        <p className="text-[#a1a1a1] mb-6">
-          Cogitator supports multiple vector storage backends.
-        </p>
+        <p className="text-[#a1a1a1] mb-6">Cogitator supports multiple vector storage backends.</p>
         <div className="grid grid-cols-2 gap-4 mb-6">
           {[
             { name: 'PostgreSQL + pgvector', recommended: true },
@@ -798,7 +829,10 @@ const agent = new Agent({
             { name: 'Pinecone', recommended: false },
             { name: 'In-Memory', recommended: false },
           ].map((v) => (
-            <div key={v.name} className={`p-3 border rounded-lg ${v.recommended ? 'bg-[#00ff88]/5 border-[#00ff88]/30' : 'bg-[#111] border-[#222]'}`}>
+            <div
+              key={v.name}
+              className={`p-3 border rounded-lg ${v.recommended ? 'bg-[#00ff88]/5 border-[#00ff88]/30' : 'bg-[#111] border-[#222]'}`}
+            >
               <span className="text-[#fafafa]">{v.name}</span>
               {v.recommended && <span className="ml-2 text-xs text-[#00ff88]">recommended</span>}
             </div>
@@ -844,9 +878,7 @@ console.log(result.stdout);`}</CodeBlock>
     'sandbox-wasm': (
       <>
         <h2 className="text-3xl font-bold text-[#fafafa] mb-4">WASM Executor</h2>
-        <p className="text-[#a1a1a1] mb-6">
-          Lightweight, fast execution without Docker overhead.
-        </p>
+        <p className="text-[#a1a1a1] mb-6">Lightweight, fast execution without Docker overhead.</p>
         <CodeBlock language="typescript">{`import { WasmSandbox } from '@cogitator-ai/sandbox';
 
 const sandbox = new WasmSandbox({
@@ -862,9 +894,7 @@ const sum = [1, 2, 3, 4, 5].reduce((a, b) => a + b, 0);
 console.log('Sum:', sum);
   \`,
 });`}</CodeBlock>
-        <Callout type="tip">
-          WASM sandbox starts in milliseconds vs seconds for Docker.
-        </Callout>
+        <Callout type="tip">WASM sandbox starts in milliseconds vs seconds for Docker.</Callout>
       </>
     ),
     'sandbox-security': (
@@ -879,7 +909,10 @@ console.log('Sum:', sum);
             { feature: 'Filesystem Access', docker: 'Configurable', wasm: 'None' },
             { feature: 'System Calls', docker: 'Filtered', wasm: 'Blocked' },
           ].map((row) => (
-            <div key={row.feature} className="flex items-center justify-between p-3 bg-[#111] border border-[#222] rounded-lg text-sm">
+            <div
+              key={row.feature}
+              className="flex items-center justify-between p-3 bg-[#111] border border-[#222] rounded-lg text-sm"
+            >
               <span className="text-[#fafafa]">{row.feature}</span>
               <div className="flex gap-4">
                 <span className="text-[#00ff88] w-24 text-center">Docker: {row.docker}</span>
@@ -906,7 +939,7 @@ console.log('Sum:', sum);
         </p>
         <div className="p-6 bg-[#111] border border-[#222] rounded-xl font-mono text-sm">
           <pre className="text-[#00ff88]">
-{`Client (Cogitator)  ◄──────────►  MCP Server
+            {`Client (Cogitator)  ◄──────────►  MCP Server
         │                              │
         │  1. List Tools               │
         │  ───────────────────────►   │
@@ -1005,8 +1038,13 @@ server.start();`}</CodeBlock>
             { method: 'GET', path: '/api/workflows', desc: 'List workflows' },
             { method: 'POST', path: '/api/workflows/:id/run', desc: 'Execute workflow' },
           ].map((ep) => (
-            <div key={`${ep.method}-${ep.path}`} className="flex items-center gap-4 p-3 bg-[#111] border border-[#222] rounded-lg font-mono text-sm">
-              <span className={`px-2 py-1 rounded text-xs ${ep.method === 'GET' ? 'bg-[#00aaff]/20 text-[#00aaff]' : 'bg-[#00ff88]/20 text-[#00ff88]'}`}>
+            <div
+              key={`${ep.method}-${ep.path}`}
+              className="flex items-center gap-4 p-3 bg-[#111] border border-[#222] rounded-lg font-mono text-sm"
+            >
+              <span
+                className={`px-2 py-1 rounded text-xs ${ep.method === 'GET' ? 'bg-[#00aaff]/20 text-[#00aaff]' : 'bg-[#00ff88]/20 text-[#00ff88]'}`}
+              >
                 {ep.method}
               </span>
               <code className="text-[#fafafa]">{ep.path}</code>
@@ -1036,9 +1074,7 @@ const response = await client.chat.completions.create({
     { role: 'user', content: 'Hello!' },
   ],
 });`}</CodeBlock>
-        <Callout type="info">
-          Compatible with any OpenAI client library in any language.
-        </Callout>
+        <Callout type="info">Compatible with any OpenAI client library in any language.</Callout>
       </>
     ),
     'api-websocket': (
@@ -1120,7 +1156,10 @@ scrape_configs:
             'cogitator_tool_calls_total',
             'cogitator_memory_operations_total',
           ].map((m) => (
-            <div key={m} className="px-3 py-2 bg-[#111] border border-[#222] rounded text-[#00ff88]">
+            <div
+              key={m}
+              className="px-3 py-2 bg-[#111] border border-[#222] rounded text-[#00ff88]"
+            >
               {m}
             </div>
           ))}
@@ -1209,7 +1248,9 @@ export default function DocsPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-64 px-4 py-2 bg-[#111] border border-[#222] rounded-lg text-[#fafafa] text-sm placeholder-[#666] focus:outline-none focus:border-[#00ff88]"
               />
-              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[#444] text-xs">⌘K</kbd>
+              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[#444] text-xs">
+                ⌘K
+              </kbd>
             </div>
             <Link
               href="/dashboard"
@@ -1222,7 +1263,12 @@ export default function DocsPage() {
               className="md:hidden p-2 text-[#fafafa]"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </button>
           </div>
@@ -1237,7 +1283,10 @@ export default function DocsPage() {
             exit={{ opacity: 0, x: -300 }}
             className="fixed inset-0 z-40 md:hidden"
           >
-            <div className="absolute inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
+            <div
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setMobileMenuOpen(false)}
+            />
             <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#0a0a0a] border-r border-[#1a1a1a] pt-20 p-4 overflow-auto">
               {sections.map((section) => (
                 <div key={section.id} className="mb-4">
@@ -1272,7 +1321,8 @@ export default function DocsPage() {
                 <button
                   onClick={() => handleSectionClick(section.id)}
                   className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2 transition-colors ${
-                    activeSection === section.id || section.subsections?.some((s) => s.id === activeSection)
+                    activeSection === section.id ||
+                    section.subsections?.some((s) => s.id === activeSection)
                       ? 'bg-[#00ff88]/10 text-[#00ff88]'
                       : 'text-[#a1a1a1] hover:text-[#fafafa] hover:bg-[#111]'
                   }`}
@@ -1327,7 +1377,7 @@ export default function DocsPage() {
                   className="text-[#5865F2] hover:text-[#7289DA] flex items-center gap-1"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
                   </svg>
                   Discord
                 </a>

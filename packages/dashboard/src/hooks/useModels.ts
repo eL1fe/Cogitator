@@ -53,8 +53,7 @@ export function useModels() {
     return model?.pricing ?? null;
   };
 
-  const getModelsByProvider = (provider: string) =>
-    models.filter((m) => m.provider === provider);
+  const getModelsByProvider = (provider: string) => models.filter((m) => m.provider === provider);
 
   return {
     models,

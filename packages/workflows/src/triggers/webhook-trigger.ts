@@ -98,10 +98,12 @@ export class WebhookTriggerExecutor {
   private cleanupInterval?: ReturnType<typeof setInterval>;
   private onFire?: (trigger: WorkflowTrigger, context: TriggerContext) => Promise<string>;
 
-  constructor(options: {
-    onFire?: (trigger: WorkflowTrigger, context: TriggerContext) => Promise<string>;
-    cleanupIntervalMs?: number;
-  } = {}) {
+  constructor(
+    options: {
+      onFire?: (trigger: WorkflowTrigger, context: TriggerContext) => Promise<string>;
+      cleanupIntervalMs?: number;
+    } = {}
+  ) {
     this.onFire = options.onFire;
 
     const cleanupMs = options.cleanupIntervalMs ?? 60000;
@@ -113,11 +115,7 @@ export class WebhookTriggerExecutor {
   /**
    * Register a webhook trigger
    */
-  register(
-    workflowName: string,
-    config: WebhookTriggerConfig,
-    externalId?: string
-  ): string {
+  register(workflowName: string, config: WebhookTriggerConfig, externalId?: string): string {
     const triggerId = externalId ?? nanoid();
     const now = Date.now();
 
@@ -207,7 +205,7 @@ export class WebhookTriggerExecutor {
       return null;
     }
 
-    const trigger = Array.from(pathTriggers.values()).find(t => t.enabled);
+    const trigger = Array.from(pathTriggers.values()).find((t) => t.enabled);
     if (!trigger) {
       return null;
     }
@@ -339,16 +337,14 @@ export class WebhookTriggerExecutor {
    * Get all triggers for a workflow
    */
   getTriggersForWorkflow(workflowName: string): WebhookTriggerState[] {
-    return Array.from(this.triggers.values()).filter(
-      t => t.workflowName === workflowName
-    );
+    return Array.from(this.triggers.values()).filter((t) => t.workflowName === workflowName);
   }
 
   /**
    * Get all enabled triggers
    */
   getEnabledTriggers(): WebhookTriggerState[] {
-    return Array.from(this.triggers.values()).filter(t => t.enabled);
+    return Array.from(this.triggers.values()).filter((t) => t.enabled);
   }
 
   /**
@@ -394,10 +390,7 @@ export class WebhookTriggerExecutor {
     this.deduplicationCache.clear();
   }
 
-  private async authenticate(
-    request: WebhookRequest,
-    auth?: WebhookAuthConfig
-  ): Promise<void> {
+  private async authenticate(request: WebhookRequest, auth?: WebhookAuthConfig): Promise<void> {
     if (!auth || auth.type === 'none') {
       return;
     }
@@ -437,9 +430,8 @@ export class WebhookTriggerExecutor {
         }
 
         const algorithm = auth.algorithm === 'sha512' ? 'sha512' : 'sha256';
-        const payload = typeof request.body === 'string'
-          ? request.body
-          : JSON.stringify(request.body);
+        const payload =
+          typeof request.body === 'string' ? request.body : JSON.stringify(request.body);
 
         const expectedSignature = crypto
           .createHmac(algorithm, auth.secret)
@@ -448,10 +440,7 @@ export class WebhookTriggerExecutor {
 
         const actualSignature = signature.replace(/^sha(256|512)=/, '');
 
-        if (!crypto.timingSafeEqual(
-          Buffer.from(actualSignature),
-          Buffer.from(expectedSignature)
-        )) {
+        if (!crypto.timingSafeEqual(Buffer.from(actualSignature), Buffer.from(expectedSignature))) {
           throw new WebhookAuthError('Invalid signature');
         }
         break;
@@ -477,19 +466,11 @@ export class WebhookTriggerExecutor {
 
     const result = rateLimiter.consume(clientKey);
     if (!result.allowed) {
-      throw new WebhookRateLimitError(
-        result.retryAfter ?? 0,
-        result.remaining,
-        result.resetAt
-      );
+      throw new WebhookRateLimitError(result.retryAfter ?? 0, result.remaining, result.resetAt);
     }
   }
 
-  private isDuplicate(
-    triggerId: string,
-    dedupKey: string,
-    windowMs: number
-  ): boolean {
+  private isDuplicate(triggerId: string, dedupKey: string, windowMs: number): boolean {
     const cacheKey = `${triggerId}:${dedupKey}`;
     const existing = this.deduplicationCache.get(cacheKey);
 
@@ -559,9 +540,11 @@ export class WebhookTriggerExecutor {
 /**
  * Create a webhook trigger executor
  */
-export function createWebhookTrigger(options: {
-  onFire?: (trigger: WorkflowTrigger, context: TriggerContext) => Promise<string>;
-} = {}): WebhookTriggerExecutor {
+export function createWebhookTrigger(
+  options: {
+    onFire?: (trigger: WorkflowTrigger, context: TriggerContext) => Promise<string>;
+  } = {}
+): WebhookTriggerExecutor {
   return new WebhookTriggerExecutor(options);
 }
 

@@ -259,10 +259,7 @@ export class MCPClient {
   /**
    * Get a prompt from the MCP server
    */
-  async getPrompt(
-    name: string,
-    args?: Record<string, string>
-  ): Promise<MCPPromptMessage[]> {
+  async getPrompt(name: string, args?: Record<string, string>): Promise<MCPPromptMessage[]> {
     const result = await this.client.getPrompt({
       name,
       arguments: args,

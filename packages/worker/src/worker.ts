@@ -6,12 +6,7 @@
  */
 
 import { Worker, type Job } from 'bullmq';
-import type {
-  WorkerConfig,
-  JobPayload,
-  JobResult,
-  QueueMetrics,
-} from './types';
+import type { WorkerConfig, JobPayload, JobResult, QueueMetrics } from './types';
 import { processAgentJob } from './processors/agent';
 import { processWorkflowJob } from './processors/workflow';
 import { processSwarmJob } from './processors/swarm';

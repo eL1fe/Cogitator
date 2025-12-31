@@ -15,16 +15,11 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Cogitator Documentation',
-    description:
-      'Complete guide to building AI agents, workflows, and swarms with Cogitator.',
+    description: 'Complete guide to building AI agents, workflows, and swarms with Cogitator.',
     type: 'website',
   },
 };
 
-export default function DocsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DocsLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

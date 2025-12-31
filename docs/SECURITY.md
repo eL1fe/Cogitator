@@ -11,6 +11,7 @@ Cogitator provides three sandbox execution modes with different security charact
 The WASM sandbox uses [Extism](https://extism.org/) to execute code in a WebAssembly sandbox.
 
 **Security Properties:**
+
 - **Memory Isolation**: WASM linear memory is bounds-checked; no access to host memory
 - **No Filesystem Access**: By default, WASM modules cannot access the host filesystem
 - **No Network Access**: WASM modules cannot make network requests without explicit host functions
@@ -18,16 +19,18 @@ The WASM sandbox uses [Extism](https://extism.org/) to execute code in a WebAsse
 - **Memory Limits**: WASM memory can be limited via `memoryPages` configuration (64KB per page)
 
 **Configuration:**
+
 ```typescript
 const config: SandboxConfig = {
   type: 'wasm',
   wasmModule: '/path/to/module.wasm',
-  timeout: 5000,        // 5 second timeout
-  wasi: false,          // Disable WASI for maximum isolation
+  timeout: 5000, // 5 second timeout
+  wasi: false, // Disable WASI for maximum isolation
 };
 ```
 
 **Known Limitations:**
+
 - WASM modules must be pre-compiled; dynamic code execution is not supported
 - QuickJS runtime embedded in WASM modules adds ~2MB overhead
 - Some JavaScript features may not be available in the QuickJS environment
@@ -37,29 +40,32 @@ const config: SandboxConfig = {
 Docker provides container-level isolation for more complex tool execution.
 
 **Security Properties:**
+
 - **Process Isolation**: Runs in a separate container with its own PID namespace
 - **Filesystem Isolation**: Container has its own filesystem; host mounts are configurable
 - **Network Isolation**: Configurable network access (default: disabled)
 - **Resource Limits**: CPU, memory, and I/O can be limited via cgroups
 
 **Configuration:**
+
 ```typescript
 const config: SandboxConfig = {
   type: 'docker',
   image: 'cogitator/sandbox:latest',
   resources: {
-    cpuLimit: 1,              // 1 CPU core
-    memoryLimit: '512m',      // 512MB RAM
-    timeout: 30000,           // 30 seconds
+    cpuLimit: 1, // 1 CPU core
+    memoryLimit: '512m', // 512MB RAM
+    timeout: 30000, // 30 seconds
   },
   network: {
-    enabled: false,           // No network access
+    enabled: false, // No network access
   },
-  mounts: [],                 // No host mounts
+  mounts: [], // No host mounts
 };
 ```
 
 **Recommendations:**
+
 - Use minimal base images (Alpine, distroless)
 - Run containers as non-root user
 - Disable privileged mode
@@ -73,6 +79,7 @@ Native execution runs tools directly in the Node.js process.
 **WARNING**: This mode provides NO isolation and should only be used for development and trusted code.
 
 **Security Properties:**
+
 - No isolation from host process
 - Full access to filesystem, network, and environment
 - No resource limits beyond OS-level controls
@@ -82,12 +89,14 @@ Native execution runs tools directly in the Node.js process.
 ### Untrusted Tool Code
 
 **Threat**: Malicious or buggy tool code attempting to:
+
 - Access sensitive files
 - Make unauthorized network requests
 - Exhaust system resources (DoS)
 - Escape sandbox isolation
 
 **Mitigations**:
+
 1. Use WASM or Docker sandbox for untrusted code
 2. Apply resource limits (CPU, memory, time)
 3. Disable network access by default
@@ -96,11 +105,13 @@ Native execution runs tools directly in the Node.js process.
 ### LLM Prompt Injection
 
 **Threat**: Adversarial inputs causing the LLM to:
+
 - Execute unintended tool calls
 - Reveal system prompts or sensitive data
 - Generate harmful outputs
 
 **Mitigations**:
+
 1. Validate tool call arguments against schemas (Zod validation)
 2. Limit available tools to minimum necessary set
 3. Use tool allowlists/denylists per agent
@@ -112,6 +123,7 @@ Native execution runs tools directly in the Node.js process.
 **Threat**: Unauthorized access to Cogitator APIs
 
 **Mitigations**:
+
 1. API key authentication (`X-API-Key` header)
 2. JWT authentication for user sessions
 3. RBAC for multi-tenant deployments
@@ -123,6 +135,7 @@ Native execution runs tools directly in the Node.js process.
 **Threat**: Sensitive data exposure through memory systems
 
 **Mitigations**:
+
 1. Encrypt data at rest in Postgres (TDE)
 2. Use Redis AUTH and TLS
 3. Implement memory TTLs for automatic expiration
@@ -137,12 +150,12 @@ Native execution runs tools directly in the Node.js process.
 NODE_ENV: production
 
 # LLM Configuration
-OPENAI_API_KEY: ${VAULT_PATH}  # Use secret manager
+OPENAI_API_KEY: ${VAULT_PATH} # Use secret manager
 ANTHROPIC_API_KEY: ${VAULT_PATH}
 
 # Database
 DATABASE_URL: postgresql://user:${DB_PASS}@host:5432/cogitator?sslmode=require
-REDIS_URL: rediss://user:${REDIS_PASS}@host:6379  # TLS enabled
+REDIS_URL: rediss://user:${REDIS_PASS}@host:6379 # TLS enabled
 
 # Sandbox defaults
 SANDBOX_DEFAULT_TYPE: wasm
@@ -181,22 +194,22 @@ spec:
             - ALL
       resources:
         limits:
-          memory: "2Gi"
-          cpu: "1"
+          memory: '2Gi'
+          cpu: '1'
 ```
 
 ## WASM vs Docker Security Comparison
 
-| Feature | WASM | Docker |
-|---------|------|--------|
-| Memory Isolation | Yes (linear memory) | Yes (cgroups) |
-| Filesystem Isolation | Yes (no access) | Yes (configurable) |
-| Network Isolation | Yes (no access) | Yes (configurable) |
-| Process Isolation | N/A (single-threaded) | Yes (PID namespace) |
-| Resource Limits | Memory pages, timeout | CPU, memory, I/O |
-| Cold Start | 1-10ms | 1-5s |
-| Overhead | ~2MB per module | 50-200MB per container |
-| Escape Risk | Very Low | Low |
+| Feature              | WASM                  | Docker                 |
+| -------------------- | --------------------- | ---------------------- |
+| Memory Isolation     | Yes (linear memory)   | Yes (cgroups)          |
+| Filesystem Isolation | Yes (no access)       | Yes (configurable)     |
+| Network Isolation    | Yes (no access)       | Yes (configurable)     |
+| Process Isolation    | N/A (single-threaded) | Yes (PID namespace)    |
+| Resource Limits      | Memory pages, timeout | CPU, memory, I/O       |
+| Cold Start           | 1-10ms                | 1-5s                   |
+| Overhead             | ~2MB per module       | 50-200MB per container |
+| Escape Risk          | Very Low              | Low                    |
 
 ## Reporting Security Issues
 
@@ -227,18 +240,19 @@ If you discover a security vulnerability:
 
 #### Security Properties Verified
 
-| Property | Status | Notes |
-|----------|--------|-------|
-| Memory isolation | ✅ | Extism provides linear memory bounds checking |
-| No filesystem access | ✅ | WASM modules cannot access host filesystem |
-| No network access | ✅ | No network primitives available in WASM |
-| Timeout enforcement | ✅ | Promise.race with configurable timeout |
-| Output size limits | ✅ | MAX_OUTPUT_SIZE = 50KB |
-| Plugin caching | ✅ | LRU cache with configurable size |
+| Property             | Status | Notes                                         |
+| -------------------- | ------ | --------------------------------------------- |
+| Memory isolation     | ✅     | Extism provides linear memory bounds checking |
+| No filesystem access | ✅     | WASM modules cannot access host filesystem    |
+| No network access    | ✅     | No network primitives available in WASM       |
+| Timeout enforcement  | ✅     | Promise.race with configurable timeout        |
+| Output size limits   | ✅     | MAX_OUTPUT_SIZE = 50KB                        |
+| Plugin caching       | ✅     | LRU cache with configurable size              |
 
 #### WASI Configuration
 
 When `wasi: true` is enabled:
+
 - Limited filesystem access may be exposed
 - Environment variables may be accessible
 - **Recommendation**: Keep `wasi: false` for untrusted code
@@ -265,14 +279,14 @@ When `wasi: true` is enabled:
 
 #### Security Controls Verified
 
-| Control | Status | Implementation |
-|---------|--------|----------------|
-| Network isolation | ✅ | `NetworkMode: 'none'` |
-| Capability dropping | ✅ | `CapDrop: ['ALL']` |
-| Privilege escalation | ✅ | `no-new-privileges` |
-| Non-root user | ✅ | User namespace mapping |
-| Resource limits | ✅ | Memory, CPU, PID limits |
-| Timeout | ✅ | Container kill after timeout |
+| Control              | Status | Implementation               |
+| -------------------- | ------ | ---------------------------- |
+| Network isolation    | ✅     | `NetworkMode: 'none'`        |
+| Capability dropping  | ✅     | `CapDrop: ['ALL']`           |
+| Privilege escalation | ✅     | `no-new-privileges`          |
+| Non-root user        | ✅     | User namespace mapping       |
+| Resource limits      | ✅     | Memory, CPU, PID limits      |
+| Timeout              | ✅     | Container kill after timeout |
 
 #### Container Pool Security
 
@@ -306,6 +320,7 @@ When `wasi: true` is enabled:
 ### Sandbox Escape Detection
 
 Monitor for:
+
 - Unexpected network connections from sandbox hosts
 - File access outside designated paths
 - Process creation outside containers

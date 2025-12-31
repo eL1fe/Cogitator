@@ -19,19 +19,15 @@ export {
   type ReduceNodeConfig,
   type MapReduceResult,
   type MapReduceNodeConfig,
-
   executeMap,
   executeReduce,
   executeMapReduce,
-
   mapNode,
   reduceNode,
   mapReduceNode,
-
   parallelMap,
   sequentialMap,
   batchedMap,
-
   collect,
   sum,
   count,

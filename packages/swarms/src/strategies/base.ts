@@ -27,16 +27,18 @@ export abstract class BaseStrategy implements IStrategy {
     input: string,
     context?: Record<string, unknown>
   ): Promise<Map<string, RunResult>> {
-    return this.coordinator.runAgentsParallel(
-      agentNames.map((name) => ({ name, input, context }))
-    );
+    return this.coordinator.runAgentsParallel(agentNames.map((name) => ({ name, input, context })));
   }
 
   /**
    * Run agents sequentially
    */
   protected async runSequential(
-    agents: { name: string; input: string | ((prevOutput?: string) => string); context?: Record<string, unknown> }[]
+    agents: {
+      name: string;
+      input: string | ((prevOutput?: string) => string);
+      context?: Record<string, unknown>;
+    }[]
   ): Promise<Map<string, RunResult>> {
     const results = new Map<string, RunResult>();
     let prevOutput: string | undefined;
@@ -81,9 +83,7 @@ export abstract class BaseStrategy implements IStrategy {
   /**
    * Merge all results into a single usage summary
    */
-  protected mergeUsage(
-    results: Map<string, RunResult>
-  ): RunResult['usage'] {
+  protected mergeUsage(results: Map<string, RunResult>): RunResult['usage'] {
     let inputTokens = 0;
     let outputTokens = 0;
     let cost = 0;

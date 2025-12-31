@@ -58,7 +58,7 @@ describe('Triggers', () => {
         bucket.consume();
         bucket.consume();
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await new Promise((resolve) => setTimeout(resolve, 150));
 
         const result = bucket.consume();
         expect(result.allowed).toBe(true);
@@ -136,7 +136,7 @@ describe('Triggers', () => {
         limiter.consume('key');
         limiter.consume('key');
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await new Promise((resolve) => setTimeout(resolve, 150));
 
         expect(limiter.consume('key').allowed).toBe(true);
       });
@@ -233,7 +233,7 @@ describe('Triggers', () => {
 
     it('respects maxConcurrent', async () => {
       const onFire = vi.fn(async () => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         return 'run-id';
       });
       const execWithFire = new CronTriggerExecutor({ onFire });
@@ -599,7 +599,7 @@ describe('Triggers', () => {
 
       manager.emitEvent('user.created', { userId: '123' });
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       expect(callback).toHaveBeenCalled();
     });
@@ -617,12 +617,12 @@ describe('Triggers', () => {
 
       manager.emitEvent('user.created', { source: 'webhook', userId: '123' });
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
       expect(callback).not.toHaveBeenCalled();
 
       manager.emitEvent('user.created', { source: 'api', userId: '456' });
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
       expect(callback).toHaveBeenCalled();
     });
 

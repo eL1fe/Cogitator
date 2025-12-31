@@ -117,8 +117,7 @@ export async function pullModel(
             progress.percent = Math.round((progress.completed / progress.total) * 100);
           }
           onProgress(progress);
-        } catch {
-        }
+        } catch {}
       }
     }
 

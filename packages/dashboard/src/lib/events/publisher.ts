@@ -56,7 +56,12 @@ let currentRunContext: { runId: string; agentId: string } | null = null;
 
 export function createCogitatorCallbacks() {
   return {
-    onRunStart: async (data: { runId: string; agentId: string; input: string; threadId: string }) => {
+    onRunStart: async (data: {
+      runId: string;
+      agentId: string;
+      input: string;
+      threadId: string;
+    }) => {
       currentRunContext = { runId: data.runId, agentId: data.agentId };
 
       const event: RunStartEvent = {
@@ -127,11 +132,9 @@ export function createCogitatorCallbacks() {
       }
     },
 
-    onToolResult: async (_result: ToolResult) => {
-    },
+    onToolResult: async (_result: ToolResult) => {},
 
-    onSpan: async (_span: Span) => {
-    },
+    onSpan: async (_span: Span) => {},
   };
 }
 

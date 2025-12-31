@@ -32,17 +32,12 @@ function rowToAgent(row: AgentRow): Agent {
 }
 
 export async function getAllAgents(): Promise<Agent[]> {
-  const rows = await query<AgentRow>(
-    'SELECT * FROM dashboard_agents ORDER BY created_at DESC'
-  );
+  const rows = await query<AgentRow>('SELECT * FROM dashboard_agents ORDER BY created_at DESC');
   return rows.map(rowToAgent);
 }
 
 export async function getAgentById(id: string): Promise<Agent | null> {
-  const row = await queryOne<AgentRow>(
-    'SELECT * FROM dashboard_agents WHERE id = $1',
-    [id]
-  );
+  const row = await queryOne<AgentRow>('SELECT * FROM dashboard_agents WHERE id = $1', [id]);
   return row ? rowToAgent(row) : null;
 }
 
@@ -64,13 +59,16 @@ export async function createAgent(data: {
   return agent!;
 }
 
-export async function updateAgent(id: string, data: Partial<{
-  name: string;
-  model: string;
-  description: string;
-  instructions: string;
-  status: 'online' | 'offline' | 'busy';
-}>): Promise<Agent | null> {
+export async function updateAgent(
+  id: string,
+  data: Partial<{
+    name: string;
+    model: string;
+    description: string;
+    instructions: string;
+    status: 'online' | 'offline' | 'busy';
+  }>
+): Promise<Agent | null> {
   const updates: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -127,15 +125,20 @@ export async function incrementAgentStats(id: string, tokens: number, cost: numb
   );
 }
 
-export async function setAgentStatus(id: string, status: 'online' | 'offline' | 'busy'): Promise<void> {
-  await execute(
-    'UPDATE dashboard_agents SET status = $1, updated_at = NOW() WHERE id = $2',
-    [status, id]
-  );
+export async function setAgentStatus(
+  id: string,
+  status: 'online' | 'offline' | 'busy'
+): Promise<void> {
+  await execute('UPDATE dashboard_agents SET status = $1, updated_at = NOW() WHERE id = $2', [
+    status,
+    id,
+  ]);
 }
 
 export async function getAgentCount(): Promise<number> {
-  const result = await queryOne<{ count: string }>('SELECT COUNT(*) as count FROM dashboard_agents');
+  const result = await queryOne<{ count: string }>(
+    'SELECT COUNT(*) as count FROM dashboard_agents'
+  );
   return parseInt(result?.count || '0');
 }
 
@@ -144,9 +147,21 @@ export async function seedDefaultAgents(): Promise<void> {
 
   if (count === 0) {
     const defaultAgents = [
-      { name: 'Research Agent', model: 'gpt-4o', description: 'Analyzes data and provides comprehensive research reports' },
-      { name: 'Code Assistant', model: 'claude-3-5-sonnet', description: 'Helps with code reviews, refactoring, and documentation' },
-      { name: 'Data Analyst', model: 'gpt-4o-mini', description: 'Processes data and generates analytical insights' },
+      {
+        name: 'Research Agent',
+        model: 'gpt-4o',
+        description: 'Analyzes data and provides comprehensive research reports',
+      },
+      {
+        name: 'Code Assistant',
+        model: 'claude-3-5-sonnet',
+        description: 'Helps with code reviews, refactoring, and documentation',
+      },
+      {
+        name: 'Data Analyst',
+        model: 'gpt-4o-mini',
+        description: 'Processes data and generates analytical insights',
+      },
     ];
 
     for (const agent of defaultAgents) {

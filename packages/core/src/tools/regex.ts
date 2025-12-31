@@ -8,7 +8,10 @@ import { tool } from '../tool';
 const regexMatchParams = z.object({
   text: z.string().describe('The text to search in'),
   pattern: z.string().describe('Regular expression pattern'),
-  flags: z.string().optional().describe('Regex flags (default: "g"). Common: g=global, i=case-insensitive, m=multiline'),
+  flags: z
+    .string()
+    .optional()
+    .describe('Regex flags (default: "g"). Common: g=global, i=case-insensitive, m=multiline'),
 });
 
 export const regexMatch = tool({

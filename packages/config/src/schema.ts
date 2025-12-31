@@ -4,13 +4,7 @@
 
 import { z } from 'zod';
 
-export const LLMProviderSchema = z.enum([
-  'ollama',
-  'openai',
-  'anthropic',
-  'google',
-  'vllm',
-]);
+export const LLMProviderSchema = z.enum(['ollama', 'openai', 'anthropic', 'google', 'vllm']);
 
 export const ProvidersConfigSchema = z.object({
   ollama: z.object({ baseUrl: z.string() }).optional(),

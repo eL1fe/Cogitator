@@ -93,9 +93,7 @@ export class DockerSandboxExecutor extends BaseSandboxExecutor {
 
     try {
       const container = await this.pool.acquire(image, {
-        memory: config.resources?.memory
-          ? parseMemory(config.resources.memory)
-          : undefined,
+        memory: config.resources?.memory ? parseMemory(config.resources.memory) : undefined,
         cpus: config.resources?.cpus,
         cpuShares: config.resources?.cpuShares,
         pidsLimit: config.resources?.pidsLimit,
@@ -107,9 +105,7 @@ export class DockerSandboxExecutor extends BaseSandboxExecutor {
       try {
         const exec = await container.exec({
           Cmd: request.command,
-          Env: Object.entries({ ...config.env, ...request.env }).map(
-            ([k, v]) => `${k}=${v}`
-          ),
+          Env: Object.entries({ ...config.env, ...request.env }).map(([k, v]) => `${k}=${v}`),
           WorkingDir: request.cwd ?? config.workdir ?? '/workspace',
           AttachStdout: true,
           AttachStderr: true,

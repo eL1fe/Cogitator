@@ -64,8 +64,7 @@ export class WasmSandboxExecutor extends BaseSandboxExecutor {
     for (const plugin of this.pluginCache.values()) {
       try {
         await plugin.close();
-      } catch {
-      }
+      } catch {}
     }
     this.pluginCache.clear();
     this.cacheOrder = [];
@@ -117,10 +116,7 @@ export class WasmSandboxExecutor extends BaseSandboxExecutor {
     }
   }
 
-  private async getOrCreatePlugin(
-    wasmModule: string,
-    useWasi: boolean
-  ): Promise<ExtismPlugin> {
+  private async getOrCreatePlugin(wasmModule: string, useWasi: boolean): Promise<ExtismPlugin> {
     const cacheKey = `${wasmModule}:${useWasi}`;
 
     if (this.pluginCache.has(cacheKey)) {
@@ -146,7 +142,9 @@ export class WasmSandboxExecutor extends BaseSandboxExecutor {
     return plugin;
   }
 
-  private async loadWasmSource(wasmModule: string): Promise<Uint8Array | { wasm: { url: string }[] }> {
+  private async loadWasmSource(
+    wasmModule: string
+  ): Promise<Uint8Array | { wasm: { url: string }[] }> {
     if (wasmModule.startsWith('http://') || wasmModule.startsWith('https://')) {
       return { wasm: [{ url: wasmModule }] };
     }

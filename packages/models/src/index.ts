@@ -19,10 +19,7 @@ export {
 
 export { ModelCache } from './cache';
 
-export {
-  fetchLiteLLMData,
-  transformLiteLLMData,
-} from './fetcher';
+export { fetchLiteLLMData, transformLiteLLMData } from './fetcher';
 
 export {
   BUILTIN_MODELS,

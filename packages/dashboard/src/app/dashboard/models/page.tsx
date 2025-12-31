@@ -132,8 +132,7 @@ export default function ModelsPage() {
               } else {
                 setPulling((prev) => ({ ...prev, [name]: progress }));
               }
-            } catch {
-            }
+            } catch {}
           }
         }
       }
@@ -194,295 +193,266 @@ export default function ModelsPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between animate-fade-in">
-              <div>
-                <h1 className="text-2xl font-semibold text-text-primary">
-                  Models
-                </h1>
-                <p className="text-text-secondary mt-1">
-                  Manage local and cloud AI models
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setLoading(true);
-                  fetchModels();
-                }}
-                className="gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
+      {/* Header */}
+      <div className="flex items-center justify-between animate-fade-in">
+        <div>
+          <h1 className="text-2xl font-semibold text-text-primary">Models</h1>
+          <p className="text-text-secondary mt-1">Manage local and cloud AI models</p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setLoading(true);
+            fetchModels();
+          }}
+          className="gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
+
+      {/* Ollama Status */}
+      <Card className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className={`p-3 rounded-xl ${data?.ollama.available ? 'bg-success/10' : 'bg-error/10'}`}
+            >
+              <Server
+                className={`w-6 h-6 ${data?.ollama.available ? 'text-success' : 'text-error'}`}
+              />
             </div>
+            <div>
+              <h3 className="font-medium text-text-primary">Ollama</h3>
+              <p className="text-sm text-text-secondary">
+                {data?.ollama.available ? `Running v${data.ollama.version}` : 'Not connected'}
+              </p>
+            </div>
+          </div>
+          <Badge variant={data?.ollama.available ? 'success' : 'error'}>
+            {data?.ollama.available ? 'Online' : 'Offline'}
+          </Badge>
+        </div>
+      </Card>
 
-            {/* Ollama Status */}
-            <Card className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`p-3 rounded-xl ${data?.ollama.available ? 'bg-success/10' : 'bg-error/10'}`}>
-                    <Server className={`w-6 h-6 ${data?.ollama.available ? 'text-success' : 'text-error'}`} />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-text-primary">Ollama</h3>
-                    <p className="text-sm text-text-secondary">
-                      {data?.ollama.available
-                        ? `Running v${data.ollama.version}`
-                        : 'Not connected'}
-                    </p>
-                  </div>
+      {/* Downloaded Models */}
+      <Card className="animate-fade-in" style={{ animationDelay: '150ms' }}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium text-text-primary flex items-center gap-2">
+            <HardDrive className="w-5 h-5" />
+            Downloaded Models
+          </h3>
+          <span className="text-sm text-text-muted">{data?.ollama.models.length || 0} models</span>
+        </div>
+
+        {loading ? (
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center gap-4 p-3">
+                <Skeleton className="h-10 w-10 rounded-lg" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-3 w-32" />
                 </div>
-                <Badge variant={data?.ollama.available ? 'success' : 'error'}>
-                  {data?.ollama.available ? 'Online' : 'Offline'}
-                </Badge>
+                <Skeleton className="h-8 w-20" />
               </div>
-            </Card>
-
-            {/* Downloaded Models */}
-            <Card className="animate-fade-in" style={{ animationDelay: '150ms' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-text-primary flex items-center gap-2">
-                  <HardDrive className="w-5 h-5" />
-                  Downloaded Models
-                </h3>
-                <span className="text-sm text-text-muted">
-                  {data?.ollama.models.length || 0} models
-                </span>
-              </div>
-
-              {loading ? (
-                <div className="space-y-3">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="flex items-center gap-4 p-3">
-                      <Skeleton className="h-10 w-10 rounded-lg" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-48" />
-                        <Skeleton className="h-3 w-32" />
-                      </div>
-                      <Skeleton className="h-8 w-20" />
-                    </div>
-                  ))}
+            ))}
+          </div>
+        ) : !data?.ollama.available ? (
+          <div className="py-8 text-center text-text-muted">
+            <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p>Ollama is not running</p>
+            <p className="text-sm mt-1">Start Ollama to manage local models</p>
+          </div>
+        ) : data.ollama.models.length === 0 ? (
+          <div className="py-8 text-center text-text-muted">
+            <Cpu className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p>No models downloaded</p>
+            <p className="text-sm mt-1">Download a model from the list below</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {data.ollama.models.map((model) => (
+              <div
+                key={model.name}
+                className="flex items-center gap-4 p-3 rounded-lg bg-bg-tertiary"
+              >
+                <div className="p-2 bg-accent/10 rounded-lg">
+                  <Cpu className="w-5 h-5 text-accent" />
                 </div>
-              ) : !data?.ollama.available ? (
-                <div className="py-8 text-center text-text-muted">
-                  <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p>Ollama is not running</p>
-                  <p className="text-sm mt-1">Start Ollama to manage local models</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-text-primary">{model.displayName}</p>
+                  <p className="text-sm text-text-secondary">
+                    {model.parameterSize} • {model.sizeFormatted} • {model.quantization}
+                  </p>
                 </div>
-              ) : data.ollama.models.length === 0 ? (
-                <div className="py-8 text-center text-text-muted">
-                  <Cpu className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p>No models downloaded</p>
-                  <p className="text-sm mt-1">Download a model from the list below</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {data.ollama.models.map((model) => (
-                    <div
-                      key={model.name}
-                      className="flex items-center gap-4 p-3 rounded-lg bg-bg-tertiary"
-                    >
-                      <div className="p-2 bg-accent/10 rounded-lg">
-                        <Cpu className="w-5 h-5 text-accent" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-text-primary">
-                          {model.displayName}
-                        </p>
-                        <p className="text-sm text-text-secondary">
-                          {model.parameterSize} • {model.sizeFormatted} • {model.quantization}
-                        </p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteModel(model.name)}
-                        disabled={deleting === model.name}
-                        className="text-error hover:bg-error/10"
-                      >
-                        {deleting === model.name ? (
-                          <RefreshCw className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-4 h-4" />
-                        )}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Card>
-
-            {/* Available Models */}
-            <Card className="animate-fade-in" style={{ animationDelay: '200ms' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-text-primary flex items-center gap-2">
-                  <Download className="w-5 h-5" />
-                  Available Models
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {data?.available.map((model) => {
-                  const progress = pulling[model.name];
-                  const isPulling = !!progress;
-
-                  return (
-                    <div
-                      key={model.name}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-border-primary"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-text-primary text-sm">
-                          {model.name}
-                        </p>
-                        <p className="text-xs text-text-muted truncate">
-                          {model.description}
-                        </p>
-                        <p className="text-xs text-text-secondary mt-1">
-                          {model.size}
-                        </p>
-                      </div>
-
-                      {isPulling ? (
-                        <div className="w-32">
-                          <div className="flex items-center justify-between text-xs mb-1">
-                            <span className="text-text-muted truncate">
-                              {progress.status}
-                            </span>
-                            {progress.percent !== undefined && (
-                              <span className="text-accent">{progress.percent}%</span>
-                            )}
-                          </div>
-                          <div className="h-1.5 bg-bg-tertiary rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-accent transition-all duration-300"
-                              style={{ width: `${progress.percent || 0}%` }}
-                            />
-                          </div>
-                        </div>
-                      ) : model.isDownloaded ? (
-                        <Badge variant="success" size="sm" className="gap-1">
-                          <Check className="w-3 h-3" />
-                          Installed
-                        </Badge>
-                      ) : (
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => pullModel(model.name)}
-                          disabled={!data?.ollama.available}
-                          className="gap-1"
-                        >
-                          <Download className="w-3 h-3" />
-                          Pull
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </Card>
-
-            {/* Cloud Providers */}
-            <Card className="animate-fade-in" style={{ animationDelay: '250ms' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-text-primary flex items-center gap-2">
-                  <Cloud className="w-5 h-5" />
-                  Cloud Providers
-                </h3>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowApiKeys(!showApiKeys)}
-                  className="gap-2"
+                  onClick={() => deleteModel(model.name)}
+                  disabled={deleting === model.name}
+                  className="text-error hover:bg-error/10"
                 >
-                  <Key className="w-4 h-4" />
-                  {showApiKeys ? 'Hide' : 'Configure'} API Keys
+                  {deleting === model.name ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
+            ))}
+          </div>
+        )}
+      </Card>
 
-              {showApiKeys && (
-                <div className="mb-6 p-4 bg-bg-tertiary rounded-lg space-y-4">
-                  <div>
-                    <label className="block text-sm text-text-secondary mb-1">
-                      OpenAI API Key
-                    </label>
-                    <Input
-                      type="password"
-                      placeholder="sk-..."
-                      value={apiKeys.openai}
-                      onChange={(e) =>
-                        setApiKeys((prev) => ({ ...prev, openai: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-text-secondary mb-1">
-                      Anthropic API Key
-                    </label>
-                    <Input
-                      type="password"
-                      placeholder="sk-ant-..."
-                      value={apiKeys.anthropic}
-                      onChange={(e) =>
-                        setApiKeys((prev) => ({ ...prev, anthropic: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-text-secondary mb-1">
-                      Google API Key
-                    </label>
-                    <Input
-                      type="password"
-                      placeholder="AIza..."
-                      value={apiKeys.google}
-                      onChange={(e) =>
-                        setApiKeys((prev) => ({ ...prev, google: e.target.value }))
-                      }
-                    />
-                  </div>
-                  <Button
-                    variant="primary"
-                    onClick={saveApiKeys}
-                    disabled={savingKeys}
-                    className="w-full"
-                  >
-                    {savingKeys ? 'Saving...' : 'Save API Keys'}
-                  </Button>
+      {/* Available Models */}
+      <Card className="animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium text-text-primary flex items-center gap-2">
+            <Download className="w-5 h-5" />
+            Available Models
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {data?.available.map((model) => {
+            const progress = pulling[model.name];
+            const isPulling = !!progress;
+
+            return (
+              <div
+                key={model.name}
+                className="flex items-center gap-3 p-3 rounded-lg border border-border-primary"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-text-primary text-sm">{model.name}</p>
+                  <p className="text-xs text-text-muted truncate">{model.description}</p>
+                  <p className="text-xs text-text-secondary mt-1">{model.size}</p>
                 </div>
-              )}
 
-              <div className="space-y-3">
-                {data?.cloud.map((provider) => (
-                  <div
-                    key={provider.id}
-                    className="flex items-center gap-4 p-3 rounded-lg border border-border-primary"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-text-primary">
-                          {provider.name}
-                        </p>
-                        <Badge
-                          variant={provider.configured ? 'success' : 'outline'}
-                          size="sm"
-                        >
-                          {provider.configured ? 'Configured' : 'Not configured'}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-text-muted mt-1">
-                        {provider.models.map((m: { id: string; name: string } | string) =>
-                          typeof m === 'string' ? m : m.name
-                        ).join(', ')}
-                      </p>
+                {isPulling ? (
+                  <div className="w-32">
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="text-text-muted truncate">{progress.status}</span>
+                      {progress.percent !== undefined && (
+                        <span className="text-accent">{progress.percent}%</span>
+                      )}
+                    </div>
+                    <div className="h-1.5 bg-bg-tertiary rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-accent transition-all duration-300"
+                        style={{ width: `${progress.percent || 0}%` }}
+                      />
                     </div>
                   </div>
-                ))}
+                ) : model.isDownloaded ? (
+                  <Badge variant="success" size="sm" className="gap-1">
+                    <Check className="w-3 h-3" />
+                    Installed
+                  </Badge>
+                ) : (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => pullModel(model.name)}
+                    disabled={!data?.ollama.available}
+                    className="gap-1"
+                  >
+                    <Download className="w-3 h-3" />
+                    Pull
+                  </Button>
+                )}
               </div>
-            </Card>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Cloud Providers */}
+      <Card className="animate-fade-in" style={{ animationDelay: '250ms' }}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium text-text-primary flex items-center gap-2">
+            <Cloud className="w-5 h-5" />
+            Cloud Providers
+          </h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowApiKeys(!showApiKeys)}
+            className="gap-2"
+          >
+            <Key className="w-4 h-4" />
+            {showApiKeys ? 'Hide' : 'Configure'} API Keys
+          </Button>
+        </div>
+
+        {showApiKeys && (
+          <div className="mb-6 p-4 bg-bg-tertiary rounded-lg space-y-4">
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">OpenAI API Key</label>
+              <Input
+                type="password"
+                placeholder="sk-..."
+                value={apiKeys.openai}
+                onChange={(e) => setApiKeys((prev) => ({ ...prev, openai: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Anthropic API Key</label>
+              <Input
+                type="password"
+                placeholder="sk-ant-..."
+                value={apiKeys.anthropic}
+                onChange={(e) => setApiKeys((prev) => ({ ...prev, anthropic: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1">Google API Key</label>
+              <Input
+                type="password"
+                placeholder="AIza..."
+                value={apiKeys.google}
+                onChange={(e) => setApiKeys((prev) => ({ ...prev, google: e.target.value }))}
+              />
+            </div>
+            <Button
+              variant="primary"
+              onClick={saveApiKeys}
+              disabled={savingKeys}
+              className="w-full"
+            >
+              {savingKeys ? 'Saving...' : 'Save API Keys'}
+            </Button>
+          </div>
+        )}
+
+        <div className="space-y-3">
+          {data?.cloud.map((provider) => (
+            <div
+              key={provider.id}
+              className="flex items-center gap-4 p-3 rounded-lg border border-border-primary"
+            >
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-text-primary">{provider.name}</p>
+                  <Badge variant={provider.configured ? 'success' : 'outline'} size="sm">
+                    {provider.configured ? 'Configured' : 'Not configured'}
+                  </Badge>
+                </div>
+                <p className="text-sm text-text-muted mt-1">
+                  {provider.models
+                    .map((m: { id: string; name: string } | string) =>
+                      typeof m === 'string' ? m : m.name
+                    )
+                    .join(', ')}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 }

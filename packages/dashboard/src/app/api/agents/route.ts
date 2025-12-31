@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import {
-  getAgents,
-  createAgent,
-  initializeExtendedSchema,
-} from '@/lib/cogitator/db';
+import { getAgents, createAgent, initializeExtendedSchema } from '@/lib/cogitator/db';
 import { initializeSchema } from '@/lib/db';
 import { getAvailableTools } from '@/lib/cogitator';
 import { withAuth } from '@/lib/auth/middleware';
@@ -45,7 +41,7 @@ export const POST = withAuth(async (request) => {
       return NextResponse.json(
         {
           error: 'Validation failed',
-          details: parsed.error.errors.map(e => ({
+          details: parsed.error.errors.map((e) => ({
             path: e.path.join('.'),
             message: e.message,
           })),

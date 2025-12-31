@@ -95,9 +95,7 @@ export function SystemHealth() {
       name: 'Redis',
       key: 'redis' as const,
       icon: Server,
-      detail: health?.services.redis.latency
-        ? `${health.services.redis.latency}ms`
-        : undefined,
+      detail: health?.services.redis.latency ? `${health.services.redis.latency}ms` : undefined,
     },
     {
       name: 'Ollama',
@@ -129,21 +127,14 @@ export function SystemHealth() {
           const ServiceIcon = service.icon;
 
           return (
-            <div
-              key={service.key}
-              className="flex items-center gap-3 p-2 rounded-lg"
-            >
+            <div key={service.key} className="flex items-center gap-3 p-2 rounded-lg">
               <div className={`p-2 rounded ${config.bg}`}>
                 <ServiceIcon className={`w-4 h-4 ${config.color}`} />
               </div>
 
               <div className="flex-1">
-                <p className="text-sm font-medium text-text-primary">
-                  {service.name}
-                </p>
-                {service.detail && (
-                  <p className="text-xs text-text-muted">{service.detail}</p>
-                )}
+                <p className="text-sm font-medium text-text-primary">{service.name}</p>
+                {service.detail && <p className="text-xs text-text-muted">{service.detail}</p>}
               </div>
 
               <Icon className={`w-4 h-4 ${config.color}`} />

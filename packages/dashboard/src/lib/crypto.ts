@@ -5,7 +5,10 @@ const IV_LENGTH = 16;
 const KEY_LENGTH = 32;
 
 function getEncryptionKey(): Buffer {
-  const secret = process.env.COGITATOR_ENCRYPTION_KEY || process.env.NEXTAUTH_SECRET || 'cogitator-default-key-change-in-production';
+  const secret =
+    process.env.COGITATOR_ENCRYPTION_KEY ||
+    process.env.NEXTAUTH_SECRET ||
+    'cogitator-default-key-change-in-production';
   const salt = process.env.COGITATOR_ENCRYPTION_SALT || 'cogitator-salt';
   return scryptSync(secret, salt, KEY_LENGTH);
 }
@@ -47,7 +50,7 @@ export function decrypt(encryptedText: string): string {
 export function isEncrypted(text: string): boolean {
   const parts = text.split(':');
   if (parts.length !== 3) return false;
-  return parts.every(part => /^[0-9a-f]+$/i.test(part));
+  return parts.every((part) => /^[0-9a-f]+$/i.test(part));
 }
 
 export function maskApiKey(key: string): string {

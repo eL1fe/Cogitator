@@ -11,7 +11,11 @@ export {
   DockerSandboxExecutor,
   type DockerExecutorOptions,
 } from './executors/index';
-export { ContainerPool, type ContainerPoolOptions, type ContainerCreateOptions } from './pool/index';
+export {
+  ContainerPool,
+  type ContainerPoolOptions,
+  type ContainerCreateOptions,
+} from './pool/index';
 export { parseMemory, cpusToNanoCpus } from './utils/index';
 
 export type {

@@ -51,20 +51,20 @@ docker-compose -f docker-compose.cpu.yml up -d
 
 After starting Docker, these services will be available:
 
-| Service    | Port  | Description                          |
-|------------|-------|--------------------------------------|
-| PostgreSQL | 5432  | Primary database with pgvector       |
-| Redis      | 6379  | Cache, events, short-term memory     |
-| Ollama     | 11434 | Local LLM runtime                    |
+| Service    | Port  | Description                      |
+| ---------- | ----- | -------------------------------- |
+| PostgreSQL | 5432  | Primary database with pgvector   |
+| Redis      | 6379  | Cache, events, short-term memory |
+| Ollama     | 11434 | Local LLM runtime                |
 
 ## Pre-installed Models
 
 The setup includes:
 
-| Model                      | Purpose                    | Size   |
-|---------------------------|----------------------------|--------|
-| `nomic-embed-text-v2-moe` | Embeddings for memory      | ~274MB |
-| `llama3.2:3b`             | Default chat model         | ~2GB   |
+| Model                     | Purpose               | Size   |
+| ------------------------- | --------------------- | ------ |
+| `nomic-embed-text-v2-moe` | Embeddings for memory | ~274MB |
+| `llama3.2:3b`             | Default chat model    | ~2GB   |
 
 ## Commands Reference
 
@@ -174,6 +174,7 @@ SELECT * FROM search_memory_by_embedding(
 ### NVIDIA GPU
 
 The default `docker-compose.yml` includes GPU support. Requirements:
+
 - NVIDIA GPU with CUDA support
 - [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
 
@@ -244,10 +245,9 @@ make setup
 For production, consider:
 
 1. **External PostgreSQL** with proper backups
-2. **Redis Cluster** for high availability  
+2. **Redis Cluster** for high availability
 3. **GPU server** for Ollama (or use cloud APIs)
 4. **Reverse proxy** (nginx, Caddy) for HTTPS
 5. **Environment secrets** management
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for production deployment guide.
-

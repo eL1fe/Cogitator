@@ -92,7 +92,10 @@ describe('Logger', () => {
 
     it('can add call-time context to child', () => {
       const entries: LogEntry[] = [];
-      const parent = new Logger({ level: 'debug', output: (entry) => entries.push(entry) }, { service: 'api' });
+      const parent = new Logger(
+        { level: 'debug', output: (entry) => entries.push(entry) },
+        { service: 'api' }
+      );
 
       const child = parent.child({ requestId: 'req-123' });
       child.info('operation', { operation: 'fetch' });

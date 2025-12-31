@@ -21,10 +21,18 @@ describe('jsonParse tool', () => {
   });
 
   it('parses JSON primitives', async () => {
-    expect((await jsonParse.execute({ json: '"hello"' }, mockContext) as { result: string }).result).toBe('hello');
-    expect((await jsonParse.execute({ json: '42' }, mockContext) as { result: number }).result).toBe(42);
-    expect((await jsonParse.execute({ json: 'true' }, mockContext) as { result: boolean }).result).toBe(true);
-    expect((await jsonParse.execute({ json: 'null' }, mockContext) as { result: null }).result).toBe(null);
+    expect(
+      ((await jsonParse.execute({ json: '"hello"' }, mockContext)) as { result: string }).result
+    ).toBe('hello');
+    expect(
+      ((await jsonParse.execute({ json: '42' }, mockContext)) as { result: number }).result
+    ).toBe(42);
+    expect(
+      ((await jsonParse.execute({ json: 'true' }, mockContext)) as { result: boolean }).result
+    ).toBe(true);
+    expect(
+      ((await jsonParse.execute({ json: 'null' }, mockContext)) as { result: null }).result
+    ).toBe(null);
   });
 
   it('returns error for invalid JSON', async () => {
@@ -56,7 +64,10 @@ describe('jsonStringify tool', () => {
   });
 
   it('respects custom indent', async () => {
-    const result = await jsonStringify.execute({ data: { a: 1 }, pretty: true, indent: 4 }, mockContext);
+    const result = await jsonStringify.execute(
+      { data: { a: 1 }, pretty: true, indent: 4 },
+      mockContext
+    );
     expect((result as { result: string }).result).toBe('{\n    "a": 1\n}');
   });
 
@@ -66,9 +77,15 @@ describe('jsonStringify tool', () => {
   });
 
   it('stringifies primitives', async () => {
-    expect((await jsonStringify.execute({ data: 'hello' }, mockContext) as { result: string }).result).toBe('"hello"');
-    expect((await jsonStringify.execute({ data: 42 }, mockContext) as { result: string }).result).toBe('42');
-    expect((await jsonStringify.execute({ data: null }, mockContext) as { result: string }).result).toBe('null');
+    expect(
+      ((await jsonStringify.execute({ data: 'hello' }, mockContext)) as { result: string }).result
+    ).toBe('"hello"');
+    expect(
+      ((await jsonStringify.execute({ data: 42 }, mockContext)) as { result: string }).result
+    ).toBe('42');
+    expect(
+      ((await jsonStringify.execute({ data: null }, mockContext)) as { result: string }).result
+    ).toBe('null');
   });
 
   it('has correct metadata', () => {

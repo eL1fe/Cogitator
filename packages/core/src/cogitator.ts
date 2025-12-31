@@ -36,8 +36,24 @@ type SandboxManager = {
   initialize(): Promise<void>;
   execute(
     request: { command: string[]; cwd?: string; env?: Record<string, string>; timeout?: number },
-    config: { type: string; image?: string; resources?: unknown; network?: unknown; timeout?: number }
-  ): Promise<{ success: boolean; data?: { stdout: string; stderr: string; exitCode: number; timedOut: boolean; duration: number }; error?: string }>;
+    config: {
+      type: string;
+      image?: string;
+      resources?: unknown;
+      network?: unknown;
+      timeout?: number;
+    }
+  ): Promise<{
+    success: boolean;
+    data?: {
+      stdout: string;
+      stderr: string;
+      exitCode: number;
+      timedOut: boolean;
+      duration: number;
+    };
+    error?: string;
+  }>;
   isDockerAvailable(): Promise<boolean>;
   shutdown(): Promise<void>;
 };
@@ -380,7 +396,11 @@ export class Cogitator {
             };
             messages.push(toolMessage);
 
-            if (this.memoryAdapter && options.saveHistory !== false && options.useMemory !== false) {
+            if (
+              this.memoryAdapter &&
+              options.saveHistory !== false &&
+              options.useMemory !== false
+            ) {
               await this.saveEntry(threadId, toolMessage, undefined, [result]);
             }
           }
@@ -452,7 +472,7 @@ export class Cogitator {
           'agent.name': agent.name,
           'agent.model': agent.model,
           'run.id': runId,
-          'error': error instanceof Error ? error.message : String(error),
+          error: error instanceof Error ? error.message : String(error),
         },
         'error',
         'server',

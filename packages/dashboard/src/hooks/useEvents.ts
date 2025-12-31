@@ -63,37 +63,37 @@ export function useEvents(options: UseEventsOptions = {}) {
       };
 
       eventSource.addEventListener('connected', (event) => {
-        const data = JSON.parse((event).data);
+        const data = JSON.parse(event.data);
         const handlers = handlersRef.current.get('connected');
         handlers?.forEach((handler) => handler(data));
       });
 
       eventSource.addEventListener('run', (event) => {
-        const data = JSON.parse((event).data);
+        const data = JSON.parse(event.data);
         const handlers = handlersRef.current.get('run');
         handlers?.forEach((handler) => handler(data));
       });
 
       eventSource.addEventListener('log', (event) => {
-        const data = JSON.parse((event).data);
+        const data = JSON.parse(event.data);
         const handlers = handlersRef.current.get('log');
         handlers?.forEach((handler) => handler(data));
       });
 
       eventSource.addEventListener('agent', (event) => {
-        const data = JSON.parse((event).data);
+        const data = JSON.parse(event.data);
         const handlers = handlersRef.current.get('agent');
         handlers?.forEach((handler) => handler(data));
       });
 
       eventSource.addEventListener('workflow', (event) => {
-        const data = JSON.parse((event).data);
+        const data = JSON.parse(event.data);
         const handlers = handlersRef.current.get('workflow');
         handlers?.forEach((handler) => handler(data));
       });
 
       eventSource.addEventListener('swarm', (event) => {
-        const data = JSON.parse((event).data);
+        const data = JSON.parse(event.data);
         const handlers = handlersRef.current.get('swarm');
         handlers?.forEach((handler) => handler(data));
       });
@@ -173,9 +173,7 @@ export function useRunEvents(
           options.onToken?.(event.payload as string);
           break;
         case 'toolCall':
-          options.onToolCall?.(
-            event.payload as { id: string; name: string; arguments: unknown }
-          );
+          options.onToolCall?.(event.payload as { id: string; name: string; arguments: unknown });
           break;
         case 'toolResult':
           options.onToolResult?.(

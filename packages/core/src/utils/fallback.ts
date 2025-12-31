@@ -46,10 +46,7 @@ export interface FallbackConfig<T> {
 export async function withFallback<T>(config: FallbackConfig<T>): Promise<T> {
   const { primary, fallbacks, retry, circuitBreakers, onFallback } = config;
 
-  const operations = [
-    { name: 'primary', fn: primary },
-    ...fallbacks,
-  ];
+  const operations = [{ name: 'primary', fn: primary }, ...fallbacks];
 
   let lastError: Error | undefined;
 

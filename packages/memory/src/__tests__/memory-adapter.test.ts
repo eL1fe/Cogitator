@@ -133,8 +133,16 @@ describe('InMemoryAdapter', () => {
     });
 
     it('gets entries for a thread', async () => {
-      await adapter.addEntry({ threadId, message: { role: 'user', content: 'One' }, tokenCount: 5 });
-      await adapter.addEntry({ threadId, message: { role: 'assistant', content: 'Two' }, tokenCount: 5 });
+      await adapter.addEntry({
+        threadId,
+        message: { role: 'user', content: 'One' },
+        tokenCount: 5,
+      });
+      await adapter.addEntry({
+        threadId,
+        message: { role: 'assistant', content: 'Two' },
+        tokenCount: 5,
+      });
 
       const result = await adapter.getEntries({ threadId });
 
@@ -168,7 +176,11 @@ describe('InMemoryAdapter', () => {
     it('filters by before/after dates', async () => {
       const before = new Date();
       await new Promise((r) => setTimeout(r, 10));
-      await adapter.addEntry({ threadId, message: { role: 'user', content: 'After' }, tokenCount: 5 });
+      await adapter.addEntry({
+        threadId,
+        message: { role: 'user', content: 'After' },
+        tokenCount: 5,
+      });
 
       const result = await adapter.getEntries({ threadId, before });
 

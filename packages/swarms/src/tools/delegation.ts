@@ -22,7 +22,10 @@ export function createDelegationTools(
       task: z.string().describe('The task description to delegate'),
       context: z.record(z.unknown()).optional().describe('Additional context for the worker'),
       priority: z.enum(['high', 'normal', 'low']).optional().describe('Task priority'),
-      waitForCompletion: z.boolean().optional().describe('Wait for worker to complete (default: true)'),
+      waitForCompletion: z
+        .boolean()
+        .optional()
+        .describe('Wait for worker to complete (default: true)'),
     }),
     execute: async ({ worker, task, context, priority = 'normal', waitForCompletion = true }) => {
       const workerAgent = coordinator.getAgent(worker);
@@ -31,18 +34,21 @@ export function createDelegationTools(
         return {
           success: false,
           error: `Worker agent '${worker}' not found`,
-          availableWorkers: coordinator.getAgentsByRole('worker').map(a => a.agent.name),
+          availableWorkers: coordinator.getAgentsByRole('worker').map((a) => a.agent.name),
         };
       }
 
-      const tasks = blackboard.read<{
-        id: string;
-        worker: string;
-        task: string;
-        status: string;
-        delegatedBy: string;
-        timestamp: number;
-      }[]>('tasks') ?? [];
+      const tasks =
+        blackboard.read<
+          {
+            id: string;
+            worker: string;
+            task: string;
+            status: string;
+            delegatedBy: string;
+            timestamp: number;
+          }[]
+        >('tasks') ?? [];
 
       const taskId = `task_${Date.now()}_${worker}`;
       tasks.push({
@@ -56,32 +62,35 @@ export function createDelegationTools(
       blackboard.write('tasks', tasks, currentAgent);
 
       if (!waitForCompletion) {
-        coordinator.runAgent(worker, task, {
-          ...context,
-          delegationContext: {
-            delegatedBy: currentAgent,
-            taskId,
-            priority,
-          },
-        }).then(result => {
-          const currentTasks = blackboard.read<typeof tasks>('tasks') ?? [];
-          const taskIndex = currentTasks.findIndex(t => t.id === taskId);
-          if (taskIndex >= 0) {
-            currentTasks[taskIndex].status = 'completed';
-          }
-          blackboard.write('tasks', currentTasks, worker);
+        coordinator
+          .runAgent(worker, task, {
+            ...context,
+            delegationContext: {
+              delegatedBy: currentAgent,
+              taskId,
+              priority,
+            },
+          })
+          .then((result) => {
+            const currentTasks = blackboard.read<typeof tasks>('tasks') ?? [];
+            const taskIndex = currentTasks.findIndex((t) => t.id === taskId);
+            if (taskIndex >= 0) {
+              currentTasks[taskIndex].status = 'completed';
+            }
+            blackboard.write('tasks', currentTasks, worker);
 
-          const workerResults = blackboard.read<Record<string, unknown>>('workerResults') ?? {};
-          workerResults[taskId] = result.output;
-          blackboard.write('workerResults', workerResults, worker);
-        }).catch(() => {
-          const currentTasks = blackboard.read<typeof tasks>('tasks') ?? [];
-          const taskIndex = currentTasks.findIndex(t => t.id === taskId);
-          if (taskIndex >= 0) {
-            currentTasks[taskIndex].status = 'failed';
-          }
-          blackboard.write('tasks', currentTasks, worker);
-        });
+            const workerResults = blackboard.read<Record<string, unknown>>('workerResults') ?? {};
+            workerResults[taskId] = result.output;
+            blackboard.write('workerResults', workerResults, worker);
+          })
+          .catch(() => {
+            const currentTasks = blackboard.read<typeof tasks>('tasks') ?? [];
+            const taskIndex = currentTasks.findIndex((t) => t.id === taskId);
+            if (taskIndex >= 0) {
+              currentTasks[taskIndex].status = 'failed';
+            }
+            blackboard.write('tasks', currentTasks, worker);
+          });
 
         return {
           success: true,
@@ -103,7 +112,7 @@ export function createDelegationTools(
         });
 
         const currentTasks = blackboard.read<typeof tasks>('tasks') ?? [];
-        const taskIndex = currentTasks.findIndex(t => t.id === taskId);
+        const taskIndex = currentTasks.findIndex((t) => t.id === taskId);
         if (taskIndex >= 0) {
           currentTasks[taskIndex].status = 'completed';
         }
@@ -126,7 +135,7 @@ export function createDelegationTools(
         };
       } catch (error) {
         const currentTasks = blackboard.read<typeof tasks>('tasks') ?? [];
-        const taskIndex = currentTasks.findIndex(t => t.id === taskId);
+        const taskIndex = currentTasks.findIndex((t) => t.id === taskId);
         if (taskIndex >= 0) {
           currentTasks[taskIndex].status = 'failed';
         }
@@ -158,15 +167,18 @@ export function createDelegationTools(
         };
       }
 
-      const tasks = blackboard.read<{
-        id: string;
-        worker: string;
-        task: string;
-        status: string;
-        timestamp: number;
-      }[]>('tasks') ?? [];
+      const tasks =
+        blackboard.read<
+          {
+            id: string;
+            worker: string;
+            task: string;
+            status: string;
+            timestamp: number;
+          }[]
+        >('tasks') ?? [];
 
-      const workerTasks = tasks.filter(t => t.worker === worker);
+      const workerTasks = tasks.filter((t) => t.worker === worker);
       const lastTask = workerTasks[workerTasks.length - 1];
 
       const workerResults = blackboard.read<Record<string, unknown>>('workerResults') ?? {};
@@ -179,16 +191,18 @@ export function createDelegationTools(
         tokenCount: workerAgent.tokenCount,
         tasks: {
           total: workerTasks.length,
-          completed: workerTasks.filter(t => t.status === 'completed').length,
-          pending: workerTasks.filter(t => t.status === 'delegated').length,
-          failed: workerTasks.filter(t => t.status === 'failed').length,
+          completed: workerTasks.filter((t) => t.status === 'completed').length,
+          pending: workerTasks.filter((t) => t.status === 'delegated').length,
+          failed: workerTasks.filter((t) => t.status === 'failed').length,
         },
-        lastTask: lastTask ? {
-          id: lastTask.id,
-          task: lastTask.task.slice(0, 200),
-          status: lastTask.status,
-          result: typeof lastResult === 'string' ? lastResult.slice(0, 500) : lastResult,
-        } : null,
+        lastTask: lastTask
+          ? {
+              id: lastTask.id,
+              task: lastTask.task.slice(0, 200),
+              status: lastTask.status,
+              result: typeof lastResult === 'string' ? lastResult.slice(0, 500) : lastResult,
+            }
+          : null,
       };
     },
   });
@@ -199,7 +213,10 @@ export function createDelegationTools(
     parameters: z.object({
       worker: z.string().describe('Name of the worker agent'),
       feedback: z.string().describe('Feedback on what needs to be revised'),
-      taskId: z.string().optional().describe('Specific task ID to revise (uses last task if omitted)'),
+      taskId: z
+        .string()
+        .optional()
+        .describe('Specific task ID to revise (uses last task if omitted)'),
     }),
     execute: async ({ worker, feedback, taskId }) => {
       const workerAgent = coordinator.getAgent(worker);
@@ -211,16 +228,19 @@ export function createDelegationTools(
         };
       }
 
-      const tasks = blackboard.read<{
-        id: string;
-        worker: string;
-        task: string;
-        status: string;
-      }[]>('tasks') ?? [];
+      const tasks =
+        blackboard.read<
+          {
+            id: string;
+            worker: string;
+            task: string;
+            status: string;
+          }[]
+        >('tasks') ?? [];
 
-      const workerTasks = tasks.filter(t => t.worker === worker);
+      const workerTasks = tasks.filter((t) => t.worker === worker);
       const targetTask = taskId
-        ? workerTasks.find(t => t.id === taskId)
+        ? workerTasks.find((t) => t.id === taskId)
         : workerTasks[workerTasks.length - 1];
 
       if (!targetTask) {
@@ -263,7 +283,7 @@ Please provide a revised response addressing the feedback.
       blackboard.write('workerResults', workerResults, worker);
 
       const updatedTasks = blackboard.read<typeof tasks>('tasks') ?? [];
-      const taskIndex = updatedTasks.findIndex(t => t.id === targetTask.id);
+      const taskIndex = updatedTasks.findIndex((t) => t.id === targetTask.id);
       if (taskIndex >= 0) {
         updatedTasks[taskIndex].status = 'revised';
       }
@@ -289,14 +309,16 @@ Please provide a revised response addressing the feedback.
 
       return {
         count: workers.length,
-        workers: workers.map(w => ({
+        workers: workers.map((w) => ({
           name: w.agent.name,
           state: w.state,
           tokenCount: w.tokenCount,
-          ...(includeMetadata ? {
-            expertise: w.metadata.expertise ?? [],
-            priority: w.metadata.priority ?? 0,
-          } : {}),
+          ...(includeMetadata
+            ? {
+                expertise: w.metadata.expertise ?? [],
+                priority: w.metadata.priority ?? 0,
+              }
+            : {}),
         })),
       };
     },

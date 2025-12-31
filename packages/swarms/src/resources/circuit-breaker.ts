@@ -91,8 +91,7 @@ export class CircuitBreaker {
       for (const listener of this.stateChangeListeners) {
         try {
           listener(newState);
-        } catch {
-        }
+        } catch {}
       }
     }
   }

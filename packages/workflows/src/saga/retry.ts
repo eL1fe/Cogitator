@@ -68,10 +68,7 @@ function defaultIsRetryable(error: Error): boolean {
 /**
  * Calculate delay with jitter
  */
-function calculateDelay(
-  attempt: number,
-  config: DelayConfig
-): number {
+function calculateDelay(attempt: number, config: DelayConfig): number {
   let baseDelay: number;
 
   switch (config.backoff) {
@@ -275,10 +272,7 @@ export function Retryable<T = unknown>(options: RetryOptions<T> = {}) {
     const originalMethod = descriptor.value as (...args: unknown[]) => Promise<T>;
 
     descriptor.value = async function (this: unknown, ...args: unknown[]): Promise<T> {
-      const result = await executeWithRetry(
-        () => originalMethod.apply(this, args),
-        options
-      );
+      const result = await executeWithRetry(() => originalMethod.apply(this, args), options);
 
       if (!result.success) {
         throw result.error ?? new Error('Retry failed');

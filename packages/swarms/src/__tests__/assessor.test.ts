@@ -149,7 +149,12 @@ describe('ModelScorer', () => {
         id: 'cloud',
         provider: 'openai',
         displayName: 'Cloud Model',
-        capabilities: { supportsVision: false, supportsTools: false, supportsStreaming: true, supportsJson: true },
+        capabilities: {
+          supportsVision: false,
+          supportsTools: false,
+          supportsStreaming: true,
+          supportsJson: true,
+        },
         pricing: { input: 0.5, output: 0.5 },
         contextWindow: 8192,
         isLocal: false,
@@ -211,11 +216,21 @@ describe('ModelScorer', () => {
       const models: DiscoveredModel[] = [
         createMockModel({
           id: 'model-a',
-          capabilities: { supportsVision: true, supportsTools: false, supportsStreaming: true, supportsJson: true },
+          capabilities: {
+            supportsVision: true,
+            supportsTools: false,
+            supportsStreaming: true,
+            supportsJson: true,
+          },
         }),
         createMockModel({
           id: 'model-b',
-          capabilities: { supportsVision: false, supportsTools: false, supportsStreaming: true, supportsJson: true },
+          capabilities: {
+            supportsVision: false,
+            supportsTools: false,
+            supportsStreaming: true,
+            supportsJson: true,
+          },
         }),
       ];
       const reqs = createMockRequirements({ needsVision: true });

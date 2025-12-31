@@ -347,8 +347,7 @@ export class CircuitBreaker {
     for (const handler of this.eventHandlers) {
       try {
         handler(event);
-      } catch {
-      }
+      } catch {}
     }
   }
 }
@@ -392,19 +391,14 @@ export class CircuitBreakerOpenError extends Error {
 /**
  * Create a circuit breaker instance
  */
-export function createCircuitBreaker(
-  config?: Partial<CircuitBreakerConfig>
-): CircuitBreaker {
+export function createCircuitBreaker(config?: Partial<CircuitBreakerConfig>): CircuitBreaker {
   return new CircuitBreaker(config);
 }
 
 /**
  * Decorator for circuit breaker protected methods
  */
-export function WithCircuitBreaker(
-  breaker: CircuitBreaker,
-  nodeId: string
-) {
+export function WithCircuitBreaker(breaker: CircuitBreaker, nodeId: string) {
   return function (
     _target: unknown,
     _propertyKey: string,

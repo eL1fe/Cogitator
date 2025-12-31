@@ -19,11 +19,7 @@ import type {
   Baggage,
 } from '@cogitator-ai/types';
 import { nanoid } from 'nanoid';
-import {
-  type SpanExporterInstance,
-  createSpanExporter,
-  NoopSpanExporter,
-} from './exporters';
+import { type SpanExporterInstance, createSpanExporter, NoopSpanExporter } from './exporters';
 import {
   TRACE_PARENT_HEADER,
   TRACE_STATE_HEADER,
@@ -322,10 +318,7 @@ export class WorkflowTracer {
   /**
    * Start a tool execution span
    */
-  startToolSpan(
-    toolName: string,
-    attributes?: Record<string, unknown>
-  ): SpanScope {
+  startToolSpan(toolName: string, attributes?: Record<string, unknown>): SpanScope {
     const parentSpan = this.spanStack[this.spanStack.length - 1];
     const traceId = parentSpan?.traceId ?? generateTraceId();
     const spanId = generateSpanId();

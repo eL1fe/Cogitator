@@ -156,7 +156,9 @@ export class OpenAIServer {
 
     this.started = true;
     console.log(`[OpenAI Server] Listening on http://${this.config.host}:${this.config.port}`);
-    console.log(`[OpenAI Server] Use with OpenAI SDK: baseURL = "http://localhost:${this.config.port}/v1"`);
+    console.log(
+      `[OpenAI Server] Use with OpenAI SDK: baseURL = "http://localhost:${this.config.port}/v1"`
+    );
   }
 
   /**

@@ -95,9 +95,11 @@ export function AuthSection({ isOpen, onClose }: AuthSectionProps) {
             <div className="relative bg-[#0a0a0a] rounded-2xl border border-[#262626] p-8 overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#00ff88]/50 to-transparent" />
 
-              <div className="absolute inset-0 opacity-[0.02]"
+              <div
+                className="absolute inset-0 opacity-[0.02]"
                 style={{
-                  backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.1) 2px, rgba(0,255,136,0.1) 4px)',
+                  backgroundImage:
+                    'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.1) 2px, rgba(0,255,136,0.1) 4px)',
                 }}
               />
 
@@ -126,17 +128,13 @@ export function AuthSection({ isOpen, onClose }: AuthSectionProps) {
 
                 <div className="flex items-center gap-4 my-6">
                   <div className="flex-1 h-[1px] bg-[#262626]" />
-                  <span className="text-xs text-[#666666] uppercase tracking-wider">
-                    or
-                  </span>
+                  <span className="text-xs text-[#666666] uppercase tracking-wider">or</span>
                   <div className="flex-1 h-[1px] bg-[#262626]" />
                 </div>
 
                 <form onSubmit={handleEmailAuth} className="space-y-4">
                   <div>
-                    <label className="block text-sm text-[#a1a1a1] mb-2">
-                      Email
-                    </label>
+                    <label className="block text-sm text-[#a1a1a1] mb-2">Email</label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#666666]" />
                       <input
@@ -151,9 +149,7 @@ export function AuthSection({ isOpen, onClose }: AuthSectionProps) {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[#a1a1a1] mb-2">
-                      Password
-                    </label>
+                    <label className="block text-sm text-[#a1a1a1] mb-2">Password</label>
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}

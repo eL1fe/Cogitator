@@ -12,10 +12,7 @@ const hashParams = z.object({
     .enum(['md5', 'sha1', 'sha256', 'sha512'])
     .optional()
     .describe('Hash algorithm (default: sha256)'),
-  encoding: z
-    .enum(['hex', 'base64'])
-    .optional()
-    .describe('Output encoding (default: hex)'),
+  encoding: z.enum(['hex', 'base64']).optional().describe('Output encoding (default: hex)'),
 });
 
 export const hash = tool({

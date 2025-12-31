@@ -16,10 +16,7 @@ import type {
   ScheduleOptions,
   RunStore,
 } from '@cogitator-ai/types';
-import {
-  getNextCronOccurrence,
-  validateCronExpression,
-} from '../timers/cron-parser';
+import { getNextCronOccurrence, validateCronExpression } from '../timers/cron-parser';
 
 /**
  * Priority queue item
@@ -133,10 +130,7 @@ export class PriorityQueue {
       const parentIndex = Math.floor((index - 1) / 2);
       if (this.compare(this.items[index], this.items[parentIndex]) >= 0) break;
 
-      [this.items[index], this.items[parentIndex]] = [
-        this.items[parentIndex],
-        this.items[index],
-      ];
+      [this.items[index], this.items[parentIndex]] = [this.items[parentIndex], this.items[index]];
       index = parentIndex;
     }
   }
@@ -163,10 +157,7 @@ export class PriorityQueue {
 
       if (smallest === index) break;
 
-      [this.items[index], this.items[smallest]] = [
-        this.items[smallest],
-        this.items[index],
-      ];
+      [this.items[index], this.items[smallest]] = [this.items[smallest], this.items[index]];
       index = smallest;
     }
   }

@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import {
-  getWorkflows,
-  createWorkflow,
-  initializeExtendedSchema,
-} from '@/lib/cogitator/db';
+import { getWorkflows, createWorkflow, initializeExtendedSchema } from '@/lib/cogitator/db';
 import { initializeSchema } from '@/lib/db';
 import { withAuth } from '@/lib/auth/middleware';
 
@@ -40,10 +36,7 @@ export const GET = withAuth(async (request) => {
     });
   } catch (error) {
     console.error('[api/workflows] Failed to fetch workflows:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch workflows' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch workflows' }, { status: 500 });
   }
 });
 
@@ -53,10 +46,7 @@ export const POST = withAuth(async (request) => {
     const body = await request.json();
 
     if (!body.name || !body.definition) {
-      return NextResponse.json(
-        { error: 'Name and definition are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Name and definition are required' }, { status: 400 });
     }
 
     const workflow = await createWorkflow({
@@ -70,9 +60,6 @@ export const POST = withAuth(async (request) => {
     return NextResponse.json(workflow, { status: 201 });
   } catch (error) {
     console.error('[api/workflows] Failed to create workflow:', error);
-    return NextResponse.json(
-      { error: 'Failed to create workflow' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create workflow' }, { status: 500 });
   }
 });

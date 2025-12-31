@@ -2,16 +2,7 @@
 
 import { memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import {
-  Bot,
-  Wrench,
-  Code,
-  User,
-  Clock,
-  Play,
-  CheckCircle,
-  GitBranch,
-} from 'lucide-react';
+import { Bot, Wrench, Code, User, Clock, Play, CheckCircle, GitBranch } from 'lucide-react';
 
 interface WorkflowNodeData {
   label: string;
@@ -57,16 +48,11 @@ function WorkflowNodeComponent({ data, selected }: NodeProps) {
       )}
 
       <div className="flex items-center gap-3">
-        <div
-          className="p-2 rounded-lg"
-          style={{ backgroundColor: `${config.color}20` }}
-        >
+        <div className="p-2 rounded-lg" style={{ backgroundColor: `${config.color}20` }}>
           <Icon className="w-5 h-5" style={{ color: config.color }} />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-medium text-text-primary truncate">
-            {nodeData.label}
-          </div>
+          <div className="font-medium text-text-primary truncate">{nodeData.label}</div>
           {!isStartOrEnd && nodeData.config && Object.keys(nodeData.config).length > 0 && (
             <div className="text-xs text-text-muted truncate">
               {Object.keys(nodeData.config).length} settings

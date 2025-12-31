@@ -79,9 +79,7 @@ export class InMemoryAdapter extends BaseMemoryAdapter {
     return this.success(undefined);
   }
 
-  async addEntry(
-    entry: Omit<MemoryEntry, 'id' | 'createdAt'>
-  ): Promise<MemoryResult<MemoryEntry>> {
+  async addEntry(entry: Omit<MemoryEntry, 'id' | 'createdAt'>): Promise<MemoryResult<MemoryEntry>> {
     if (this.entries.size >= this.maxEntries) {
       const oldestId = this.entries.keys().next().value;
       if (oldestId) {
@@ -103,9 +101,7 @@ export class InMemoryAdapter extends BaseMemoryAdapter {
     return this.success(full);
   }
 
-  async getEntries(
-    options: MemoryQueryOptions
-  ): Promise<MemoryResult<MemoryEntry[]>> {
+  async getEntries(options: MemoryQueryOptions): Promise<MemoryResult<MemoryEntry[]>> {
     const entryIds = this.threadEntries.get(options.threadId) ?? [];
     let entries = entryIds
       .map((id) => this.entries.get(id))

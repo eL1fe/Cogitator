@@ -17,7 +17,11 @@ import type {
   WorkflowState,
 } from '@cogitator-ai/types';
 import { type CronTriggerExecutor, createCronTrigger } from './cron-trigger';
-import { type WebhookTriggerExecutor, createWebhookTrigger, type WebhookRequest } from './webhook-trigger';
+import {
+  type WebhookTriggerExecutor,
+  createWebhookTrigger,
+  type WebhookRequest,
+} from './webhook-trigger';
 
 /**
  * Trigger store interface
@@ -60,17 +64,17 @@ export class InMemoryTriggerStore implements TriggerStore {
   async list(workflowName?: string): Promise<WorkflowTrigger[]> {
     const all = Array.from(this.triggers.values());
     if (workflowName) {
-      return all.filter(t => t.workflowName === workflowName);
+      return all.filter((t) => t.workflowName === workflowName);
     }
     return all;
   }
 
   async listEnabled(): Promise<WorkflowTrigger[]> {
-    return Array.from(this.triggers.values()).filter(t => t.enabled);
+    return Array.from(this.triggers.values()).filter((t) => t.enabled);
   }
 
   async listByType(type: 'cron' | 'webhook' | 'event'): Promise<WorkflowTrigger[]> {
-    return Array.from(this.triggers.values()).filter(t => t.type === type);
+    return Array.from(this.triggers.values()).filter((t) => t.type === type);
   }
 
   clear(): void {
@@ -98,8 +102,7 @@ export class SimpleTriggerEventEmitter implements TriggerEventEmitter {
       for (const callback of callbacks) {
         try {
           callback(payload);
-        } catch {
-        }
+        } catch {}
       }
     }
   }
@@ -154,8 +157,7 @@ export class DefaultTriggerManager implements ITriggerManager {
       for (const callback of this.triggerCallbacks) {
         try {
           callback(trigger, context);
-        } catch {
-        }
+        } catch {}
       }
 
       await this.store.update(trigger.id, {
@@ -353,8 +355,7 @@ export class DefaultTriggerManager implements ITriggerManager {
     for (const callback of this.triggerCallbacks) {
       try {
         callback(trigger, context);
-      } catch {
-      }
+      } catch {}
     }
 
     await this.store.update(id, {
@@ -368,9 +369,7 @@ export class DefaultTriggerManager implements ITriggerManager {
   /**
    * Subscribe to trigger events
    */
-  onTrigger(
-    callback: (trigger: WorkflowTrigger, context: TriggerContext) => void
-  ): () => void {
+  onTrigger(callback: (trigger: WorkflowTrigger, context: TriggerContext) => void): () => void {
     this.triggerCallbacks.add(callback);
     return () => {
       this.triggerCallbacks.delete(callback);
@@ -427,7 +426,7 @@ export class DefaultTriggerManager implements ITriggerManager {
     totalErrors: number;
   }> {
     const all = await this.store.list();
-    const enabled = all.filter(t => t.enabled);
+    const enabled = all.filter((t) => t.enabled);
 
     const byType: Record<string, number> = { cron: 0, webhook: 0, event: 0 };
     let totalFired = 0;
@@ -485,9 +484,7 @@ export class DefaultTriggerManager implements ITriggerManager {
         return;
       }
 
-      const transformedPayload = config.transform
-        ? config.transform(payload)
-        : payload;
+      const transformedPayload = config.transform ? config.transform(payload) : payload;
 
       const trigger = await this.store.get(id);
       if (!trigger?.enabled) return;
@@ -506,8 +503,7 @@ export class DefaultTriggerManager implements ITriggerManager {
       for (const callback of this.triggerCallbacks) {
         try {
           callback(trigger, context);
-        } catch {
-        }
+        } catch {}
       }
 
       await this.store.update(id, {
@@ -523,9 +519,7 @@ export class DefaultTriggerManager implements ITriggerManager {
 /**
  * Create a trigger manager
  */
-export function createTriggerManager(
-  config: TriggerManagerConfig = {}
-): DefaultTriggerManager {
+export function createTriggerManager(config: TriggerManagerConfig = {}): DefaultTriggerManager {
   return new DefaultTriggerManager(config);
 }
 

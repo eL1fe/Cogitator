@@ -20,57 +20,36 @@ export class ConsoleNotifier implements ApprovalNotifier {
   }
 
   async notify(request: ApprovalRequest): Promise<void> {
-    console.log(
-      `${this.prefix} New approval request: ${request.title}`,
-      {
-        id: request.id,
-        type: request.type,
-        assignee: request.assignee,
-        priority: request.priority,
-        deadline: request.deadline
-          ? new Date(request.deadline).toISOString()
-          : undefined,
-      }
-    );
+    console.log(`${this.prefix} New approval request: ${request.title}`, {
+      id: request.id,
+      type: request.type,
+      assignee: request.assignee,
+      priority: request.priority,
+      deadline: request.deadline ? new Date(request.deadline).toISOString() : undefined,
+    });
   }
 
-  async notifyEscalation(
-    request: ApprovalRequest,
-    reason: string
-  ): Promise<void> {
-    console.log(
-      `${this.prefix} Escalation: ${request.title}`,
-      {
-        id: request.id,
-        reason,
-        escalateTo: request.escalateTo,
-      }
-    );
+  async notifyEscalation(request: ApprovalRequest, reason: string): Promise<void> {
+    console.log(`${this.prefix} Escalation: ${request.title}`, {
+      id: request.id,
+      reason,
+      escalateTo: request.escalateTo,
+    });
   }
 
   async notifyTimeout(request: ApprovalRequest): Promise<void> {
-    console.log(
-      `${this.prefix} Timeout: ${request.title}`,
-      {
-        id: request.id,
-        action: request.timeoutAction,
-      }
-    );
+    console.log(`${this.prefix} Timeout: ${request.title}`, {
+      id: request.id,
+      action: request.timeoutAction,
+    });
   }
 
-  async notifyDelegation(
-    request: ApprovalRequest,
-    from: string,
-    to: string
-  ): Promise<void> {
-    console.log(
-      `${this.prefix} Delegation: ${request.title}`,
-      {
-        id: request.id,
-        from,
-        to,
-      }
-    );
+  async notifyDelegation(request: ApprovalRequest, from: string, to: string): Promise<void> {
+    console.log(`${this.prefix} Delegation: ${request.title}`, {
+      id: request.id,
+      from,
+      to,
+    });
   }
 }
 
@@ -157,10 +136,7 @@ export class WebhookNotifier implements ApprovalNotifier {
     await this.send(payload);
   }
 
-  async notifyEscalation(
-    request: ApprovalRequest,
-    reason: string
-  ): Promise<void> {
+  async notifyEscalation(request: ApprovalRequest, reason: string): Promise<void> {
     const payload = this.formatPayload('escalation', request, { reason });
     await this.send(payload);
   }
@@ -172,11 +148,7 @@ export class WebhookNotifier implements ApprovalNotifier {
     await this.send(payload);
   }
 
-  async notifyDelegation(
-    request: ApprovalRequest,
-    from: string,
-    to: string
-  ): Promise<void> {
+  async notifyDelegation(request: ApprovalRequest, from: string, to: string): Promise<void> {
     const payload = this.formatPayload('delegation', request, { from, to });
     await this.send(payload);
   }
@@ -251,10 +223,7 @@ export class CompositeNotifier implements ApprovalNotifier {
   private notifiers: ApprovalNotifier[];
   private continueOnError: boolean;
 
-  constructor(
-    notifiers: ApprovalNotifier[],
-    options: { continueOnError?: boolean } = {}
-  ) {
+  constructor(notifiers: ApprovalNotifier[], options: { continueOnError?: boolean } = {}) {
     this.notifiers = notifiers;
     this.continueOnError = options.continueOnError ?? true;
   }
@@ -263,10 +232,7 @@ export class CompositeNotifier implements ApprovalNotifier {
     await this.fanOut((n) => n.notify(request));
   }
 
-  async notifyEscalation(
-    request: ApprovalRequest,
-    reason: string
-  ): Promise<void> {
+  async notifyEscalation(request: ApprovalRequest, reason: string): Promise<void> {
     await this.fanOut((n) => n.notifyEscalation(request, reason));
   }
 
@@ -274,17 +240,11 @@ export class CompositeNotifier implements ApprovalNotifier {
     await this.fanOut((n) => n.notifyTimeout(request));
   }
 
-  async notifyDelegation(
-    request: ApprovalRequest,
-    from: string,
-    to: string
-  ): Promise<void> {
+  async notifyDelegation(request: ApprovalRequest, from: string, to: string): Promise<void> {
     await this.fanOut((n) => n.notifyDelegation(request, from, to));
   }
 
-  private async fanOut(
-    fn: (notifier: ApprovalNotifier) => Promise<void>
-  ): Promise<void> {
+  private async fanOut(fn: (notifier: ApprovalNotifier) => Promise<void>): Promise<void> {
     const errors: Error[] = [];
 
     for (const notifier of this.notifiers) {
@@ -300,10 +260,7 @@ export class CompositeNotifier implements ApprovalNotifier {
     }
 
     if (errors.length > 0) {
-      const combined = new AggregateError(
-        errors,
-        `${errors.length} notifier(s) failed`
-      );
+      const combined = new AggregateError(errors, `${errors.length} notifier(s) failed`);
       throw combined;
     }
   }

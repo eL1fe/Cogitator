@@ -6,15 +6,9 @@
 
 import type { FastifyInstance } from 'fastify';
 import type { OpenAIAdapter } from '../../client/openai-adapter';
-import type {
-  CreateRunRequest,
-  SubmitToolOutputsRequest,
-} from '../../types/openai-types';
+import type { CreateRunRequest, SubmitToolOutputsRequest } from '../../types/openai-types';
 
-export function registerRunRoutes(
-  fastify: FastifyInstance,
-  adapter: OpenAIAdapter
-) {
+export function registerRunRoutes(fastify: FastifyInstance, adapter: OpenAIAdapter) {
   fastify.post<{ Params: { thread_id: string }; Body: CreateRunRequest }>(
     '/v1/threads/:thread_id/runs',
     async (request, reply) => {
@@ -31,10 +25,7 @@ export function registerRunRoutes(
       }
 
       try {
-        const run = await adapter.createRun(
-          request.params.thread_id,
-          request.body
-        );
+        const run = await adapter.createRun(request.params.thread_id, request.body);
 
         if (request.body.stream) {
           return handleStreamingRun(reply, adapter, request.params.thread_id, run.id);
@@ -54,45 +45,41 @@ export function registerRunRoutes(
   );
 
   fastify.post<{
-    Body: CreateRunRequest & { thread?: { messages?: { role: 'user' | 'assistant'; content: string }[] } };
-  }>(
-    '/v1/threads/runs',
-    async (request, reply) => {
-      const thread = adapter.createThread();
+    Body: CreateRunRequest & {
+      thread?: { messages?: { role: 'user' | 'assistant'; content: string }[] };
+    };
+  }>('/v1/threads/runs', async (request, reply) => {
+    const thread = adapter.createThread();
 
-      if (request.body.thread?.messages) {
-        for (const msg of request.body.thread.messages) {
-          adapter.addMessage(thread.id, msg);
-        }
-      }
-
-      try {
-        const run = await adapter.createRun(thread.id, request.body);
-
-        if (request.body.stream) {
-          return handleStreamingRun(reply, adapter, thread.id, run.id);
-        }
-
-        return reply.status(201).send(run);
-      } catch (error) {
-        return reply.status(400).send({
-          error: {
-            message: error instanceof Error ? error.message : 'Failed to create run',
-            type: 'invalid_request_error',
-            code: 'invalid_request',
-          },
-        });
+    if (request.body.thread?.messages) {
+      for (const msg of request.body.thread.messages) {
+        adapter.addMessage(thread.id, msg);
       }
     }
-  );
+
+    try {
+      const run = await adapter.createRun(thread.id, request.body);
+
+      if (request.body.stream) {
+        return handleStreamingRun(reply, adapter, thread.id, run.id);
+      }
+
+      return reply.status(201).send(run);
+    } catch (error) {
+      return reply.status(400).send({
+        error: {
+          message: error instanceof Error ? error.message : 'Failed to create run',
+          type: 'invalid_request_error',
+          code: 'invalid_request',
+        },
+      });
+    }
+  });
 
   fastify.get<{ Params: { thread_id: string; run_id: string } }>(
     '/v1/threads/:thread_id/runs/:run_id',
     async (request, reply) => {
-      const run = adapter.getRun(
-        request.params.thread_id,
-        request.params.run_id
-      );
+      const run = adapter.getRun(request.params.thread_id, request.params.run_id);
 
       if (!run) {
         return reply.status(404).send({
@@ -111,10 +98,7 @@ export function registerRunRoutes(
   fastify.post<{ Params: { thread_id: string; run_id: string } }>(
     '/v1/threads/:thread_id/runs/:run_id/cancel',
     async (request, reply) => {
-      const run = adapter.cancelRun(
-        request.params.thread_id,
-        request.params.run_id
-      );
+      const run = adapter.cancelRun(request.params.thread_id, request.params.run_id);
 
       if (!run) {
         return reply.status(404).send({
@@ -133,49 +117,49 @@ export function registerRunRoutes(
   fastify.post<{
     Params: { thread_id: string; run_id: string };
     Body: SubmitToolOutputsRequest;
-  }>(
-    '/v1/threads/:thread_id/runs/:run_id/submit_tool_outputs',
-    async (request, reply) => {
-      try {
-        const run = await adapter.submitToolOutputs(
-          request.params.thread_id,
-          request.params.run_id,
-          request.body
-        );
+  }>('/v1/threads/:thread_id/runs/:run_id/submit_tool_outputs', async (request, reply) => {
+    try {
+      const run = await adapter.submitToolOutputs(
+        request.params.thread_id,
+        request.params.run_id,
+        request.body
+      );
 
-        if (!run) {
-          return reply.status(404).send({
-            error: {
-              message: `No run found with id '${request.params.run_id}'`,
-              type: 'invalid_request_error',
-              code: 'not_found',
-            },
-          });
-        }
-
-        if (request.body.stream) {
-          return handleStreamingRun(reply, adapter, request.params.thread_id, run.id);
-        }
-
-        return reply.send(run);
-      } catch (error) {
-        return reply.status(400).send({
+      if (!run) {
+        return reply.status(404).send({
           error: {
-            message: error instanceof Error ? error.message : 'Failed to submit tool outputs',
+            message: `No run found with id '${request.params.run_id}'`,
             type: 'invalid_request_error',
-            code: 'invalid_request',
+            code: 'not_found',
           },
         });
       }
+
+      if (request.body.stream) {
+        return handleStreamingRun(reply, adapter, request.params.thread_id, run.id);
+      }
+
+      return reply.send(run);
+    } catch (error) {
+      return reply.status(400).send({
+        error: {
+          message: error instanceof Error ? error.message : 'Failed to submit tool outputs',
+          type: 'invalid_request_error',
+          code: 'invalid_request',
+        },
+      });
     }
-  );
+  });
 }
 
 /**
  * Handle streaming run response
  */
 async function handleStreamingRun(
-  reply: { raw: { write: (data: string) => void; end: () => void }; header: (key: string, value: string) => void },
+  reply: {
+    raw: { write: (data: string) => void; end: () => void };
+    header: (key: string, value: string) => void;
+  },
   adapter: OpenAIAdapter,
   threadId: string,
   runId: string

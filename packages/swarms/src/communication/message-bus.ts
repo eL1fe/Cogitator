@@ -3,11 +3,7 @@
  */
 
 import { nanoid } from 'nanoid';
-import type {
-  MessageBus,
-  MessageBusConfig,
-  SwarmMessage,
-} from '@cogitator-ai/types';
+import type { MessageBus, MessageBusConfig, SwarmMessage } from '@cogitator-ai/types';
 
 export class InMemoryMessageBus implements MessageBus {
   private messages: SwarmMessage[] = [];
@@ -24,13 +20,8 @@ export class InMemoryMessageBus implements MessageBus {
       throw new Error('Message bus is not enabled');
     }
 
-    if (
-      this.config.maxMessageLength &&
-      message.content.length > this.config.maxMessageLength
-    ) {
-      throw new Error(
-        `Message exceeds max length of ${this.config.maxMessageLength} characters`
-      );
+    if (this.config.maxMessageLength && message.content.length > this.config.maxMessageLength) {
+      throw new Error(`Message exceeds max length of ${this.config.maxMessageLength} characters`);
     }
 
     if (this.config.maxMessagesPerTurn) {
@@ -43,13 +34,8 @@ export class InMemoryMessageBus implements MessageBus {
       this.agentMessageCounts.set(message.from, count + 1);
     }
 
-    if (
-      this.config.maxTotalMessages &&
-      this.messages.length >= this.config.maxTotalMessages
-    ) {
-      throw new Error(
-        `Max total messages (${this.config.maxTotalMessages}) reached`
-      );
+    if (this.config.maxTotalMessages && this.messages.length >= this.config.maxTotalMessages) {
+      throw new Error(`Max total messages (${this.config.maxTotalMessages}) reached`);
     }
 
     const fullMessage: SwarmMessage = {
@@ -94,10 +80,7 @@ export class InMemoryMessageBus implements MessageBus {
 
   getMessages(agentName: string, limit?: number): SwarmMessage[] {
     const relevant = this.messages.filter(
-      (m) =>
-        m.to === agentName ||
-        m.to === 'broadcast' ||
-        m.from === agentName
+      (m) => m.to === agentName || m.to === 'broadcast' || m.from === agentName
     );
 
     if (limit) {
@@ -108,9 +91,7 @@ export class InMemoryMessageBus implements MessageBus {
 
   getConversation(agent1: string, agent2: string): SwarmMessage[] {
     return this.messages.filter(
-      (m) =>
-        (m.from === agent1 && m.to === agent2) ||
-        (m.from === agent2 && m.to === agent1)
+      (m) => (m.from === agent1 && m.to === agent2) || (m.from === agent2 && m.to === agent1)
     );
   }
 
@@ -120,9 +101,7 @@ export class InMemoryMessageBus implements MessageBus {
 
   getUnreadMessages(agentName: string): SwarmMessage[] {
     return this.messages.filter(
-      (m) =>
-        (m.to === agentName || m.to === 'broadcast') &&
-        m.from !== agentName
+      (m) => (m.to === agentName || m.to === 'broadcast') && m.from !== agentName
     );
   }
 
@@ -142,8 +121,7 @@ export class InMemoryMessageBus implements MessageBus {
         for (const handler of handlers) {
           try {
             handler(message);
-          } catch {
-          }
+          } catch {}
         }
       }
     } else {
@@ -152,8 +130,7 @@ export class InMemoryMessageBus implements MessageBus {
           for (const handler of handlers) {
             try {
               handler(message);
-            } catch {
-            }
+            } catch {}
           }
         }
       }

@@ -30,7 +30,10 @@ export function createVotingTools(
     parameters: z.object({
       decision: z.string().describe('Your decision/vote'),
       reasoning: z.string().optional().describe('Optional reasoning for your vote'),
-      confidence: z.number().optional().describe('Confidence level 0-1 (optional, affects display only)'),
+      confidence: z
+        .number()
+        .optional()
+        .describe('Confidence level 0-1 (optional, affects display only)'),
     }),
     execute: async ({ decision, reasoning, confidence }) => {
       const consensusState = blackboard.read<{
@@ -57,12 +60,16 @@ export function createVotingTools(
       consensusState.votes.push(vote);
       blackboard.write('consensus', consensusState, currentAgent);
 
-      events.emit('consensus:vote', {
-        agent: currentAgent,
-        decision,
-        round: consensusState.currentRound,
-        confidence,
-      }, currentAgent);
+      events.emit(
+        'consensus:vote',
+        {
+          agent: currentAgent,
+          decision,
+          round: consensusState.currentRound,
+          confidence,
+        },
+        currentAgent
+      );
 
       return {
         success: true,
@@ -78,7 +85,10 @@ export function createVotingTools(
     name: 'get_votes',
     description: 'Get all votes cast in the current consensus session',
     parameters: z.object({
-      round: z.number().optional().describe('Specific round to get votes for (all rounds if omitted)'),
+      round: z
+        .number()
+        .optional()
+        .describe('Specific round to get votes for (all rounds if omitted)'),
       includeReasoning: z.boolean().optional().describe('Include vote reasoning'),
     }),
     execute: async ({ round, includeReasoning = false }) => {
@@ -100,7 +110,7 @@ export function createVotingTools(
       let votes = consensusState.votes;
 
       if (round !== undefined) {
-        votes = votes.filter(v => v.round === round);
+        votes = votes.filter((v) => v.round === round);
       }
 
       const voteCounts = new Map<string, { count: number; weighted: number; voters: string[] }>();
@@ -119,7 +129,7 @@ export function createVotingTools(
         totalVotes: votes.length,
         threshold: consensusState.threshold,
         resolution: consensusState.resolution,
-        votes: votes.map(v => ({
+        votes: votes.map((v) => ({
           agent: v.agentName,
           decision: v.decision,
           round: v.round,
@@ -157,12 +167,11 @@ export function createVotingTools(
       }
 
       const previousVoteIndex = consensusState.votes.findIndex(
-        v => v.agentName === currentAgent && v.round === consensusState.currentRound
+        (v) => v.agentName === currentAgent && v.round === consensusState.currentRound
       );
 
-      const previousDecision = previousVoteIndex >= 0
-        ? consensusState.votes[previousVoteIndex].decision
-        : null;
+      const previousDecision =
+        previousVoteIndex >= 0 ? consensusState.votes[previousVoteIndex].decision : null;
 
       if (previousVoteIndex >= 0) {
         consensusState.votes.splice(previousVoteIndex, 1);
@@ -179,12 +188,16 @@ export function createVotingTools(
       consensusState.votes.push(vote);
       blackboard.write('consensus', consensusState, currentAgent);
 
-      events.emit('consensus:vote:changed', {
-        agent: currentAgent,
-        previousDecision,
-        newDecision,
-        round: consensusState.currentRound,
-      }, currentAgent);
+      events.emit(
+        'consensus:vote:changed',
+        {
+          agent: currentAgent,
+          previousDecision,
+          newDecision,
+          round: consensusState.currentRound,
+        },
+        currentAgent
+      );
 
       return {
         success: true,
@@ -217,7 +230,7 @@ export function createVotingTools(
       }
 
       const currentRoundVotes = consensusState.votes.filter(
-        v => v.round === consensusState.currentRound
+        (v) => v.round === consensusState.currentRound
       );
 
       const voteCounts = new Map<string, number>();
@@ -253,7 +266,7 @@ export function createVotingTools(
         leadingVotes: leadingCount,
         consensusRatio: Math.round(consensusRatio * 100) / 100,
         wouldReachConsensus,
-        hasVoted: currentRoundVotes.some(v => v.agentName === currentAgent),
+        hasVoted: currentRoundVotes.some((v) => v.agentName === currentAgent),
       };
     },
   });

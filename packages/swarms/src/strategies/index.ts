@@ -33,10 +33,7 @@ import { DebateStrategy } from './debate';
 /**
  * Create a strategy instance based on configuration
  */
-export function createStrategy(
-  coordinator: SwarmCoordinator,
-  config: SwarmConfig
-): IStrategy {
+export function createStrategy(coordinator: SwarmCoordinator, config: SwarmConfig): IStrategy {
   const strategy = config.strategy;
 
   switch (strategy) {

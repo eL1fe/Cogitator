@@ -96,9 +96,7 @@ export default function SwarmsPage() {
   };
 
   const getAgentNames = (agentIds: string[]) => {
-    return agentIds
-      .map((id) => agents.find((a) => a.id === id)?.name || 'Unknown')
-      .slice(0, 3);
+    return agentIds.map((id) => agents.find((a) => a.id === id)?.name || 'Unknown').slice(0, 3);
   };
 
   const filteredSwarms = swarms.filter(
@@ -110,154 +108,136 @@ export default function SwarmsPage() {
   return (
     <>
       <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between animate-fade-in">
-              <div>
-                <h1 className="text-2xl font-semibold text-text-primary">
-                  Swarms
-                </h1>
-                <p className="text-text-secondary mt-1">
-                  Multi-agent coordination and collaboration
-                </p>
-              </div>
-              <Button
-                variant="primary"
-                className="gap-2"
-                onClick={() => setShowCreateModal(true)}
-              >
-                <Plus className="w-4 h-4" />
-                New Swarm
-              </Button>
-            </div>
+        {/* Header */}
+        <div className="flex items-center justify-between animate-fade-in">
+          <div>
+            <h1 className="text-2xl font-semibold text-text-primary">Swarms</h1>
+            <p className="text-text-secondary mt-1">Multi-agent coordination and collaboration</p>
+          </div>
+          <Button variant="primary" className="gap-2" onClick={() => setShowCreateModal(true)}>
+            <Plus className="w-4 h-4" />
+            New Swarm
+          </Button>
+        </div>
 
-            {/* Search */}
-            <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-              <Input
-                placeholder="Search swarms..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                icon={<Search className="w-4 h-4" />}
-                className="max-w-md"
-              />
-            </div>
+        {/* Search */}
+        <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <Input
+            placeholder="Search swarms..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            icon={<Search className="w-4 h-4" />}
+            className="max-w-md"
+          />
+        </div>
 
-            {/* Swarms Grid */}
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(6)].map((_, i) => (
-                  <Card key={i}>
-                    <Skeleton className="h-6 w-32 mb-2" />
-                    <Skeleton className="h-4 w-48 mb-4" />
-                    <Skeleton className="h-20" />
-                  </Card>
-                ))}
-              </div>
-            ) : filteredSwarms.length === 0 ? (
-              <Card className="py-12 text-center">
-                <Users className="w-12 h-12 mx-auto mb-4 text-text-muted opacity-50" />
-                <h3 className="text-lg font-medium text-text-primary mb-2">
-                  {search ? 'No swarms found' : 'No swarms yet'}
-                </h3>
-                <p className="text-text-secondary mb-4">
-                  {search
-                    ? 'Try a different search term'
-                    : 'Create a swarm to coordinate multiple agents'}
-                </p>
-                {!search && (
-                  <Button
-                    variant="primary"
-                    className="gap-2"
-                    onClick={() => setShowCreateModal(true)}
-                  >
-                    <Plus className="w-4 h-4" />
-                    Create Swarm
-                  </Button>
-                )}
+        {/* Swarms Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i}>
+                <Skeleton className="h-6 w-32 mb-2" />
+                <Skeleton className="h-4 w-48 mb-4" />
+                <Skeleton className="h-20" />
               </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredSwarms.map((swarm, index) => {
-                  const strategy =
-                    strategyConfig[swarm.strategy as keyof typeof strategyConfig] ||
-                    strategyConfig.hierarchical;
-                  const agentNames = getAgentNames(swarm.agentIds);
-
-                  return (
-                    <Card
-                      key={swarm.id}
-                      className="animate-fade-in hover:border-accent/50 transition-colors cursor-pointer"
-                      style={{ animationDelay: `${(index + 2) * 50}ms` }}
-                      onClick={() => setSelectedSwarm(swarm)}
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-accent/10 rounded-lg">
-                            <Users className="w-5 h-5 text-accent" />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-text-primary">
-                              {swarm.name}
-                            </h3>
-                            <Badge
-                              variant="outline"
-                              size="sm"
-                              className={strategy.color}
-                            >
-                              {strategy.label}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex gap-1">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteSwarm(swarm.id);
-                            }}
-                            className="p-1.5 rounded-lg hover:bg-error/10 text-text-muted hover:text-error transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {swarm.description && (
-                        <p className="text-sm text-text-secondary mb-4 line-clamp-2">
-                          {swarm.description}
-                        </p>
-                      )}
-
-                      {/* Agents */}
-                      <div className="mb-4">
-                        <div className="flex items-center gap-2 text-xs text-text-muted mb-2">
-                          <Bot className="w-3 h-3" />
-                          <span>Agents ({swarm.agentIds.length})</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {agentNames.map((name, i) => (
-                            <Badge key={i} variant="outline" size="sm">
-                              {name}
-                            </Badge>
-                          ))}
-                          {swarm.agentIds.length > 3 && (
-                            <Badge variant="outline" size="sm">
-                              +{swarm.agentIds.length - 3}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Stats */}
-                      <div className="flex items-center gap-4 pt-4 border-t border-border-subtle">
-                        <div className="flex items-center gap-1 text-xs text-text-muted">
-                          <Activity className="w-3 h-3" />
-                          <span>{swarm.totalRuns} runs</span>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
+            ))}
+          </div>
+        ) : filteredSwarms.length === 0 ? (
+          <Card className="py-12 text-center">
+            <Users className="w-12 h-12 mx-auto mb-4 text-text-muted opacity-50" />
+            <h3 className="text-lg font-medium text-text-primary mb-2">
+              {search ? 'No swarms found' : 'No swarms yet'}
+            </h3>
+            <p className="text-text-secondary mb-4">
+              {search
+                ? 'Try a different search term'
+                : 'Create a swarm to coordinate multiple agents'}
+            </p>
+            {!search && (
+              <Button variant="primary" className="gap-2" onClick={() => setShowCreateModal(true)}>
+                <Plus className="w-4 h-4" />
+                Create Swarm
+              </Button>
             )}
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredSwarms.map((swarm, index) => {
+              const strategy =
+                strategyConfig[swarm.strategy as keyof typeof strategyConfig] ||
+                strategyConfig.hierarchical;
+              const agentNames = getAgentNames(swarm.agentIds);
+
+              return (
+                <Card
+                  key={swarm.id}
+                  className="animate-fade-in hover:border-accent/50 transition-colors cursor-pointer"
+                  style={{ animationDelay: `${(index + 2) * 50}ms` }}
+                  onClick={() => setSelectedSwarm(swarm)}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-accent/10 rounded-lg">
+                        <Users className="w-5 h-5 text-accent" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-text-primary">{swarm.name}</h3>
+                        <Badge variant="outline" size="sm" className={strategy.color}>
+                          {strategy.label}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteSwarm(swarm.id);
+                        }}
+                        className="p-1.5 rounded-lg hover:bg-error/10 text-text-muted hover:text-error transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {swarm.description && (
+                    <p className="text-sm text-text-secondary mb-4 line-clamp-2">
+                      {swarm.description}
+                    </p>
+                  )}
+
+                  {/* Agents */}
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 text-xs text-text-muted mb-2">
+                      <Bot className="w-3 h-3" />
+                      <span>Agents ({swarm.agentIds.length})</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {agentNames.map((name, i) => (
+                        <Badge key={i} variant="outline" size="sm">
+                          {name}
+                        </Badge>
+                      ))}
+                      {swarm.agentIds.length > 3 && (
+                        <Badge variant="outline" size="sm">
+                          +{swarm.agentIds.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="flex items-center gap-4 pt-4 border-t border-border-subtle">
+                    <div className="flex items-center gap-1 text-xs text-text-muted">
+                      <Activity className="w-3 h-3" />
+                      <span>{swarm.totalRuns} runs</span>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <CreateSwarmModal

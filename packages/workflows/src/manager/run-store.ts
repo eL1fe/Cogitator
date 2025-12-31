@@ -91,16 +91,11 @@ export class InMemoryRunStore implements RunStore {
     return deleted;
   }
 
-  private applyFilters(
-    runs: WorkflowRun[],
-    filters: WorkflowRunFilters
-  ): WorkflowRun[] {
+  private applyFilters(runs: WorkflowRun[], filters: WorkflowRunFilters): WorkflowRun[] {
     let result = runs;
 
     if (filters.status) {
-      const statuses = Array.isArray(filters.status)
-        ? filters.status
-        : [filters.status];
+      const statuses = Array.isArray(filters.status) ? filters.status : [filters.status];
       result = result.filter((r) => statuses.includes(r.status));
     }
 
@@ -109,9 +104,7 @@ export class InMemoryRunStore implements RunStore {
     }
 
     if (filters.tags && filters.tags.length > 0) {
-      result = result.filter((r) =>
-        filters.tags!.some((tag) => r.tags.includes(tag))
-      );
+      result = result.filter((r) => filters.tags!.some((tag) => r.tags.includes(tag)));
     }
 
     if (filters.triggerId) {
@@ -123,24 +116,16 @@ export class InMemoryRunStore implements RunStore {
     }
 
     if (filters.startedAfter) {
-      result = result.filter(
-        (r) => r.startedAt && r.startedAt >= filters.startedAfter!
-      );
+      result = result.filter((r) => r.startedAt && r.startedAt >= filters.startedAfter!);
     }
     if (filters.startedBefore) {
-      result = result.filter(
-        (r) => r.startedAt && r.startedAt <= filters.startedBefore!
-      );
+      result = result.filter((r) => r.startedAt && r.startedAt <= filters.startedBefore!);
     }
     if (filters.completedAfter) {
-      result = result.filter(
-        (r) => r.completedAt && r.completedAt >= filters.completedAfter!
-      );
+      result = result.filter((r) => r.completedAt && r.completedAt >= filters.completedAfter!);
     }
     if (filters.completedBefore) {
-      result = result.filter(
-        (r) => r.completedAt && r.completedAt <= filters.completedBefore!
-      );
+      result = result.filter((r) => r.completedAt && r.completedAt <= filters.completedBefore!);
     }
 
     if (filters.hasError !== undefined) {
@@ -152,9 +137,7 @@ export class InMemoryRunStore implements RunStore {
     result.sort((a, b) => {
       const aVal = a[orderBy] ?? 0;
       const bVal = b[orderBy] ?? 0;
-      return direction === 'asc'
-        ? (aVal) - (bVal)
-        : (bVal) - (aVal);
+      return direction === 'asc' ? aVal - bVal : bVal - aVal;
     });
 
     const offset = filters.offset ?? 0;
@@ -236,10 +219,7 @@ export class FileRunStore implements RunStore {
   private cacheExpiry = new Map<string, number>();
   private readonly cacheTTL: number;
 
-  constructor(options: {
-    directory: string;
-    cacheTTL?: number;
-  }) {
+  constructor(options: { directory: string; cacheTTL?: number }) {
     this.directory = options.directory;
     this.cacheTTL = options.cacheTTL ?? 60000;
   }
@@ -255,11 +235,7 @@ export class FileRunStore implements RunStore {
 
   async save(run: WorkflowRun): Promise<void> {
     await fs.mkdir(this.directory, { recursive: true });
-    await fs.writeFile(
-      this.getRunPath(run.id),
-      JSON.stringify(run, null, 2),
-      'utf-8'
-    );
+    await fs.writeFile(this.getRunPath(run.id), JSON.stringify(run, null, 2), 'utf-8');
 
     this.cache.set(run.id, run);
     this.cacheExpiry.set(run.id, Date.now() + this.cacheTTL);
@@ -308,8 +284,7 @@ export class FileRunStore implements RunStore {
   async delete(id: string): Promise<void> {
     try {
       await fs.unlink(this.getRunPath(id));
-    } catch {
-    }
+    } catch {}
 
     this.cache.delete(id);
     this.cacheExpiry.delete(id);
@@ -357,24 +332,18 @@ export class FileRunStore implements RunStore {
           runs.push(run);
         }
       }
-    } catch {
-    }
+    } catch {}
 
     return runs;
   }
 
-  private applyFilters(
-    runs: WorkflowRun[],
-    filters?: WorkflowRunFilters
-  ): WorkflowRun[] {
+  private applyFilters(runs: WorkflowRun[], filters?: WorkflowRunFilters): WorkflowRun[] {
     if (!filters) return runs;
 
     let result = runs;
 
     if (filters.status) {
-      const statuses = Array.isArray(filters.status)
-        ? filters.status
-        : [filters.status];
+      const statuses = Array.isArray(filters.status) ? filters.status : [filters.status];
       result = result.filter((r) => statuses.includes(r.status));
     }
 
@@ -383,9 +352,7 @@ export class FileRunStore implements RunStore {
     }
 
     if (filters.tags && filters.tags.length > 0) {
-      result = result.filter((r) =>
-        filters.tags!.some((tag) => r.tags.includes(tag))
-      );
+      result = result.filter((r) => filters.tags!.some((tag) => r.tags.includes(tag)));
     }
 
     if (filters.triggerId) {
@@ -397,24 +364,16 @@ export class FileRunStore implements RunStore {
     }
 
     if (filters.startedAfter) {
-      result = result.filter(
-        (r) => r.startedAt && r.startedAt >= filters.startedAfter!
-      );
+      result = result.filter((r) => r.startedAt && r.startedAt >= filters.startedAfter!);
     }
     if (filters.startedBefore) {
-      result = result.filter(
-        (r) => r.startedAt && r.startedAt <= filters.startedBefore!
-      );
+      result = result.filter((r) => r.startedAt && r.startedAt <= filters.startedBefore!);
     }
     if (filters.completedAfter) {
-      result = result.filter(
-        (r) => r.completedAt && r.completedAt >= filters.completedAfter!
-      );
+      result = result.filter((r) => r.completedAt && r.completedAt >= filters.completedAfter!);
     }
     if (filters.completedBefore) {
-      result = result.filter(
-        (r) => r.completedAt && r.completedAt <= filters.completedBefore!
-      );
+      result = result.filter((r) => r.completedAt && r.completedAt <= filters.completedBefore!);
     }
 
     if (filters.hasError !== undefined) {
@@ -426,9 +385,7 @@ export class FileRunStore implements RunStore {
     result.sort((a, b) => {
       const aVal = a[orderBy] ?? 0;
       const bVal = b[orderBy] ?? 0;
-      return direction === 'asc'
-        ? (aVal) - (bVal)
-        : (bVal) - (aVal);
+      return direction === 'asc' ? aVal - bVal : bVal - aVal;
     });
 
     const offset = filters.offset ?? 0;

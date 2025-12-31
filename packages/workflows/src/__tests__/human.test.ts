@@ -205,7 +205,7 @@ describe('Human-in-the-Loop', () => {
       const callback = vi.fn();
       store.onResponse('req-1', callback);
 
-      await new Promise(resolve => queueMicrotask(resolve));
+      await new Promise((resolve) => queueMicrotask(resolve));
 
       expect(callback).toHaveBeenCalled();
     });
@@ -416,7 +416,7 @@ describe('Human-in-the-Loop', () => {
     it('supports dynamic assignee', () => {
       const config = approvalNode<TestState>('dynamic-assignee', {
         title: 'Review',
-        assignee: (state) => state.value > 100 ? 'senior@example.com' : 'junior@example.com',
+        assignee: (state) => (state.value > 100 ? 'senior@example.com' : 'junior@example.com'),
       });
 
       const assigneeFn = config.approval.assignee as (state: TestState) => string;
@@ -446,7 +446,7 @@ describe('Human-in-the-Loop', () => {
 
       const resultPromise = executeHumanNode({ value: 10 }, config, context);
 
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       const pending = await store.getPendingRequests();
       expect(pending).toHaveLength(1);
@@ -486,7 +486,7 @@ describe('Human-in-the-Loop', () => {
 
       const resultPromise = executeHumanNode({ value: 10 }, config, context);
 
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       const pending = await store.getPendingRequests();
       await store.submitResponse({
@@ -583,7 +583,7 @@ describe('Human-in-the-Loop', () => {
 
       const resultPromise = executeHumanNode({ value: 10 }, config, context);
 
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       const pending = await store.getPendingRequests();
       await store.submitResponse({
@@ -621,7 +621,7 @@ describe('Human-in-the-Loop', () => {
 
       const resultPromise = executeHumanNode({ value: 10 }, config, context);
 
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       const pending = await store.getPendingRequests();
       await store.submitResponse({
@@ -659,7 +659,7 @@ describe('Human-in-the-Loop', () => {
 
       const resultPromise = executeHumanNode({ value: 10 }, config, context);
 
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       const pending = await store.getPendingRequests();
       await store.submitResponse({

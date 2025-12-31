@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
-import {
-  MCPClient,
-  MCPServer,
-} from '@cogitator-ai/mcp';
+import { MCPClient, MCPServer } from '@cogitator-ai/mcp';
 import type { MCPClientConfig, MCPServerConfig } from '@cogitator-ai/mcp';
 import { getAvailableTools, getCogitator } from '@/lib/cogitator';
 import { withAuth } from '@/lib/auth/middleware';
@@ -37,7 +34,7 @@ export const GET = withAuth(async (request) => {
         const tools = await client.getTools();
         return NextResponse.json({
           clientId,
-          tools: tools.map(t => ({
+          tools: tools.map((t) => ({
             name: t.name,
             description: t.description,
             parameters: t.toJSON().parameters,
@@ -100,10 +97,7 @@ export const POST = withAuth(async (request) => {
         const { config, clientId } = body;
 
         if (!config || !clientId) {
-          return NextResponse.json(
-            { error: 'config and clientId required' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'config and clientId required' }, { status: 400 });
         }
 
         if (activeClients.has(clientId)) {
@@ -170,10 +164,7 @@ export const POST = withAuth(async (request) => {
         const { clientId, toolName, args } = body;
 
         if (!clientId || !toolName) {
-          return NextResponse.json(
-            { error: 'clientId and toolName required' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'clientId and toolName required' }, { status: 400 });
         }
 
         const client = activeClients.get(clientId);
@@ -189,10 +180,7 @@ export const POST = withAuth(async (request) => {
         const { clientId, uri } = body;
 
         if (!clientId || !uri) {
-          return NextResponse.json(
-            { error: 'clientId and uri required' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'clientId and uri required' }, { status: 400 });
         }
 
         const client = activeClients.get(clientId);
@@ -208,10 +196,7 @@ export const POST = withAuth(async (request) => {
         const { clientId, promptName, args } = body;
 
         if (!clientId || !promptName) {
-          return NextResponse.json(
-            { error: 'clientId and promptName required' },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: 'clientId and promptName required' }, { status: 400 });
         }
 
         const client = activeClients.get(clientId);
@@ -244,7 +229,7 @@ export const POST = withAuth(async (request) => {
 
         return NextResponse.json({
           imported: mcpTools.length,
-          tools: mcpTools.map(t => t.name),
+          tools: mcpTools.map((t) => t.name),
         });
       }
 

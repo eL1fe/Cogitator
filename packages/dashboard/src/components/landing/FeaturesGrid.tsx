@@ -2,15 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { FeatureCard } from './FeatureCard';
-import {
-  Layers,
-  GitBranch,
-  Users,
-  Brain,
-  Shield,
-  Plug,
-  Activity,
-} from 'lucide-react';
+import { Layers, GitBranch, Users, Brain, Shield, Plug, Activity } from 'lucide-react';
 
 const features = [
   {
@@ -45,8 +37,7 @@ const features = [
   },
   {
     title: 'Sandboxed Execution',
-    description:
-      'Run untrusted code in Docker containers or WASM. Never on your host.',
+    description: 'Run untrusted code in Docker containers or WASM. Never on your host.',
     icon: <Shield className="w-6 h-6" />,
     glowColor: '#ffaa00',
   },
@@ -89,11 +80,7 @@ export function FeaturesGrid() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {features.map((feature, i) => (
-            <FeatureCard
-              key={feature.title}
-              {...feature}
-              delay={i * 0.1}
-            />
+            <FeatureCard key={feature.title} {...feature} delay={i * 0.1} />
           ))}
         </div>
       </div>

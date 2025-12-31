@@ -8,10 +8,7 @@ export const POST = withAuth(async (request) => {
     const { name } = await request.json();
 
     if (!name) {
-      return NextResponse.json(
-        { error: 'Model name required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Model name required' }, { status: 400 });
     }
 
     const response = await fetch(`${OLLAMA_URL}/api/delete`, {
@@ -21,18 +18,12 @@ export const POST = withAuth(async (request) => {
     });
 
     if (!response.ok) {
-      return NextResponse.json(
-        { error: 'Failed to delete model' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to delete model' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Failed to delete model:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete model' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete model' }, { status: 500 });
   }
 });

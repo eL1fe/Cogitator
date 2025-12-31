@@ -17,8 +17,7 @@ describe('ContainerPool', () => {
     }
   });
 
-  afterAll(async () => {
-  });
+  afterAll(async () => {});
 
   describe('when Docker is available', () => {
     it.skipIf(!dockerAvailable)('creates pool with default options', () => {

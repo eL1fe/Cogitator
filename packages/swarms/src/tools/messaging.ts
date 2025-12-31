@@ -17,7 +17,10 @@ export function createMessagingTools(messageBus: MessageBus, currentAgent: strin
       to: z.string().describe('Name of the recipient agent'),
       message: z.string().describe('The message content to send'),
       channel: z.string().optional().describe('Optional channel for message categorization'),
-      waitForReply: z.boolean().optional().describe('Whether to wait for a response (default: false)'),
+      waitForReply: z
+        .boolean()
+        .optional()
+        .describe('Whether to wait for a response (default: false)'),
     }),
     execute: async ({ to, message, channel, waitForReply }) => {
       const msg = await messageBus.send({
@@ -37,9 +40,7 @@ export function createMessagingTools(messageBus: MessageBus, currentAgent: strin
         while (waited < maxWait) {
           const messages = messageBus.getMessages(currentAgent);
           const reply = messages.find(
-            m => m.from === to &&
-                 m.type === 'response' &&
-                 m.metadata?.correlationId === msg.id
+            (m) => m.from === to && m.type === 'response' && m.metadata?.correlationId === msg.id
           );
 
           if (reply) {
@@ -51,7 +52,7 @@ export function createMessagingTools(messageBus: MessageBus, currentAgent: strin
             };
           }
 
-          await new Promise(r => setTimeout(r, pollInterval));
+          await new Promise((r) => setTimeout(r, pollInterval));
           waited += pollInterval;
         }
 
@@ -83,17 +84,17 @@ export function createMessagingTools(messageBus: MessageBus, currentAgent: strin
       let messages = messageBus.getMessages(currentAgent);
 
       if (from) {
-        messages = messages.filter(m => m.from === from);
+        messages = messages.filter((m) => m.from === from);
       }
       if (channel) {
-        messages = messages.filter(m => m.channel === channel);
+        messages = messages.filter((m) => m.channel === channel);
       }
 
       messages = messages.slice(0, limit);
 
       return {
         count: messages.length,
-        messages: messages.map(m => ({
+        messages: messages.map((m) => ({
           id: m.id,
           from: m.from,
           content: m.content,
@@ -132,7 +133,7 @@ export function createMessagingTools(messageBus: MessageBus, currentAgent: strin
     }),
     execute: async ({ originalMessageId, message }) => {
       const allMessages = messageBus.getMessages(currentAgent);
-      const original = allMessages.find(m => m.id === originalMessageId);
+      const original = allMessages.find((m) => m.id === originalMessageId);
 
       if (!original) {
         return {

@@ -40,8 +40,7 @@ export class SandboxManager {
       if (result.success) {
         this.executors.set('docker', docker);
       }
-    } catch {
-    }
+    } catch {}
 
     try {
       const wasm = new WasmSandboxExecutor({
@@ -51,8 +50,7 @@ export class SandboxManager {
       if (result.success) {
         this.executors.set('wasm', wasm);
       }
-    } catch {
-    }
+    } catch {}
 
     this.initialized = true;
   }
@@ -68,25 +66,19 @@ export class SandboxManager {
 
     if (!executor) {
       if (type === 'wasm') {
-        console.warn(
-          '[sandbox] WASM unavailable, falling back to Docker'
-        );
+        console.warn('[sandbox] WASM unavailable, falling back to Docker');
         const dockerExecutor = this.executors.get('docker');
         if (dockerExecutor) {
           return dockerExecutor.execute(request, { ...config, type: 'docker' });
         }
-        console.warn(
-          '[sandbox] Docker also unavailable, falling back to native execution'
-        );
+        console.warn('[sandbox] Docker also unavailable, falling back to native execution');
         const nativeExecutor = this.executors.get('native');
         if (nativeExecutor) {
           return nativeExecutor.execute(request, { ...config, type: 'native' });
         }
       }
       if (type === 'docker') {
-        console.warn(
-          '[sandbox] Docker unavailable, falling back to native execution'
-        );
+        console.warn('[sandbox] Docker unavailable, falling back to native execution');
         const nativeExecutor = this.executors.get('native');
         if (nativeExecutor) {
           return nativeExecutor.execute(request, { ...config, type: 'native' });

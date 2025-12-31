@@ -168,16 +168,19 @@ export async function createRun(data: {
   return run!;
 }
 
-export async function updateRun(id: string, data: Partial<{
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
-  output: string;
-  duration: number;
-  inputTokens: number;
-  outputTokens: number;
-  totalTokens: number;
-  cost: number;
-  error: string;
-}>): Promise<Run | null> {
+export async function updateRun(
+  id: string,
+  data: Partial<{
+    status: 'running' | 'completed' | 'failed' | 'cancelled';
+    output: string;
+    duration: number;
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    cost: number;
+    error: string;
+  }>
+): Promise<Run | null> {
   const updates: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -245,12 +248,15 @@ export async function addToolCall(data: {
   return id;
 }
 
-export async function updateToolCall(id: string, data: {
-  status: 'success' | 'error';
-  result?: unknown;
-  duration?: number;
-  error?: string;
-}): Promise<void> {
+export async function updateToolCall(
+  id: string,
+  data: {
+    status: 'success' | 'error';
+    result?: unknown;
+    duration?: number;
+    error?: string;
+  }
+): Promise<void> {
   await execute(
     `UPDATE dashboard_tool_calls
      SET status = $1, result = $2, duration = $3, error = $4, completed_at = NOW()

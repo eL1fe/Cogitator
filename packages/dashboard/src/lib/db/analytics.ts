@@ -50,7 +50,7 @@ export async function getHourlyStats(hours = 24): Promise<HourlyStats[]> {
     ORDER BY h.hour
   `);
 
-  return rows.map(row => ({
+  return rows.map((row) => ({
     hour: row.hour.toISOString(),
     runs: parseInt(row.runs),
     tokens: parseInt(row.tokens),
@@ -58,7 +58,9 @@ export async function getHourlyStats(hours = 24): Promise<HourlyStats[]> {
   }));
 }
 
-export async function getModelStats(period: 'day' | 'week' | 'month' = 'day'): Promise<ModelStats[]> {
+export async function getModelStats(
+  period: 'day' | 'week' | 'month' = 'day'
+): Promise<ModelStats[]> {
   const intervals = {
     day: "NOW() - INTERVAL '1 day'",
     week: "NOW() - INTERVAL '7 days'",
@@ -83,7 +85,7 @@ export async function getModelStats(period: 'day' | 'week' | 'month' = 'day'): P
     ORDER BY cost DESC
   `);
 
-  return rows.map(row => ({
+  return rows.map((row) => ({
     model: row.model,
     runs: parseInt(row.runs),
     tokens: parseInt(row.tokens),
@@ -91,7 +93,10 @@ export async function getModelStats(period: 'day' | 'week' | 'month' = 'day'): P
   }));
 }
 
-export async function getTopAgents(limit = 10, period: 'day' | 'week' | 'month' = 'week'): Promise<AgentStats[]> {
+export async function getTopAgents(
+  limit = 10,
+  period: 'day' | 'week' | 'month' = 'week'
+): Promise<AgentStats[]> {
   const intervals = {
     day: "NOW() - INTERVAL '1 day'",
     week: "NOW() - INTERVAL '7 days'",
@@ -107,7 +112,8 @@ export async function getTopAgents(limit = 10, period: 'day' | 'week' | 'month' 
     cost: string;
     avg_duration: string;
     success_rate: string;
-  }>(`
+  }>(
+    `
     SELECT
       a.id,
       a.name,
@@ -125,9 +131,11 @@ export async function getTopAgents(limit = 10, period: 'day' | 'week' | 'month' 
     GROUP BY a.id, a.name, a.model
     ORDER BY runs DESC
     LIMIT $1
-  `, [limit]);
+  `,
+    [limit]
+  );
 
-  return rows.map(row => ({
+  return rows.map((row) => ({
     id: row.id,
     name: row.name,
     model: row.model,

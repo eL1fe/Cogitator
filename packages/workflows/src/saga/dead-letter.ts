@@ -61,10 +61,7 @@ export class InMemoryDLQ extends BaseDLQ {
     this.defaultTTL = options.defaultTTL ?? 7 * 24 * 60 * 60 * 1000;
 
     if (options.cleanupIntervalMs) {
-      this.cleanupInterval = setInterval(
-        () => void this.cleanup(),
-        options.cleanupIntervalMs
-      );
+      this.cleanupInterval = setInterval(() => void this.cleanup(), options.cleanupIntervalMs);
     }
   }
 
@@ -186,10 +183,7 @@ export class FileDLQ extends BaseDLQ {
   private defaultTTL: number;
   private initialized = false;
 
-  constructor(
-    directory: string,
-    options: { defaultTTL?: number } = {}
-  ) {
+  constructor(directory: string, options: { defaultTTL?: number } = {}) {
     super();
     this.directory = directory;
     this.defaultTTL = options.defaultTTL ?? 7 * 24 * 60 * 60 * 1000;
@@ -200,8 +194,7 @@ export class FileDLQ extends BaseDLQ {
 
     try {
       await fs.mkdir(this.directory, { recursive: true });
-    } catch {
-    }
+    } catch {}
     this.initialized = true;
   }
 
@@ -274,16 +267,16 @@ export class FileDLQ extends BaseDLQ {
           if (filters.nodeId && entry.nodeId !== filters.nodeId) continue;
           if (filters.minAttempts !== undefined && entry.attempts < filters.minAttempts) continue;
           if (filters.maxAttempts !== undefined && entry.attempts > filters.maxAttempts) continue;
-          if (filters.createdAfter !== undefined && entry.createdAt < filters.createdAfter) continue;
-          if (filters.createdBefore !== undefined && entry.createdAt > filters.createdBefore) continue;
+          if (filters.createdAfter !== undefined && entry.createdAt < filters.createdAfter)
+            continue;
+          if (filters.createdBefore !== undefined && entry.createdAt > filters.createdBefore)
+            continue;
           if (filters.tags && !filters.tags.every((t) => entry.tags?.includes(t))) continue;
 
           results.push(entry);
-        } catch {
-        }
+        } catch {}
       }
-    } catch {
-    }
+    } catch {}
 
     results.sort((a, b) => b.createdAt - a.createdAt);
 
@@ -334,8 +327,7 @@ export class FileDLQ extends BaseDLQ {
           .filter((f) => f.endsWith('.json'))
           .map((f) => fs.unlink(join(this.directory, f)).catch(() => {}))
       );
-    } catch {
-    }
+    } catch {}
   }
 }
 
@@ -380,18 +372,16 @@ export function createDLQEntry(
 /**
  * Create an in-memory DLQ
  */
-export function createInMemoryDLQ(
-  options?: { defaultTTL?: number; cleanupIntervalMs?: number }
-): InMemoryDLQ {
+export function createInMemoryDLQ(options?: {
+  defaultTTL?: number;
+  cleanupIntervalMs?: number;
+}): InMemoryDLQ {
   return new InMemoryDLQ(options);
 }
 
 /**
  * Create a file-based DLQ
  */
-export function createFileDLQ(
-  directory: string,
-  options?: { defaultTTL?: number }
-): FileDLQ {
+export function createFileDLQ(directory: string, options?: { defaultTTL?: number }): FileDLQ {
   return new FileDLQ(directory, options);
 }

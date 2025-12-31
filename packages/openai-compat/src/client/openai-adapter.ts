@@ -82,14 +82,17 @@ export class OpenAIAdapter {
     return stored ? this.toAssistant(stored) : undefined;
   }
 
-  updateAssistant(id: string, updates: Partial<{
-    model: string;
-    name: string;
-    instructions: string;
-    tools: unknown[];
-    metadata: Record<string, string>;
-    temperature: number;
-  }>): Assistant | undefined {
+  updateAssistant(
+    id: string,
+    updates: Partial<{
+      model: string;
+      name: string;
+      instructions: string;
+      tools: unknown[];
+      metadata: Record<string, string>;
+      temperature: number;
+    }>
+  ): Assistant | undefined {
     const stored = this.threadManager.updateAssistant(id, updates);
     return stored ? this.toAssistant(stored) : undefined;
   }
@@ -129,7 +132,10 @@ export class OpenAIAdapter {
     return this.threadManager.deleteThread(id);
   }
 
-  addMessage(threadId: string, params: { role: 'user' | 'assistant'; content: string; metadata?: Record<string, string> }) {
+  addMessage(
+    threadId: string,
+    params: { role: 'user' | 'assistant'; content: string; metadata?: Record<string, string> }
+  ) {
     return this.threadManager.addMessage(threadId, params);
   }
 
@@ -137,13 +143,16 @@ export class OpenAIAdapter {
     return this.threadManager.getMessage(threadId, messageId);
   }
 
-  listMessages(threadId: string, options?: {
-    limit?: number;
-    order?: 'asc' | 'desc';
-    after?: string;
-    before?: string;
-    run_id?: string;
-  }) {
+  listMessages(
+    threadId: string,
+    options?: {
+      limit?: number;
+      order?: 'asc' | 'desc';
+      after?: string;
+      before?: string;
+      run_id?: string;
+    }
+  ) {
     return this.threadManager.listMessages(threadId, options);
   }
 
@@ -311,12 +320,7 @@ export class OpenAIAdapter {
       }
 
       if (result.output) {
-        this.threadManager.addAssistantMessage(
-          threadId,
-          result.output,
-          assistant.id,
-          runId
-        );
+        this.threadManager.addAssistantMessage(threadId, result.output, assistant.id, runId);
       }
 
       state.run.status = 'completed';

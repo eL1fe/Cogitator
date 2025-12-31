@@ -39,27 +39,18 @@ describe('exec tool', () => {
   });
 
   it('handles command timeout', async () => {
-    const result = await exec.execute(
-      { command: 'sleep 10', timeout: 100 },
-      mockContext
-    );
+    const result = await exec.execute({ command: 'sleep 10', timeout: 100 }, mockContext);
     expect(result).toHaveProperty('error');
     expect((result as { error: string }).error).toContain('timed out');
   });
 
   it('handles command not found', async () => {
-    const result = await exec.execute(
-      { command: 'nonexistent-command-12345' },
-      mockContext
-    );
+    const result = await exec.execute({ command: 'nonexistent-command-12345' }, mockContext);
     expect((result as { exitCode: number }).exitCode).toBe(127);
   });
 
   it('runs multi-line commands', async () => {
-    const result = await exec.execute(
-      { command: 'echo "line1" && echo "line2"' },
-      mockContext
-    );
+    const result = await exec.execute({ command: 'echo "line1" && echo "line2"' }, mockContext);
     const stdout = (result as { stdout: string }).stdout;
     expect(stdout).toContain('line1');
     expect(stdout).toContain('line2');

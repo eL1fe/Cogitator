@@ -68,7 +68,7 @@ function splitIntoChunks(text: string, maxChunkSize: number): string[] {
 export const POST = withAuth(async (request) => {
   try {
     const body: ChatCompletionRequest = await request.json();
-    const { model, messages, temperature = 0.7, max_tokens, stream = false} = body;
+    const { model, messages, temperature = 0.7, max_tokens, stream = false } = body;
 
     if (!model) {
       return NextResponse.json(
@@ -86,10 +86,10 @@ export const POST = withAuth(async (request) => {
 
     const cogitator = await getCogitator();
 
-    const systemMessage = messages.find(m => m.role === 'system');
-    const chatMessages = messages.filter(m => m.role !== 'system');
+    const systemMessage = messages.find((m) => m.role === 'system');
+    const chatMessages = messages.filter((m) => m.role !== 'system');
 
-    const lastUserMessage = [...chatMessages].reverse().find(m => m.role === 'user');
+    const lastUserMessage = [...chatMessages].reverse().find((m) => m.role === 'user');
     const input = lastUserMessage?.content || '';
 
     const agent = new Agent({
@@ -123,14 +123,16 @@ export const POST = withAuth(async (request) => {
                 object: 'chat.completion.chunk',
                 created,
                 model,
-                choices: [{
-                  index: 0,
-                  delta: { content: chunk },
-                  finish_reason: null,
-                }],
+                choices: [
+                  {
+                    index: 0,
+                    delta: { content: chunk },
+                    finish_reason: null,
+                  },
+                ],
               };
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
-              await new Promise(r => setTimeout(r, 50));
+              await new Promise((r) => setTimeout(r, 50));
             }
 
             const finalData = {
@@ -138,11 +140,13 @@ export const POST = withAuth(async (request) => {
               object: 'chat.completion.chunk',
               created,
               model,
-              choices: [{
-                index: 0,
-                delta: {},
-                finish_reason: 'stop',
-              }],
+              choices: [
+                {
+                  index: 0,
+                  delta: {},
+                  finish_reason: 'stop',
+                },
+              ],
             };
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(finalData)}\n\n`));
             controller.enqueue(encoder.encode('data: [DONE]\n\n'));
@@ -164,7 +168,7 @@ export const POST = withAuth(async (request) => {
         headers: {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
+          Connection: 'keep-alive',
         },
       });
     } else {
@@ -180,14 +184,16 @@ export const POST = withAuth(async (request) => {
         object: 'chat.completion',
         created,
         model,
-        choices: [{
-          index: 0,
-          message: {
-            role: 'assistant',
-            content: result.output,
+        choices: [
+          {
+            index: 0,
+            message: {
+              role: 'assistant',
+              content: result.output,
+            },
+            finish_reason: 'stop',
           },
-          finish_reason: 'stop',
-        }],
+        ],
         usage: {
           prompt_tokens: result.usage.inputTokens,
           completion_tokens: result.usage.outputTokens,

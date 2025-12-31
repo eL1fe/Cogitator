@@ -9,11 +9,7 @@
  * - Compensation result tracking
  */
 
-import type {
-  CompensationConfig,
-  CompensationOrder,
-  WorkflowState,
-} from '@cogitator-ai/types';
+import type { CompensationConfig, CompensationOrder, WorkflowState } from '@cogitator-ai/types';
 
 /**
  * Compensation step definition
@@ -129,11 +125,7 @@ export class CompensationManager<S = WorkflowState> {
   /**
    * Execute compensation for all completed nodes
    */
-  async compensate(
-    state: S,
-    failedNodeId: string,
-    error: Error
-  ): Promise<CompensationReport> {
+  async compensate(state: S, failedNodeId: string, error: Error): Promise<CompensationReport> {
     const startTime = Date.now();
     const compensated: CompensationResult[] = [];
     const partialFailures: string[] = [];
@@ -164,10 +156,7 @@ export class CompensationManager<S = WorkflowState> {
       for (let attempt = 0; attempt <= (step.retries ?? 0); attempt++) {
         try {
           if (step.timeout) {
-            await this.withTimeout(
-              step.compensationFn(state, originalResult),
-              step.timeout
-            );
+            await this.withTimeout(step.compensationFn(state, originalResult), step.timeout);
           } else {
             await step.compensationFn(state, originalResult);
           }
@@ -232,9 +221,7 @@ export class CompensationManager<S = WorkflowState> {
 
     result.push(...parallel);
 
-    const reverseOrder = [...this.executionOrder]
-      .reverse()
-      .filter((n) => reverse.includes(n));
+    const reverseOrder = [...this.executionOrder].reverse().filter((n) => reverse.includes(n));
     result.push(...reverseOrder);
 
     const forwardOrder = this.executionOrder.filter((n) => forward.includes(n));
@@ -246,10 +233,7 @@ export class CompensationManager<S = WorkflowState> {
   /**
    * Execute with timeout
    */
-  private async withTimeout<T>(
-    promise: Promise<T>,
-    timeoutMs: number
-  ): Promise<T> {
+  private async withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
     return Promise.race([
       promise,
       new Promise<T>((_, reject) =>

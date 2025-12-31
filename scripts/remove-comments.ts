@@ -112,7 +112,7 @@ function removeLineComments(content: string): string {
   let finalResult = result.join('\n');
   finalResult = finalResult
     .split('\n')
-    .map(l => l.trimEnd())
+    .map((l) => l.trimEnd())
     .join('\n');
   finalResult = finalResult.replace(/\n{3,}/g, '\n\n');
   finalResult = finalResult.trimEnd() + '\n';

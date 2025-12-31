@@ -93,7 +93,8 @@ export function ActiveAgents() {
       ) : (
         <div className="space-y-2">
           {displayAgents.map((agent) => {
-            const config = statusConfig[agent.status as keyof typeof statusConfig] || statusConfig.offline;
+            const config =
+              statusConfig[agent.status as keyof typeof statusConfig] || statusConfig.offline;
 
             return (
               <Link
@@ -111,9 +112,7 @@ export function ActiveAgents() {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-text-primary truncate">
-                    {agent.name}
-                  </p>
+                  <p className="text-sm font-medium text-text-primary truncate">{agent.name}</p>
                   <p className="text-xs text-text-muted truncate">{agent.model}</p>
                 </div>
 

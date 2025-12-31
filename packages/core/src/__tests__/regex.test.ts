@@ -19,10 +19,7 @@ describe('regexMatch tool', () => {
   });
 
   it('returns match positions', async () => {
-    const result = await regexMatch.execute(
-      { text: 'hello world', pattern: 'o' },
-      mockContext
-    );
+    const result = await regexMatch.execute({ text: 'hello world', pattern: 'o' }, mockContext);
     const matches = (result as { matches: { match: string; index: number }[] }).matches;
     expect(matches[0]).toEqual({ match: 'o', index: 4, groups: undefined });
     expect(matches[1]).toEqual({ match: 'o', index: 7, groups: undefined });
@@ -47,19 +44,13 @@ describe('regexMatch tool', () => {
   });
 
   it('returns empty array for no matches', async () => {
-    const result = await regexMatch.execute(
-      { text: 'hello', pattern: 'xyz' },
-      mockContext
-    );
+    const result = await regexMatch.execute({ text: 'hello', pattern: 'xyz' }, mockContext);
     expect(result).toHaveProperty('count', 0);
     expect((result as { matches: unknown[] }).matches).toEqual([]);
   });
 
   it('handles invalid regex', async () => {
-    const result = await regexMatch.execute(
-      { text: 'hello', pattern: '[invalid' },
-      mockContext
-    );
+    const result = await regexMatch.execute({ text: 'hello', pattern: '[invalid' }, mockContext);
     expect(result).toHaveProperty('error');
   });
 

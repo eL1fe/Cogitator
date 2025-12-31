@@ -9,10 +9,7 @@ const mockContext = {
 
 describe('httpRequest tool', () => {
   it('makes GET request', async () => {
-    const result = await httpRequest.execute(
-      { url: 'https://httpbin.org/get' },
-      mockContext
-    );
+    const result = await httpRequest.execute({ url: 'https://httpbin.org/get' }, mockContext);
     expect(result).toHaveProperty('status', 200);
     expect(result).toHaveProperty('method', 'GET');
     expect(result).toHaveProperty('body');

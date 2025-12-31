@@ -8,11 +8,7 @@
  * - TTL-based cleanup
  */
 
-import type {
-  ApprovalStore,
-  ApprovalRequest,
-  ApprovalResponse,
-} from '@cogitator-ai/types';
+import type { ApprovalStore, ApprovalRequest, ApprovalResponse } from '@cogitator-ai/types';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
@@ -30,10 +26,7 @@ export class InMemoryApprovalStore implements ApprovalStore {
     this.ttl = options.ttl ?? 7 * 24 * 60 * 60 * 1000;
 
     if (options.cleanupInterval) {
-      this.cleanupInterval = setInterval(
-        () => this.cleanup(),
-        options.cleanupInterval
-      );
+      this.cleanupInterval = setInterval(() => this.cleanup(), options.cleanupInterval);
     }
   }
 
@@ -65,9 +58,7 @@ export class InMemoryApprovalStore implements ApprovalStore {
     for (const request of this.requests.values()) {
       if (this.responses.has(request.id)) continue;
 
-      const isAssigned =
-        request.assignee === assignee ||
-        request.assigneeGroup?.includes(assignee);
+      const isAssigned = request.assignee === assignee || request.assigneeGroup?.includes(assignee);
 
       if (isAssigned) {
         pending.push(request);
@@ -85,8 +76,7 @@ export class InMemoryApprovalStore implements ApprovalStore {
       for (const callback of callbacks) {
         try {
           callback(response);
-        } catch {
-        }
+        } catch {}
       }
       this.callbacks.delete(response.requestId);
     }
@@ -102,10 +92,7 @@ export class InMemoryApprovalStore implements ApprovalStore {
     this.callbacks.delete(id);
   }
 
-  onResponse(
-    requestId: string,
-    callback: (response: ApprovalResponse) => void
-  ): () => void {
+  onResponse(requestId: string, callback: (response: ApprovalResponse) => void): () => void {
     const existingResponse = this.responses.get(requestId);
     if (existingResponse) {
       queueMicrotask(() => callback(existingResponse));
@@ -183,17 +170,11 @@ export class FileApprovalStore implements ApprovalStore {
   private watchInterval?: ReturnType<typeof setInterval>;
   private lastResponseCheck = new Map<string, number>();
 
-  constructor(options: {
-    directory: string;
-    pollInterval?: number;
-  }) {
+  constructor(options: { directory: string; pollInterval?: number }) {
     this.directory = options.directory;
 
     if (options.pollInterval) {
-      this.watchInterval = setInterval(
-        () => this.checkForResponses(),
-        options.pollInterval
-      );
+      this.watchInterval = setInterval(() => this.checkForResponses(), options.pollInterval);
     }
   }
 
@@ -226,8 +207,7 @@ export class FileApprovalStore implements ApprovalStore {
 
     try {
       await fs.mkdir(requestsDir, { recursive: true });
-    } catch {
-    }
+    } catch {}
 
     const pending: ApprovalRequest[] = [];
 
@@ -243,24 +223,18 @@ export class FileApprovalStore implements ApprovalStore {
         try {
           await fs.access(responsePath);
           continue;
-        } catch {
-        }
+        } catch {}
 
         try {
-          const content = await fs.readFile(
-            path.join(requestsDir, file),
-            'utf-8'
-          );
+          const content = await fs.readFile(path.join(requestsDir, file), 'utf-8');
           const request = JSON.parse(content) as ApprovalRequest;
 
           if (!workflowId || request.workflowId === workflowId) {
             pending.push(request);
           }
-        } catch {
-        }
+        } catch {}
       }
-    } catch {
-    }
+    } catch {}
 
     return pending;
   }
@@ -269,9 +243,7 @@ export class FileApprovalStore implements ApprovalStore {
     const allPending = await this.getPendingRequests();
 
     return allPending.filter(
-      (request) =>
-        request.assignee === assignee ||
-        request.assigneeGroup?.includes(assignee)
+      (request) => request.assignee === assignee || request.assigneeGroup?.includes(assignee)
     );
   }
 
@@ -285,8 +257,7 @@ export class FileApprovalStore implements ApprovalStore {
       for (const callback of callbacks) {
         try {
           callback(response);
-        } catch {
-        }
+        } catch {}
       }
       this.callbacks.delete(response.requestId);
     }
@@ -294,10 +265,7 @@ export class FileApprovalStore implements ApprovalStore {
 
   async getResponse(requestId: string): Promise<ApprovalResponse | null> {
     try {
-      const content = await fs.readFile(
-        this.getResponsePath(requestId),
-        'utf-8'
-      );
+      const content = await fs.readFile(this.getResponsePath(requestId), 'utf-8');
       return JSON.parse(content) as ApprovalResponse;
     } catch {
       return null;
@@ -307,21 +275,16 @@ export class FileApprovalStore implements ApprovalStore {
   async deleteRequest(id: string): Promise<void> {
     try {
       await fs.unlink(this.getRequestPath(id));
-    } catch {
-    }
+    } catch {}
 
     try {
       await fs.unlink(this.getResponsePath(id));
-    } catch {
-    }
+    } catch {}
 
     this.callbacks.delete(id);
   }
 
-  onResponse(
-    requestId: string,
-    callback: (response: ApprovalResponse) => void
-  ): () => void {
+  onResponse(requestId: string, callback: (response: ApprovalResponse) => void): () => void {
     this.getResponse(requestId).then((existingResponse) => {
       if (existingResponse) {
         callback(existingResponse);
@@ -373,15 +336,13 @@ export class FileApprovalStore implements ApprovalStore {
           for (const callback of callbacks) {
             try {
               callback(response);
-            } catch {
-            }
+            } catch {}
           }
 
           this.callbacks.delete(requestId);
         }
       }
-    } catch {
-    }
+    } catch {}
   }
 
   /**
@@ -420,11 +381,9 @@ export class FileApprovalStore implements ApprovalStore {
             await this.deleteRequest(id);
             deleted++;
           }
-        } catch {
-        }
+        } catch {}
       }
-    } catch {
-    }
+    } catch {}
 
     return deleted;
   }
@@ -437,11 +396,7 @@ export class FileApprovalStore implements ApprovalStore {
 export function withDelegation(
   store: ApprovalStore,
   options: {
-    onDelegation?: (
-      request: ApprovalRequest,
-      from: string,
-      to: string
-    ) => Promise<void>;
+    onDelegation?: (request: ApprovalRequest, from: string, to: string) => Promise<void>;
   } = {}
 ): ApprovalStore {
   return {

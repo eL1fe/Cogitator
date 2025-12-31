@@ -74,7 +74,9 @@ export async function getAuthenticatedUser(_request: NextRequest): Promise<User 
 
   try {
     const supabase = await createSupabaseClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) return null;
 
@@ -94,10 +96,7 @@ export function withAuth(handler: AuthenticatedRouteHandler): RouteHandler {
     const user = await getAuthenticatedUser(request);
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', code: 'AUTH_REQUIRED' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' }, { status: 401 });
     }
 
     (request as AuthenticatedRequest).user = user;
@@ -113,10 +112,7 @@ export function withRole(
     const user = await getAuthenticatedUser(request);
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', code: 'AUTH_REQUIRED' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized', code: 'AUTH_REQUIRED' }, { status: 401 });
     }
 
     if (!roles.includes(user.role)) {

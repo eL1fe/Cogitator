@@ -166,15 +166,21 @@ export class SwarmAssessor implements Assessor {
       };
 
       if (updatedConfig.supervisor) {
-        updatedConfig.supervisor = updateAgent(updatedConfig.supervisor as { name: string; model?: string }) as typeof updatedConfig.supervisor;
+        updatedConfig.supervisor = updateAgent(
+          updatedConfig.supervisor as { name: string; model?: string }
+        ) as typeof updatedConfig.supervisor;
       }
 
       if (updatedConfig.moderator) {
-        updatedConfig.moderator = updateAgent(updatedConfig.moderator as { name: string; model?: string }) as typeof updatedConfig.moderator;
+        updatedConfig.moderator = updateAgent(
+          updatedConfig.moderator as { name: string; model?: string }
+        ) as typeof updatedConfig.moderator;
       }
 
       if (updatedConfig.router) {
-        updatedConfig.router = updateAgent(updatedConfig.router as { name: string; model?: string }) as typeof updatedConfig.router;
+        updatedConfig.router = updateAgent(
+          updatedConfig.router as { name: string; model?: string }
+        ) as typeof updatedConfig.router;
       }
 
       if (updatedConfig.workers) {
@@ -223,11 +229,13 @@ export class SwarmAssessor implements Assessor {
 
   private getCacheKey(task: string, config: SwarmConfig): string {
     const taskHash = this.hashString(task.slice(0, 500));
-    const configHash = this.hashString(JSON.stringify({
-      name: config.name,
-      strategy: config.strategy,
-      agents: this.getAgentNames(config),
-    }));
+    const configHash = this.hashString(
+      JSON.stringify({
+        name: config.name,
+        strategy: config.strategy,
+        agents: this.getAgentNames(config),
+      })
+    );
     return `${taskHash}-${configHash}`;
   }
 
@@ -270,7 +278,9 @@ export class SwarmAssessor implements Assessor {
       if (model && !model.isLocal) {
         // Estimate ~1000 tokens per agent interaction
         const estimatedTokens = 1000;
-        total += (model.pricing.input * estimatedTokens + model.pricing.output * estimatedTokens) / 1_000_000;
+        total +=
+          (model.pricing.input * estimatedTokens + model.pricing.output * estimatedTokens) /
+          1_000_000;
       }
     }
     return total;
@@ -289,7 +299,10 @@ export class SwarmAssessor implements Assessor {
       .filter((a) => !a.locked)
       .map((a) => {
         const model = discoveredModels.find((m) => m.id === a.assignedModel);
-        return { assignment: a, cost: model ? (model.pricing.input + model.pricing.output) / 2 : 0 };
+        return {
+          assignment: a,
+          cost: model ? (model.pricing.input + model.pricing.output) / 2 : 0,
+        };
       })
       .sort((a, b) => b.cost - a.cost);
 

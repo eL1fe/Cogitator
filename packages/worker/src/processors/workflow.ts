@@ -12,9 +12,7 @@ import type { WorkflowJobPayload, WorkflowJobResult } from '../types';
  * Note: Full workflow execution requires deserializing the workflow graph
  * and recreating node instances. This is a placeholder implementation.
  */
-export async function processWorkflowJob(
-  payload: WorkflowJobPayload
-): Promise<WorkflowJobResult> {
+export async function processWorkflowJob(payload: WorkflowJobPayload): Promise<WorkflowJobResult> {
   const { workflowConfig, input, runId } = payload;
   const startTime = Date.now();
 

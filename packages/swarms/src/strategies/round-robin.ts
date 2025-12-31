@@ -42,12 +42,16 @@ export class RoundRobinStrategy extends BaseStrategy {
       sticky: this.config.sticky,
     });
 
-    this.coordinator.blackboard.write('round-robin', {
-      currentAgent: selectedAgent.agent.name,
-      currentIndex: this.currentIndex,
-      totalAgents: agents.length,
-      stickyEnabled: this.config.sticky,
-    }, 'system');
+    this.coordinator.blackboard.write(
+      'round-robin',
+      {
+        currentAgent: selectedAgent.agent.name,
+        currentIndex: this.currentIndex,
+        totalAgents: agents.length,
+        stickyEnabled: this.config.sticky,
+      },
+      'system'
+    );
 
     const agentContext = {
       ...options.context,
@@ -83,7 +87,7 @@ export class RoundRobinStrategy extends BaseStrategy {
       const existingAssignment = this.stickyAssignments.get(key);
 
       if (existingAssignment) {
-        const agent = agents.find(a => a.agent.name === existingAssignment);
+        const agent = agents.find((a) => a.agent.name === existingAssignment);
         if (agent) {
           return agent;
         }

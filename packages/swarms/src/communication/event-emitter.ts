@@ -54,8 +54,7 @@ export class SwarmEventEmitterImpl implements SwarmEventEmitter {
       for (const handler of handlers) {
         try {
           handler(swarmEvent);
-        } catch {
-        }
+        } catch {}
       }
     }
 
@@ -64,8 +63,7 @@ export class SwarmEventEmitterImpl implements SwarmEventEmitter {
       for (const handler of wildcardHandlers) {
         try {
           handler(swarmEvent);
-        } catch {
-        }
+        } catch {}
       }
     }
   }

@@ -39,10 +39,7 @@ function recreateTools(schemas: ToolSchema[]): Tool[] {
       description: schema.description,
       parameters: jsonSchemaToZod(schema.parameters),
       execute: async (input) => {
-        console.warn(
-          `[worker] Tool "${schema.name}" called with input:`,
-          JSON.stringify(input)
-        );
+        console.warn(`[worker] Tool "${schema.name}" called with input:`, JSON.stringify(input));
         return {
           warning: 'Tool executed in worker with stub implementation',
           input,
@@ -92,9 +89,7 @@ function getStrategyType(
 /**
  * Process a swarm job
  */
-export async function processSwarmJob(
-  payload: SwarmJobPayload
-): Promise<SwarmJobResult> {
+export async function processSwarmJob(payload: SwarmJobPayload): Promise<SwarmJobResult> {
   const { swarmConfig, input } = payload;
 
   const cogitator = new Cogitator();

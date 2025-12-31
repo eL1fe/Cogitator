@@ -53,12 +53,7 @@ const STRATEGIES = [
   },
 ];
 
-export function CreateSwarmModal({
-  isOpen,
-  onClose,
-  onCreated,
-  agents,
-}: CreateSwarmModalProps) {
+export function CreateSwarmModal({ isOpen, onClose, onCreated, agents }: CreateSwarmModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [strategy, setStrategy] = useState('hierarchical');
@@ -68,9 +63,7 @@ export function CreateSwarmModal({
 
   const toggleAgent = (agentId: string) => {
     setSelectedAgents((prev) =>
-      prev.includes(agentId)
-        ? prev.filter((id) => id !== agentId)
-        : [...prev, agentId]
+      prev.includes(agentId) ? prev.filter((id) => id !== agentId) : [...prev, agentId]
     );
   };
 
@@ -127,10 +120,7 @@ export function CreateSwarmModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       <Card className="relative w-full max-w-2xl mx-4 z-10 animate-fade-in max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
@@ -138,14 +128,9 @@ export function CreateSwarmModal({
             <div className="p-2 bg-accent/10 rounded-lg">
               <Users className="w-5 h-5 text-accent" />
             </div>
-            <h2 className="text-lg font-semibold text-text-primary">
-              Create Swarm
-            </h2>
+            <h2 className="text-lg font-semibold text-text-primary">Create Swarm</h2>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg hover:bg-bg-hover transition-colors"
-          >
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-bg-hover transition-colors">
             <X className="w-5 h-5 text-text-muted" />
           </button>
         </div>
@@ -160,9 +145,7 @@ export function CreateSwarmModal({
           {/* Basic Info */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-text-secondary mb-1">
-                Name *
-              </label>
+              <label className="block text-sm text-text-secondary mb-1">Name *</label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -172,9 +155,7 @@ export function CreateSwarmModal({
             </div>
 
             <div>
-              <label className="block text-sm text-text-secondary mb-1">
-                Description
-              </label>
+              <label className="block text-sm text-text-secondary mb-1">Description</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -187,9 +168,7 @@ export function CreateSwarmModal({
 
           {/* Strategy */}
           <div>
-            <label className="block text-sm text-text-secondary mb-2">
-              Strategy *
-            </label>
+            <label className="block text-sm text-text-secondary mb-2">Strategy *</label>
             <div className="grid grid-cols-2 gap-2">
               {STRATEGIES.map((s) => (
                 <button
@@ -202,12 +181,8 @@ export function CreateSwarmModal({
                       : 'border-border-primary bg-bg-tertiary hover:border-border-secondary'
                   }`}
                 >
-                  <div className="font-medium text-sm text-text-primary">
-                    {s.name}
-                  </div>
-                  <p className="text-xs text-text-muted mt-0.5">
-                    {s.description}
-                  </p>
+                  <div className="font-medium text-sm text-text-primary">{s.name}</div>
+                  <p className="text-xs text-text-muted mt-0.5">{s.description}</p>
                 </button>
               ))}
             </div>
@@ -248,17 +223,14 @@ export function CreateSwarmModal({
                         <CheckCircle className="w-4 h-4 text-accent" />
                       )}
                     </div>
-                    <p className="text-xs text-text-muted mt-1 truncate">
-                      {agent.model}
-                    </p>
+                    <p className="text-xs text-text-muted mt-1 truncate">{agent.model}</p>
                   </button>
                 ))}
               </div>
             )}
             {selectedAgents.length > 0 && (
               <p className="text-xs text-text-muted mt-2">
-                {selectedAgents.length} agent{selectedAgents.length !== 1 ? 's' : ''}{' '}
-                selected
+                {selectedAgents.length} agent{selectedAgents.length !== 1 ? 's' : ''} selected
               </p>
             )}
           </div>

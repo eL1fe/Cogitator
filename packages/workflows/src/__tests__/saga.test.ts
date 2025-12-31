@@ -26,7 +26,11 @@ describe('Saga Pattern', () => {
     it('succeeds on first attempt', async () => {
       const fn = vi.fn().mockResolvedValue('success');
 
-      const result = await executeWithRetry(fn, { maxRetries: 3, backoff: 'constant', initialDelay: 100 });
+      const result = await executeWithRetry(fn, {
+        maxRetries: 3,
+        backoff: 'constant',
+        initialDelay: 100,
+      });
 
       expect(result.success).toBe(true);
       expect(result.result).toBe('success');
@@ -35,7 +39,8 @@ describe('Saga Pattern', () => {
     });
 
     it('retries on failure and eventually succeeds', async () => {
-      const fn = vi.fn()
+      const fn = vi
+        .fn()
         .mockRejectedValueOnce(new Error('connection reset'))
         .mockRejectedValueOnce(new Error('timeout'))
         .mockResolvedValue('success');
@@ -69,9 +74,7 @@ describe('Saga Pattern', () => {
     });
 
     it('applies exponential backoff', async () => {
-      const fn = vi.fn()
-        .mockRejectedValueOnce(new Error('timeout'))
-        .mockResolvedValue('success');
+      const fn = vi.fn().mockRejectedValueOnce(new Error('timeout')).mockResolvedValue('success');
 
       const startTime = Date.now();
 
@@ -103,9 +106,7 @@ describe('Saga Pattern', () => {
 
     describe('withRetry wrapper', () => {
       it('wraps function with retry logic', async () => {
-        const fn = vi.fn()
-          .mockRejectedValueOnce(new Error('timeout'))
-          .mockResolvedValue('success');
+        const fn = vi.fn().mockRejectedValueOnce(new Error('timeout')).mockResolvedValue('success');
 
         const wrappedFn = withRetry(fn, {
           maxRetries: 3,
@@ -143,8 +144,7 @@ describe('Saga Pattern', () => {
       for (let i = 0; i < 3; i++) {
         try {
           await circuitBreaker.execute(nodeId, fn);
-        } catch {
-        }
+        } catch {}
       }
 
       expect(circuitBreaker.getState(nodeId)).toBe('open');
@@ -156,8 +156,7 @@ describe('Saga Pattern', () => {
       for (let i = 0; i < 3; i++) {
         try {
           await circuitBreaker.execute(nodeId, fn);
-        } catch {
-        }
+        } catch {}
       }
 
       await expect(circuitBreaker.execute(nodeId, fn)).rejects.toThrow(CircuitBreakerOpenError);
@@ -170,8 +169,7 @@ describe('Saga Pattern', () => {
       for (let i = 0; i < 3; i++) {
         try {
           await circuitBreaker.execute(nodeId, fn);
-        } catch {
-        }
+        } catch {}
       }
 
       expect(circuitBreaker.getState(nodeId)).toBe('open');
@@ -193,8 +191,7 @@ describe('Saga Pattern', () => {
       for (let i = 0; i < 3; i++) {
         try {
           await circuitBreaker.execute(nodeId, fn);
-        } catch {
-        }
+        } catch {}
       }
 
       await new Promise((resolve) => setTimeout(resolve, 150));
@@ -214,8 +211,7 @@ describe('Saga Pattern', () => {
       await circuitBreaker.execute(nodeId, fnSuccess);
       try {
         await circuitBreaker.execute(nodeId, fnFail);
-      } catch {
-      }
+      } catch {}
 
       const stats = circuitBreaker.getStats(nodeId);
       expect(stats.totalSuccesses).toBe(1);
@@ -419,8 +415,22 @@ describe('Saga Pattern', () => {
     });
 
     it('filters entries', async () => {
-      const entry1 = createDLQEntry('node1', 'wf1', 'Workflow1', { value: 1 }, new Error('test'), {});
-      const entry2 = createDLQEntry('node2', 'wf2', 'Workflow2', { value: 2 }, new Error('test'), {});
+      const entry1 = createDLQEntry(
+        'node1',
+        'wf1',
+        'Workflow1',
+        { value: 1 },
+        new Error('test'),
+        {}
+      );
+      const entry2 = createDLQEntry(
+        'node2',
+        'wf2',
+        'Workflow2',
+        { value: 2 },
+        new Error('test'),
+        {}
+      );
 
       await dlq.add(entry1);
       await dlq.add(entry2);

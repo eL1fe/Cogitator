@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server';
-import {
-  getHourlyStats,
-  getModelStats,
-  getTopAgents,
-  getDashboardStats,
-} from '@/lib/db/analytics';
+import { getHourlyStats, getModelStats, getTopAgents, getDashboardStats } from '@/lib/db/analytics';
 import { getAnalytics, initializeExtendedSchema } from '@/lib/cogitator/db';
 import { initializeSchema } from '@/lib/db';
 import { withAuth } from '@/lib/auth/middleware';

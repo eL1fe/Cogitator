@@ -48,9 +48,7 @@ export default function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="animate-fade-in">
-        <h1 className="text-2xl font-semibold text-text-primary">
-          Welcome back
-        </h1>
+        <h1 className="text-2xl font-semibold text-text-primary">Welcome back</h1>
         <p className="text-text-secondary mt-1">
           Here&apos;s what&apos;s happening with your agents
         </p>
@@ -94,10 +92,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div
-          className="lg:col-span-2 animate-fade-in"
-          style={{ animationDelay: '300ms' }}
-        >
+        <div className="lg:col-span-2 animate-fade-in" style={{ animationDelay: '300ms' }}>
           <RecentRuns />
         </div>
         <div className="space-y-6">

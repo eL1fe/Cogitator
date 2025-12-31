@@ -29,12 +29,16 @@ export class PipelineStrategy extends BaseStrategy {
     const agentResults = new Map<string, RunResult>();
     const stageOutputs = new Map<string, unknown>();
 
-    this.coordinator.blackboard.write('pipeline', {
-      stages: this.config.stages.map(s => s.name),
-      currentStage: 0,
-      completed: [],
-      failed: [],
-    }, 'system');
+    this.coordinator.blackboard.write(
+      'pipeline',
+      {
+        stages: this.config.stages.map((s) => s.name),
+        currentStage: 0,
+        completed: [],
+        failed: [],
+      },
+      'system'
+    );
 
     let currentInput: unknown = options.input;
     let stageIndex = 0;
@@ -52,11 +56,15 @@ export class PipelineStrategy extends BaseStrategy {
         completed: string[];
         failed: string[];
       }>('pipeline');
-      this.coordinator.blackboard.write('pipeline', {
-        ...pipelineState,
-        currentStage: stageIndex,
-        currentStageName: stage.name,
-      }, 'system');
+      this.coordinator.blackboard.write(
+        'pipeline',
+        {
+          ...pipelineState,
+          currentStage: stageIndex,
+          currentStageName: stage.name,
+        },
+        'system'
+      );
 
       const pipelineContext: PipelineContext = {
         input: options.input,
@@ -99,13 +107,7 @@ export class PipelineStrategy extends BaseStrategy {
       this.coordinator.blackboard.write('pipeline', updatedState, 'system');
 
       if (stage.gate) {
-        const gateResult = await this.checkGate(
-          stage,
-          result,
-          stageIndex,
-          agentResults,
-          options
-        );
+        const gateResult = await this.checkGate(stage, result, stageIndex, agentResults, options);
 
         if (gateResult.action === 'abort') {
           throw new Error(`Pipeline aborted at gate '${stage.name}': ${gateResult.reason}`);
@@ -117,11 +119,12 @@ export class PipelineStrategy extends BaseStrategy {
             failed: string[];
           }>('pipeline');
           state.failed.push(stage.name);
-          state.completed = state.completed.filter(s => s !== stage.name);
+          state.completed = state.completed.filter((s) => s !== stage.name);
           this.coordinator.blackboard.write('pipeline', state, 'system');
 
           stageIndex = stageIndex - 1;
-          currentInput = stageOutputs.get(this.config.stages[stageIndex - 1]?.name) ?? options.input;
+          currentInput =
+            stageOutputs.get(this.config.stages[stageIndex - 1]?.name) ?? options.input;
           continue;
         }
 
@@ -129,7 +132,6 @@ export class PipelineStrategy extends BaseStrategy {
           stageIndex = gateResult.targetStage;
           continue;
         }
-
       }
 
       this.coordinator.events.emit('pipeline:stage:complete', {
@@ -163,7 +165,9 @@ export class PipelineStrategy extends BaseStrategy {
   }
 
   private buildStageInstructions(stage: PipelineStage, stageIndex: number): string {
-    const isGate = stage.gate ? '\nThis stage acts as a QUALITY GATE. Your output will be validated before proceeding.' : '';
+    const isGate = stage.gate
+      ? '\nThis stage acts as a QUALITY GATE. Your output will be validated before proceeding.'
+      : '';
 
     return `
 You are the "${stage.name}" stage in a processing pipeline.
@@ -190,7 +194,8 @@ Ensure your output is well-structured and ready for the next stage to consume.
 
     if (!gateConfig) {
       const output = String(result.output).toLowerCase();
-      const hasError = output.includes('error') || output.includes('failed') || output.includes('cannot');
+      const hasError =
+        output.includes('error') || output.includes('failed') || output.includes('cannot');
 
       if (hasError) {
         this.coordinator.events.emit('pipeline:gate:fail', {
@@ -241,7 +246,7 @@ Ensure your output is well-structured and ready for the next stage to consume.
 
     if (onFail.startsWith('goto:')) {
       const targetStageName = onFail.slice(5);
-      const targetIndex = this.config.stages.findIndex(s => s.name === targetStageName);
+      const targetIndex = this.config.stages.findIndex((s) => s.name === targetStageName);
       if (targetIndex >= 0) {
         return { action: 'goto', targetStage: targetIndex };
       }

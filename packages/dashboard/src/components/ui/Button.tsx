@@ -3,8 +3,7 @@
 import { forwardRef } from 'react';
 import { cn } from '@/lib/cn';
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'primary' | 'ghost' | 'outline' | 'danger';
   size?: 'sm' | 'md' | 'lg' | 'icon';
   loading?: boolean;
@@ -12,15 +11,7 @@ export interface ButtonProps
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    {
-      className,
-      variant = 'default',
-      size = 'md',
-      loading = false,
-      disabled,
-      children,
-      ...props
-    },
+    { className, variant = 'default', size = 'md', loading = false, disabled, children, ...props },
     ref
   ) => {
     return (
@@ -34,14 +25,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           {
             'bg-bg-elevated hover:bg-bg-hover text-text-primary border border-border-default':
               variant === 'default',
-            'bg-accent hover:bg-accent-dim text-bg-primary glow-hover':
-              variant === 'primary',
-            'hover:bg-bg-hover text-text-secondary hover:text-text-primary':
-              variant === 'ghost',
+            'bg-accent hover:bg-accent-dim text-bg-primary glow-hover': variant === 'primary',
+            'hover:bg-bg-hover text-text-secondary hover:text-text-primary': variant === 'ghost',
             'border border-border-default hover:border-accent hover:text-accent bg-transparent':
               variant === 'outline',
-            'bg-error/10 hover:bg-error/20 text-error border border-error/20':
-              variant === 'danger',
+            'bg-error/10 hover:bg-error/20 text-error border border-error/20': variant === 'danger',
             'h-8 px-3 text-sm rounded-md': size === 'sm',
             'h-10 px-4 text-sm rounded-lg': size === 'md',
             'h-12 px-6 text-base rounded-lg': size === 'lg',
@@ -52,11 +40,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {loading ? (
-          <svg
-            className="animate-spin h-4 w-4 mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
+          <svg className="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
             <circle
               className="opacity-25"
               cx="12"

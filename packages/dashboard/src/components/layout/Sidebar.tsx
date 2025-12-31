@@ -57,9 +57,7 @@ export function Sidebar() {
           <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
             <Cpu className="w-5 h-5 text-accent" />
           </div>
-          <span className="font-semibold text-lg text-text-primary">
-            Cogitator
-          </span>
+          <span className="font-semibold text-lg text-text-primary">Cogitator</span>
         </Link>
       </div>
 
@@ -81,15 +79,10 @@ export function Sidebar() {
               )}
             >
               <item.icon
-                className={cn(
-                  'w-5 h-5',
-                  isActive ? 'text-accent' : 'text-text-tertiary'
-                )}
+                className={cn('w-5 h-5', isActive ? 'text-accent' : 'text-text-tertiary')}
               />
               {item.name}
-              {isActive && (
-                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-accent" />
-              )}
+              {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-accent" />}
             </Link>
           );
         })}
@@ -111,10 +104,7 @@ export function Sidebar() {
               )}
             >
               <item.icon
-                className={cn(
-                  'w-5 h-5',
-                  isActive ? 'text-accent' : 'text-text-tertiary'
-                )}
+                className={cn('w-5 h-5', isActive ? 'text-accent' : 'text-text-tertiary')}
               />
               {item.name}
             </Link>

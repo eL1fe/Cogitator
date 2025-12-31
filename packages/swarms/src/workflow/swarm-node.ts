@@ -45,18 +45,15 @@ export function swarmNode<S extends WorkflowState = WorkflowState>(
   swarmOrConfig: Swarm | SwarmConfig,
   options?: SwarmNodeOptions<S>
 ): WorkflowNode<S> {
-  const name = swarmOrConfig instanceof Swarm
-    ? swarmOrConfig.name
-    : swarmOrConfig.name;
+  const name = swarmOrConfig instanceof Swarm ? swarmOrConfig.name : swarmOrConfig.name;
 
   return {
     name: `swarm:${name}`,
     fn: async (ctx): Promise<NodeResult<S>> => {
       const extCtx = ctx as SwarmNodeContext<S>;
 
-      const swarm = swarmOrConfig instanceof Swarm
-        ? swarmOrConfig
-        : new Swarm(extCtx.cogitator, swarmOrConfig);
+      const swarm =
+        swarmOrConfig instanceof Swarm ? swarmOrConfig : new Swarm(extCtx.cogitator, swarmOrConfig);
 
       let input: string;
       if (options?.inputMapper) {
@@ -126,19 +123,22 @@ export function parallelSwarmsNode<S extends WorkflowState = WorkflowState>(
   mergeResults?: (results: Record<string, StrategyResult>) => Partial<S>
 ): WorkflowNode<S> {
   return {
-    name: `parallel-swarms:${swarms.map(s => {
-      const swarm = s.swarm instanceof Swarm ? s.swarm : s.swarm;
-      return 'name' in swarm ? swarm.name : 'unnamed';
-    }).join(',')}`,
+    name: `parallel-swarms:${swarms
+      .map((s) => {
+        const swarm = s.swarm instanceof Swarm ? s.swarm : s.swarm;
+        return 'name' in swarm ? swarm.name : 'unnamed';
+      })
+      .join(',')}`,
     fn: async (ctx): Promise<NodeResult<S>> => {
       const extCtx = ctx as SwarmNodeContext<S>;
       const results: Record<string, StrategyResult> = {};
 
       await Promise.all(
         swarms.map(async ({ swarm: swarmOrConfig, key, options }) => {
-          const swarm = swarmOrConfig instanceof Swarm
-            ? swarmOrConfig
-            : new Swarm(extCtx.cogitator, swarmOrConfig);
+          const swarm =
+            swarmOrConfig instanceof Swarm
+              ? swarmOrConfig
+              : new Swarm(extCtx.cogitator, swarmOrConfig);
 
           let input: string;
           if (options?.inputMapper) {

@@ -243,9 +243,8 @@ describe('GoogleBackend', () => {
       const [, options] = mockFetch.mock.calls[0] as [string, RequestInit];
       const body = JSON.parse(options.body as string);
 
-      const functionResponseContent = body.contents.find(
-        (c: { parts: unknown[] }) =>
-          c.parts.some((p) => typeof p === 'object' && p !== null && 'functionResponse' in p)
+      const functionResponseContent = body.contents.find((c: { parts: unknown[] }) =>
+        c.parts.some((p) => typeof p === 'object' && p !== null && 'functionResponse' in p)
       );
       expect(functionResponseContent).toBeDefined();
     });
@@ -460,7 +459,9 @@ describe('GoogleBackend', () => {
       for await (const _ of backend.chatStream({
         model: 'gemini-1.5-flash',
         messages: [{ role: 'user', content: 'Test' }],
-      })) { /* consume stream */ }
+      })) {
+        /* consume stream */
+      }
 
       const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
       expect(url).toContain('streamGenerateContent');
@@ -478,7 +479,9 @@ describe('GoogleBackend', () => {
         for await (const _ of backend.chatStream({
           model: 'gemini-1.5-flash',
           messages: [{ role: 'user', content: 'Test' }],
-        })) { /* consume stream */ }
+        })) {
+          /* consume stream */
+        }
       }).rejects.toThrow('Gemini API error: 401');
     });
   });

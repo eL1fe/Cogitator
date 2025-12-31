@@ -5,12 +5,7 @@
  */
 
 import { nanoid } from 'nanoid';
-import type {
-  Thread,
-  Message,
-  CreateMessageRequest,
-  MessageContent,
-} from '../types/openai-types';
+import type { Thread, Message, CreateMessageRequest, MessageContent } from '../types/openai-types';
 
 export interface StoredThread {
   thread: Thread;
@@ -36,7 +31,10 @@ export interface StoredAssistant {
 export class ThreadManager {
   private threads = new Map<string, StoredThread>();
   private assistants = new Map<string, StoredAssistant>();
-  private files = new Map<string, { id: string; content: Buffer; filename: string; created_at: number }>();
+  private files = new Map<
+    string,
+    { id: string; content: Buffer; filename: string; created_at: number }
+  >();
 
   createAssistant(params: {
     model: string;
@@ -66,7 +64,10 @@ export class ThreadManager {
     return this.assistants.get(id);
   }
 
-  updateAssistant(id: string, updates: Partial<Omit<StoredAssistant, 'id' | 'created_at'>>): StoredAssistant | undefined {
+  updateAssistant(
+    id: string,
+    updates: Partial<Omit<StoredAssistant, 'id' | 'created_at'>>
+  ): StoredAssistant | undefined {
     const assistant = this.assistants.get(id);
     if (!assistant) return undefined;
 
@@ -137,13 +138,16 @@ export class ThreadManager {
     return stored?.messages.find((m) => m.id === messageId);
   }
 
-  listMessages(threadId: string, options?: {
-    limit?: number;
-    order?: 'asc' | 'desc';
-    after?: string;
-    before?: string;
-    run_id?: string;
-  }): Message[] {
+  listMessages(
+    threadId: string,
+    options?: {
+      limit?: number;
+      order?: 'asc' | 'desc';
+      after?: string;
+      before?: string;
+      run_id?: string;
+    }
+  ): Message[] {
     const stored = this.threads.get(threadId);
     if (!stored) return [];
 
@@ -244,7 +248,9 @@ export class ThreadManager {
     return { id, filename, created_at };
   }
 
-  getFile(id: string): { id: string; content: Buffer; filename: string; created_at: number } | undefined {
+  getFile(
+    id: string
+  ): { id: string; content: Buffer; filename: string; created_at: number } | undefined {
     return this.files.get(id);
   }
 

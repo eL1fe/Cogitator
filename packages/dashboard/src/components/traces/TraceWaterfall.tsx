@@ -11,13 +11,7 @@ interface TraceWaterfallProps {
   spans: TraceSpan[];
 }
 
-const COLORS = [
-  'bg-accent',
-  'bg-chart-2',
-  'bg-chart-3',
-  'bg-chart-4',
-  'bg-chart-5',
-];
+const COLORS = ['bg-accent', 'bg-chart-2', 'bg-chart-3', 'bg-chart-4', 'bg-chart-5'];
 
 export function TraceWaterfall({ spans }: TraceWaterfallProps) {
   const [selectedSpan, setSelectedSpan] = useState<TraceSpan | null>(null);
@@ -26,9 +20,7 @@ export function TraceWaterfall({ spans }: TraceWaterfallProps) {
     return (
       <Card className="text-center py-12">
         <Activity className="w-12 h-12 mx-auto mb-4 text-text-muted opacity-50" />
-        <h3 className="text-lg font-medium text-text-primary mb-2">
-          No trace data available
-        </h3>
+        <h3 className="text-lg font-medium text-text-primary mb-2">No trace data available</h3>
         <p className="text-text-secondary">
           Spans will appear here once the agent execution is traced.
         </p>
@@ -39,7 +31,9 @@ export function TraceWaterfall({ spans }: TraceWaterfallProps) {
   const flattenedSpans = flattenSpanTree(spans);
 
   const minTime = Math.min(...flattenedSpans.map((s) => s.startTime));
-  const maxTime = Math.max(...flattenedSpans.map((s) => s.endTime || s.startTime + (s.duration || 0)));
+  const maxTime = Math.max(
+    ...flattenedSpans.map((s) => s.endTime || s.startTime + (s.duration || 0))
+  );
   const totalDuration = maxTime - minTime;
 
   const depthMap = buildDepthMap(spans);
@@ -72,13 +66,9 @@ export function TraceWaterfall({ spans }: TraceWaterfallProps) {
         <div className="divide-y divide-border-subtle max-h-[500px] overflow-y-auto">
           {flattenedSpans.map((span) => {
             const depth = depthMap.get(span.id) || 0;
-            const left = totalDuration > 0
-              ? ((span.startTime - minTime) / totalDuration) * 100
-              : 0;
+            const left = totalDuration > 0 ? ((span.startTime - minTime) / totalDuration) * 100 : 0;
             const duration = span.duration || (span.endTime ? span.endTime - span.startTime : 0);
-            const width = totalDuration > 0
-              ? (duration / totalDuration) * 100
-              : 1;
+            const width = totalDuration > 0 ? (duration / totalDuration) * 100 : 1;
             const isSelected = selectedSpan?.id === span.id;
 
             return (
@@ -134,9 +124,7 @@ export function TraceWaterfall({ spans }: TraceWaterfallProps) {
           <div className="space-y-4">
             <div>
               <p className="text-xs text-text-tertiary mb-1">Name</p>
-              <p className="text-sm text-text-primary font-mono">
-                {selectedSpan.name}
-              </p>
+              <p className="text-sm text-text-primary font-mono">{selectedSpan.name}</p>
             </div>
 
             <div className="flex gap-4">
@@ -149,7 +137,13 @@ export function TraceWaterfall({ spans }: TraceWaterfallProps) {
               <div>
                 <p className="text-xs text-text-tertiary mb-1">Status</p>
                 <Badge
-                  variant={selectedSpan.status === 'ok' ? 'success' : selectedSpan.status === 'error' ? 'error' : 'warning'}
+                  variant={
+                    selectedSpan.status === 'ok'
+                      ? 'success'
+                      : selectedSpan.status === 'error'
+                        ? 'error'
+                        : 'warning'
+                  }
                   size="sm"
                 >
                   {selectedSpan.status}
@@ -160,16 +154,12 @@ export function TraceWaterfall({ spans }: TraceWaterfallProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-xs text-text-tertiary mb-1">Start Time</p>
-                <p className="text-sm text-text-primary">
-                  {selectedSpan.startTime}ms
-                </p>
+                <p className="text-sm text-text-primary">{selectedSpan.startTime}ms</p>
               </div>
               {selectedSpan.endTime && (
                 <div>
                   <p className="text-xs text-text-tertiary mb-1">End Time</p>
-                  <p className="text-sm text-text-primary">
-                    {selectedSpan.endTime}ms
-                  </p>
+                  <p className="text-sm text-text-primary">{selectedSpan.endTime}ms</p>
                 </div>
               )}
             </div>
@@ -215,14 +205,14 @@ export function TraceWaterfall({ spans }: TraceWaterfallProps) {
 
             {selectedSpan.events && selectedSpan.events.length > 0 && (
               <div>
-                <p className="text-xs text-text-tertiary mb-2">Events ({selectedSpan.events.length})</p>
+                <p className="text-xs text-text-tertiary mb-2">
+                  Events ({selectedSpan.events.length})
+                </p>
                 <div className="bg-bg-elevated rounded-lg p-3 space-y-2 max-h-32 overflow-y-auto">
                   {selectedSpan.events.map((event, i) => (
                     <div key={i} className="text-xs">
                       <span className="text-text-primary">{event.name}</span>
-                      <span className="text-text-muted ml-2">
-                        @{event.timestamp}ms
-                      </span>
+                      <span className="text-text-muted ml-2">@{event.timestamp}ms</span>
                     </div>
                   ))}
                 </div>
@@ -230,9 +220,7 @@ export function TraceWaterfall({ spans }: TraceWaterfallProps) {
             )}
           </div>
         ) : (
-          <p className="text-sm text-text-tertiary">
-            Click on a span to view details
-          </p>
+          <p className="text-sm text-text-tertiary">Click on a span to view details</p>
         )}
       </Card>
     </div>
@@ -249,7 +237,11 @@ function flattenSpanTree(spans: TraceSpan[], result: TraceSpan[] = []): TraceSpa
   return result;
 }
 
-function buildDepthMap(spans: TraceSpan[], depth = 0, map = new Map<string, number>()): Map<string, number> {
+function buildDepthMap(
+  spans: TraceSpan[],
+  depth = 0,
+  map = new Map<string, number>()
+): Map<string, number> {
   for (const span of spans) {
     map.set(span.id, depth);
     if (span.children && span.children.length > 0) {

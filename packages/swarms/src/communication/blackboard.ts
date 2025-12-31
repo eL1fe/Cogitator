@@ -108,10 +108,7 @@ export class InMemoryBlackboard implements Blackboard {
     this.subscriptions.delete(section);
   }
 
-  subscribe(
-    section: string,
-    handler: (data: unknown, agentName: string) => void
-  ): () => void {
+  subscribe(section: string, handler: (data: unknown, agentName: string) => void): () => void {
     if (!this.subscriptions.has(section)) {
       this.subscriptions.set(section, new Set());
     }
@@ -151,8 +148,7 @@ export class InMemoryBlackboard implements Blackboard {
       for (const handler of handlers) {
         try {
           handler(data, agentName);
-        } catch {
-        }
+        } catch {}
       }
     }
   }

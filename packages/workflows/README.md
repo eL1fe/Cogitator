@@ -84,7 +84,10 @@ import { agentNode, toolNode, functionNode } from '@cogitator-ai/workflows';
 const workflow = new WorkflowBuilder('pipeline')
   .addNode('analyze', agentNode(analyzerAgent))
   .addNode('transform', toolNode('json-transform', { mapping: '...' }))
-  .addNode('validate', functionNode(async (ctx) => ({ valid: true })))
+  .addNode(
+    'validate',
+    functionNode(async (ctx) => ({ valid: true }))
+  )
   .build();
 ```
 

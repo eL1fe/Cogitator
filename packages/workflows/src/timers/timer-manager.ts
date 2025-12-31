@@ -96,9 +96,7 @@ export interface TimerManagerStats {
  */
 export class TimerManager {
   private store: TimerStore;
-  private config: Required<
-    Omit<TimerManagerConfig, 'onError' | 'onTimerFired' | 'onTimerMissed'>
-  > &
+  private config: Required<Omit<TimerManagerConfig, 'onError' | 'onTimerFired' | 'onTimerMissed'>> &
     Pick<TimerManagerConfig, 'onError' | 'onTimerFired' | 'onTimerMissed'>;
   private handlers = new Map<string, TimerHandler>();
   private defaultHandler?: TimerHandler;
@@ -236,8 +234,7 @@ export class TimerManager {
    */
   private async processTimer(entry: TimerEntry): Promise<void> {
     try {
-      const handler =
-        this.handlers.get(entry.workflowId) ?? this.defaultHandler;
+      const handler = this.handlers.get(entry.workflowId) ?? this.defaultHandler;
 
       if (handler) {
         await handler(entry);
@@ -391,10 +388,7 @@ export class TimerManager {
 /**
  * Create a timer manager
  */
-export function createTimerManager(
-  store: TimerStore,
-  config?: TimerManagerConfig
-): TimerManager {
+export function createTimerManager(store: TimerStore, config?: TimerManagerConfig): TimerManager {
   return new TimerManager(store, config);
 }
 
@@ -432,8 +426,7 @@ export class RecurringTimerScheduler {
       startImmediately?: boolean;
     }
   ): Promise<void> {
-    const { workflowId, runId, nodeId, interval, metadata, startImmediately } =
-      config;
+    const { workflowId, runId, nodeId, interval, metadata, startImmediately } = config;
 
     this.recurring.set(id, {
       workflowId,
@@ -473,10 +466,7 @@ export class RecurringTimerScheduler {
   /**
    * Schedule next occurrence (called after timer fires)
    */
-  async scheduleNext(
-    id: string,
-    runId: string
-  ): Promise<string | null> {
+  async scheduleNext(id: string, runId: string): Promise<string | null> {
     const config = this.recurring.get(id);
     if (!config) return null;
 
@@ -511,8 +501,6 @@ export class RecurringTimerScheduler {
 /**
  * Create a recurring timer scheduler
  */
-export function createRecurringScheduler(
-  manager: TimerManager
-): RecurringTimerScheduler {
+export function createRecurringScheduler(manager: TimerManager): RecurringTimerScheduler {
   return new RecurringTimerScheduler(manager);
 }

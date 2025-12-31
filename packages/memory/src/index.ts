@@ -14,7 +14,11 @@ export {
 export { RedisAdapter } from './adapters/redis';
 export { PostgresAdapter } from './adapters/postgres';
 
-export { ContextBuilder, type ContextBuilderDeps, type BuildContextOptions } from './context-builder';
+export {
+  ContextBuilder,
+  type ContextBuilderDeps,
+  type BuildContextOptions,
+} from './context-builder';
 
 export {
   countTokens,

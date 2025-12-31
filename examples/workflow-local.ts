@@ -45,11 +45,11 @@ const analyzeTool = tool({
   execute: async ({ text }) => {
     console.log('  📊 Analyzing text...');
     await sleep(300);
-    
+
     const wordCount = text.split(/\s+/).length;
     const hasPositive = /good|great|excellent|happy|success/i.test(text);
     const hasNegative = /bad|poor|fail|sad|problem/i.test(text);
-    
+
     return {
       wordCount,
       sentiment: hasPositive && !hasNegative ? 'positive' : hasNegative ? 'negative' : 'neutral',
@@ -258,7 +258,6 @@ Early users report 40% improvement in development speed.`,
     console.log(`   Status: ${result.status}`);
     console.log(`   Duration: ${(duration / 1000).toFixed(1)}s`);
     console.log(`   Steps completed: ${Object.keys(result.results).length}`);
-
   } catch (error) {
     console.error('\n❌ Workflow Error:', error);
   }
@@ -272,4 +271,3 @@ function sleep(ms: number): Promise<void> {
 }
 
 main().catch(console.error);
-

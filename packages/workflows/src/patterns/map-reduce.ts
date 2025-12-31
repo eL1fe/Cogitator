@@ -301,11 +301,8 @@ export async function executeMap<S, T>(
     return result;
   };
 
-  const allResults = await executeWithConcurrency(
-    items,
-    mapper,
-    concurrency,
-    (result) => results.push(result)
+  const allResults = await executeWithConcurrency(items, mapper, concurrency, (result) =>
+    results.push(result)
   );
 
   return allResults;
@@ -324,14 +321,9 @@ export function executeReduce<S, T, R>(
       ? (config.initial as (state: S) => R)(state)
       : config.initial;
 
-  const items = config.successOnly !== false
-    ? results.filter((r) => r.success)
-    : results;
+  const items = config.successOnly !== false ? results.filter((r) => r.success) : results;
 
-  let result = items.reduce(
-    (acc, item) => config.reducer(acc, item, state),
-    initial
-  );
+  let result = items.reduce((acc, item) => config.reducer(acc, item, state), initial);
 
   if (config.finalize) {
     result = config.finalize(result, state);
@@ -616,13 +608,20 @@ export function flatMap<T>(): Omit<ReduceNodeConfig<unknown, T[], T[]>, 'name'> 
 /**
  * Stats helper - compute statistics from numeric results
  */
-export function stats(): Omit<ReduceNodeConfig<unknown, number, {
-  count: number;
-  sum: number;
-  avg: number;
-  min: number;
-  max: number;
-}>, 'name'> {
+export function stats(): Omit<
+  ReduceNodeConfig<
+    unknown,
+    number,
+    {
+      count: number;
+      sum: number;
+      avg: number;
+      min: number;
+      max: number;
+    }
+  >,
+  'name'
+> {
   return {
     initial: {
       count: 0,

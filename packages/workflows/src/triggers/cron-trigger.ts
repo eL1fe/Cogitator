@@ -6,11 +6,7 @@
  */
 
 import { nanoid } from 'nanoid';
-import type {
-  CronTriggerConfig,
-  TriggerContext,
-  WorkflowTrigger,
-} from '@cogitator-ai/types';
+import type { CronTriggerConfig, TriggerContext, WorkflowTrigger } from '@cogitator-ai/types';
 import {
   parseCronExpression,
   getNextCronOccurrence,
@@ -52,20 +48,18 @@ export class CronTriggerExecutor {
   private intervals = new Map<string, ReturnType<typeof setInterval>>();
   private onFire?: (trigger: WorkflowTrigger, context: TriggerContext) => Promise<string>;
 
-  constructor(options: {
-    onFire?: (trigger: WorkflowTrigger, context: TriggerContext) => Promise<string>;
-  } = {}) {
+  constructor(
+    options: {
+      onFire?: (trigger: WorkflowTrigger, context: TriggerContext) => Promise<string>;
+    } = {}
+  ) {
     this.onFire = options.onFire;
   }
 
   /**
    * Register a cron trigger
    */
-  register(
-    workflowName: string,
-    config: CronTriggerConfig,
-    externalId?: string
-  ): string {
+  register(workflowName: string, config: CronTriggerConfig, externalId?: string): string {
     const triggerId = externalId ?? nanoid();
 
     if (!isValidCronExpression(config.expression)) {
@@ -91,8 +85,7 @@ export class CronTriggerExecutor {
       this.scheduleNext(triggerId);
 
       if (config.runImmediately) {
-        this.fire(triggerId).catch(() => {
-        });
+        this.fire(triggerId).catch(() => {});
       }
     }
 
@@ -152,16 +145,14 @@ export class CronTriggerExecutor {
    * Get all triggers for a workflow
    */
   getTriggersForWorkflow(workflowName: string): CronTriggerState[] {
-    return Array.from(this.triggers.values()).filter(
-      t => t.workflowName === workflowName
-    );
+    return Array.from(this.triggers.values()).filter((t) => t.workflowName === workflowName);
   }
 
   /**
    * Get all enabled triggers
    */
   getEnabledTriggers(): CronTriggerState[] {
-    return Array.from(this.triggers.values()).filter(t => t.enabled);
+    return Array.from(this.triggers.values()).filter((t) => t.enabled);
   }
 
   /**
@@ -178,8 +169,10 @@ export class CronTriggerExecutor {
 
     const now = Date.now();
 
-    if (state.config.maxConcurrent !== undefined &&
-        state.activeRuns >= state.config.maxConcurrent) {
+    if (
+      state.config.maxConcurrent !== undefined &&
+      state.activeRuns >= state.config.maxConcurrent
+    ) {
       return {
         triggered: false,
         skipped: true,
@@ -208,9 +201,8 @@ export class CronTriggerExecutor {
       };
     }
 
-    const input = typeof state.config.input === 'function'
-      ? state.config.input(context)
-      : state.config.input;
+    const input =
+      typeof state.config.input === 'function' ? state.config.input(context) : state.config.input;
 
     if (input) {
       context.payload = input;
@@ -260,10 +252,10 @@ export class CronTriggerExecutor {
     let currentTime = since;
 
     while (currentTime < now) {
-      const nextRun = getNextCronOccurrence(
-        state.config.expression,
-        { timezone: state.config.timezone, currentDate: new Date(currentTime) }
-      );
+      const nextRun = getNextCronOccurrence(state.config.expression, {
+        timezone: state.config.timezone,
+        currentDate: new Date(currentTime),
+      });
 
       if (!nextRun || nextRun.getTime() >= now) {
         break;
@@ -378,9 +370,11 @@ export class CronTriggerExecutor {
 /**
  * Create a cron trigger executor
  */
-export function createCronTrigger(options: {
-  onFire?: (trigger: WorkflowTrigger, context: TriggerContext) => Promise<string>;
-} = {}): CronTriggerExecutor {
+export function createCronTrigger(
+  options: {
+    onFire?: (trigger: WorkflowTrigger, context: TriggerContext) => Promise<string>;
+  } = {}
+): CronTriggerExecutor {
   return new CronTriggerExecutor(options);
 }
 

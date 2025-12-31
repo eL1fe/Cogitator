@@ -1,8 +1,4 @@
-import {
-  createRedisClient,
-  createConfigFromEnv,
-  type RedisClient,
-} from '@cogitator-ai/redis';
+import { createRedisClient, createConfigFromEnv, type RedisClient } from '@cogitator-ai/redis';
 
 let redis: RedisClient | null = null;
 let subscriber: RedisClient | null = null;
@@ -67,11 +63,7 @@ export async function subscribe(
   };
 }
 
-export async function cache<T>(
-  key: string,
-  fn: () => Promise<T>,
-  ttlSeconds = 60
-): Promise<T> {
+export async function cache<T>(key: string, fn: () => Promise<T>, ttlSeconds = 60): Promise<T> {
   const client = await getRedis();
 
   const cached = await client.get(key);

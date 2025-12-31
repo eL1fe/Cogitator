@@ -36,9 +36,7 @@ export function BackgroundGrid() {
 
       for (let x = 0; x < canvas.width; x += gridSize) {
         for (let y = 0; y < canvas.height; y += gridSize) {
-          const distFromMouse = Math.sqrt(
-            Math.pow(x - mouseX, 2) + Math.pow(y - mouseY, 2)
-          );
+          const distFromMouse = Math.sqrt(Math.pow(x - mouseX, 2) + Math.pow(y - mouseY, 2));
           const maxDist = 200;
           const influence = Math.max(0, 1 - distFromMouse / maxDist);
 
@@ -92,10 +90,6 @@ export function BackgroundGrid() {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 0 }}
-    />
+    <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }} />
   );
 }

@@ -29,11 +29,7 @@ export function formatOpenAIError(
 /**
  * Error handler for Fastify
  */
-export function errorHandler(
-  error: FastifyError,
-  request: FastifyRequest,
-  reply: FastifyReply
-) {
+export function errorHandler(error: FastifyError, request: FastifyRequest, reply: FastifyReply) {
   request.log.error(error);
 
   const statusCode = error.statusCode ?? 500;
@@ -58,27 +54,20 @@ export function errorHandler(
     errorCode = 'rate_limit_exceeded';
   }
 
-  return reply.status(statusCode).send(
-    formatOpenAIError(
-      errorCode,
-      error.message,
-      errorType
-    )
-  );
+  return reply.status(statusCode).send(formatOpenAIError(errorCode, error.message, errorType));
 }
 
 /**
  * Not found handler for Fastify
  */
-export function notFoundHandler(
-  request: FastifyRequest,
-  reply: FastifyReply
-) {
-  return reply.status(404).send(
-    formatOpenAIError(
-      'not_found',
-      `The requested resource ${request.url} was not found`,
-      'invalid_request_error'
-    )
-  );
+export function notFoundHandler(request: FastifyRequest, reply: FastifyReply) {
+  return reply
+    .status(404)
+    .send(
+      formatOpenAIError(
+        'not_found',
+        `The requested resource ${request.url} was not found`,
+        'invalid_request_error'
+      )
+    );
 }

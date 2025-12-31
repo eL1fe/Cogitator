@@ -25,7 +25,7 @@ export function withValidation<T extends ZodSchema>(
         return NextResponse.json(
           {
             error: 'Validation failed',
-            details: error.errors.map(e => ({
+            details: error.errors.map((e) => ({
               path: e.path.join('.'),
               message: e.message,
             })),
@@ -35,10 +35,7 @@ export function withValidation<T extends ZodSchema>(
       }
 
       if (error instanceof SyntaxError) {
-        return NextResponse.json(
-          { error: 'Invalid JSON body' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
       }
 
       throw error;
@@ -69,7 +66,7 @@ export function withQueryValidation<T extends ZodSchema>(
         return NextResponse.json(
           {
             error: 'Validation failed',
-            details: error.errors.map(e => ({
+            details: error.errors.map((e) => ({
               path: e.path.join('.'),
               message: e.message,
             })),

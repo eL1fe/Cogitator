@@ -62,149 +62,130 @@ export default function AgentsPage() {
   return (
     <>
       <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between animate-fade-in">
-              <div>
-                <h1 className="text-2xl font-semibold text-text-primary">
-                  Agents
-                </h1>
-                <p className="text-text-secondary mt-1">
-                  Manage and monitor your AI agents
-                </p>
-              </div>
-              <Button
-                variant="primary"
-                className="gap-2"
-                onClick={() => setShowCreateModal(true)}
-              >
+        {/* Header */}
+        <div className="flex items-center justify-between animate-fade-in">
+          <div>
+            <h1 className="text-2xl font-semibold text-text-primary">Agents</h1>
+            <p className="text-text-secondary mt-1">Manage and monitor your AI agents</p>
+          </div>
+          <Button variant="primary" className="gap-2" onClick={() => setShowCreateModal(true)}>
+            <Plus className="w-4 h-4" />
+            New Agent
+          </Button>
+        </div>
+
+        {/* Search */}
+        <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <Input
+            placeholder="Search agents..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            icon={<Search className="w-4 h-4" />}
+            className="max-w-md"
+          />
+        </div>
+
+        {/* Agents Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i}>
+                <div className="flex items-start gap-4">
+                  <Skeleton className="h-12 w-12 rounded-xl" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </div>
+                <div className="mt-4 grid grid-cols-3 gap-4">
+                  <Skeleton className="h-12" />
+                  <Skeleton className="h-12" />
+                  <Skeleton className="h-12" />
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : filteredAgents.length === 0 ? (
+          <Card className="py-12 text-center">
+            <Bot className="w-12 h-12 mx-auto mb-4 text-text-muted opacity-50" />
+            <h3 className="text-lg font-medium text-text-primary mb-2">
+              {search ? 'No agents found' : 'No agents yet'}
+            </h3>
+            <p className="text-text-secondary mb-4">
+              {search ? 'Try a different search term' : 'Create your first agent to get started'}
+            </p>
+            {!search && (
+              <Button variant="primary" className="gap-2" onClick={() => setShowCreateModal(true)}>
                 <Plus className="w-4 h-4" />
-                New Agent
+                Create Agent
               </Button>
-            </div>
+            )}
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredAgents.map((agent, index) => {
+              const config =
+                statusConfig[agent.status as keyof typeof statusConfig] || statusConfig.offline;
 
-            {/* Search */}
-            <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-              <Input
-                placeholder="Search agents..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                icon={<Search className="w-4 h-4" />}
-                className="max-w-md"
-              />
-            </div>
-
-            {/* Agents Grid */}
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[...Array(6)].map((_, i) => (
-                  <Card key={i}>
+              return (
+                <Link
+                  key={agent.id}
+                  href={`/dashboard/agents/${agent.id}`}
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${(index + 2) * 50}ms` }}
+                >
+                  <Card className="h-full hover:border-accent/50 transition-colors">
                     <div className="flex items-start gap-4">
-                      <Skeleton className="h-12 w-12 rounded-xl" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-5 w-32" />
-                        <Skeleton className="h-4 w-24" />
+                      <div className="p-3 bg-accent/10 rounded-xl">
+                        <Bot className="w-6 h-6 text-accent" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-text-primary truncate">{agent.name}</h3>
+                          <Badge variant={config.variant} size="sm">
+                            {config.label}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-text-secondary truncate">{agent.model}</p>
                       </div>
                     </div>
+
                     <div className="mt-4 grid grid-cols-3 gap-4">
-                      <Skeleton className="h-12" />
-                      <Skeleton className="h-12" />
-                      <Skeleton className="h-12" />
+                      <div className="text-center p-2 bg-bg-tertiary rounded-lg">
+                        <Activity className="w-4 h-4 mx-auto text-text-muted mb-1" />
+                        <p className="text-sm font-medium text-text-primary">{agent.totalRuns}</p>
+                        <p className="text-xs text-text-muted">Runs</p>
+                      </div>
+                      <div className="text-center p-2 bg-bg-tertiary rounded-lg">
+                        <Zap className="w-4 h-4 mx-auto text-text-muted mb-1" />
+                        <p className="text-sm font-medium text-text-primary">
+                          {formatNumber(agent.totalTokens)}
+                        </p>
+                        <p className="text-xs text-text-muted">Tokens</p>
+                      </div>
+                      <div className="text-center p-2 bg-bg-tertiary rounded-lg">
+                        <DollarSign className="w-4 h-4 mx-auto text-text-muted mb-1" />
+                        <p className="text-sm font-medium text-text-primary">
+                          ${agent.totalCost.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-text-muted">Cost</p>
+                      </div>
                     </div>
+
+                    {agent.lastRunAt && (
+                      <p className="mt-3 text-xs text-text-muted text-center">
+                        Last run{' '}
+                        {formatDistanceToNow(new Date(agent.lastRunAt), {
+                          addSuffix: true,
+                        })}
+                      </p>
+                    )}
                   </Card>
-                ))}
-              </div>
-            ) : filteredAgents.length === 0 ? (
-              <Card className="py-12 text-center">
-                <Bot className="w-12 h-12 mx-auto mb-4 text-text-muted opacity-50" />
-                <h3 className="text-lg font-medium text-text-primary mb-2">
-                  {search ? 'No agents found' : 'No agents yet'}
-                </h3>
-                <p className="text-text-secondary mb-4">
-                  {search
-                    ? 'Try a different search term'
-                    : 'Create your first agent to get started'}
-                </p>
-                {!search && (
-                  <Button
-                    variant="primary"
-                    className="gap-2"
-                    onClick={() => setShowCreateModal(true)}
-                  >
-                    <Plus className="w-4 h-4" />
-                    Create Agent
-                  </Button>
-                )}
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredAgents.map((agent, index) => {
-                  const config = statusConfig[agent.status as keyof typeof statusConfig] || statusConfig.offline;
-
-                  return (
-                    <Link
-                      key={agent.id}
-                      href={`/dashboard/agents/${agent.id}`}
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${(index + 2) * 50}ms` }}
-                    >
-                      <Card className="h-full hover:border-accent/50 transition-colors">
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 bg-accent/10 rounded-xl">
-                            <Bot className="w-6 h-6 text-accent" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-text-primary truncate">
-                                {agent.name}
-                              </h3>
-                              <Badge variant={config.variant} size="sm">
-                                {config.label}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-text-secondary truncate">
-                              {agent.model}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="mt-4 grid grid-cols-3 gap-4">
-                          <div className="text-center p-2 bg-bg-tertiary rounded-lg">
-                            <Activity className="w-4 h-4 mx-auto text-text-muted mb-1" />
-                            <p className="text-sm font-medium text-text-primary">
-                              {agent.totalRuns}
-                            </p>
-                            <p className="text-xs text-text-muted">Runs</p>
-                          </div>
-                          <div className="text-center p-2 bg-bg-tertiary rounded-lg">
-                            <Zap className="w-4 h-4 mx-auto text-text-muted mb-1" />
-                            <p className="text-sm font-medium text-text-primary">
-                              {formatNumber(agent.totalTokens)}
-                            </p>
-                            <p className="text-xs text-text-muted">Tokens</p>
-                          </div>
-                          <div className="text-center p-2 bg-bg-tertiary rounded-lg">
-                            <DollarSign className="w-4 h-4 mx-auto text-text-muted mb-1" />
-                            <p className="text-sm font-medium text-text-primary">
-                              ${agent.totalCost.toFixed(2)}
-                            </p>
-                            <p className="text-xs text-text-muted">Cost</p>
-                          </div>
-                        </div>
-
-                        {agent.lastRunAt && (
-                          <p className="mt-3 text-xs text-text-muted text-center">
-                            Last run{' '}
-                            {formatDistanceToNow(new Date(agent.lastRunAt), {
-                              addSuffix: true,
-                            })}
-                          </p>
-                        )}
-                      </Card>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <CreateAgentModal

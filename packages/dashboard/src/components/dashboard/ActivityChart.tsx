@@ -19,11 +19,12 @@ interface ActivityChartProps {
 }
 
 export function ActivityChart({ data, loading }: ActivityChartProps) {
-  const chartData = data?.map((item) => ({
-    time: format(parseISO(item.hour), 'HH:mm'),
-    runs: item.runs,
-    tokens: Math.round(item.tokens / 1000),
-  })) || [];
+  const chartData =
+    data?.map((item) => ({
+      time: format(parseISO(item.hour), 'HH:mm'),
+      runs: item.runs,
+      tokens: Math.round(item.tokens / 1000),
+    })) || [];
 
   if (loading) {
     return (
@@ -67,23 +68,9 @@ export function ActivityChart({ data, loading }: ActivityChartProps) {
                   <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="rgba(255,255,255,0.05)"
-              />
-              <XAxis
-                dataKey="time"
-                stroke="#666"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                stroke="#666"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <XAxis dataKey="time" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: '#1a1a1a',

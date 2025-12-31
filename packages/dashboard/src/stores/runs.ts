@@ -25,27 +25,21 @@ export const useRunsStore = create<RunsState>((set) => ({
   selectedRunId: null,
   liveRuns: [],
   setRuns: (runs) => set({ runs }),
-  addRun: (run) =>
-    set((state) => ({ runs: [run, ...state.runs] })),
+  addRun: (run) => set((state) => ({ runs: [run, ...state.runs] })),
   updateRun: (id, updates) =>
     set((state) => ({
-      runs: state.runs.map((r) =>
-        r.id === id ? { ...r, ...updates } : r
-      ),
+      runs: state.runs.map((r) => (r.id === id ? { ...r, ...updates } : r)),
     })),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
   selectRun: (id) => set({ selectedRunId: id }),
-  addLiveRun: (run) =>
-    set((state) => ({ liveRuns: [...state.liveRuns, run] })),
+  addLiveRun: (run) => set((state) => ({ liveRuns: [...state.liveRuns, run] })),
   removeLiveRun: (id) =>
     set((state) => ({
       liveRuns: state.liveRuns.filter((r) => r.id !== id),
     })),
   updateLiveRun: (id, updates) =>
     set((state) => ({
-      liveRuns: state.liveRuns.map((r) =>
-        r.id === id ? { ...r, ...updates } : r
-      ),
+      liveRuns: state.liveRuns.map((r) => (r.id === id ? { ...r, ...updates } : r)),
     })),
 }));

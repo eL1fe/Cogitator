@@ -47,10 +47,7 @@ export function StatCard({
 
   if (loading) {
     return (
-      <Card
-        className="animate-fade-in"
-        style={{ animationDelay: `${delay * 50}ms` }}
-      >
+      <Card className="animate-fade-in" style={{ animationDelay: `${delay * 50}ms` }}>
         <div className="flex items-start justify-between">
           <div className="space-y-2">
             <Skeleton className="h-4 w-24" />
@@ -66,10 +63,7 @@ export function StatCard({
   }
 
   return (
-    <Card
-      className="animate-fade-in"
-      style={{ animationDelay: `${delay * 50}ms` }}
-    >
+    <Card className="animate-fade-in" style={{ animationDelay: `${delay * 50}ms` }}>
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <p className="text-sm text-text-secondary">{title}</p>
@@ -77,9 +71,7 @@ export function StatCard({
             {formatValue(value, format)}
           </p>
         </div>
-        {icon && (
-          <div className="p-2 bg-accent/10 rounded-lg text-accent">{icon}</div>
-        )}
+        {icon && <div className="p-2 bg-accent/10 rounded-lg text-accent">{icon}</div>}
       </div>
 
       {/* Change indicator */}

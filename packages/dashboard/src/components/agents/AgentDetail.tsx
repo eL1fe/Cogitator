@@ -41,10 +41,34 @@ const usageData = [
 ];
 
 const recentRuns = [
-  { id: 'run_1', status: 'completed', input: 'Analyze market trends...', duration: 4.2, tokens: 3421 },
-  { id: 'run_2', status: 'completed', input: 'Research competitor analysis...', duration: 6.8, tokens: 5234 },
-  { id: 'run_3', status: 'failed', input: 'Generate quarterly report...', duration: 2.1, tokens: 1890 },
-  { id: 'run_4', status: 'completed', input: 'Summarize feedback data...', duration: 3.5, tokens: 2678 },
+  {
+    id: 'run_1',
+    status: 'completed',
+    input: 'Analyze market trends...',
+    duration: 4.2,
+    tokens: 3421,
+  },
+  {
+    id: 'run_2',
+    status: 'completed',
+    input: 'Research competitor analysis...',
+    duration: 6.8,
+    tokens: 5234,
+  },
+  {
+    id: 'run_3',
+    status: 'failed',
+    input: 'Generate quarterly report...',
+    duration: 2.1,
+    tokens: 1890,
+  },
+  {
+    id: 'run_4',
+    status: 'completed',
+    input: 'Summarize feedback data...',
+    duration: 3.5,
+    tokens: 2678,
+  },
 ];
 
 export function AgentDetail({ agentId }: AgentDetailProps) {
@@ -53,7 +77,8 @@ export function AgentDetail({ agentId }: AgentDetailProps) {
     name: 'Research Agent',
     model: 'gpt-4o',
     status: 'online' as const,
-    description: 'Analyzes data and provides comprehensive research reports. Specializes in market research, competitive analysis, and trend forecasting.',
+    description:
+      'Analyzes data and provides comprehensive research reports. Specializes in market research, competitive analysis, and trend forecasting.',
     instructions: 'You are a research agent specializing in data analysis and report generation...',
     totalRuns: 342,
     totalTokens: 1250000,
@@ -80,9 +105,7 @@ export function AgentDetail({ agentId }: AgentDetailProps) {
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-semibold text-text-primary">
-                {agent.name}
-              </h1>
+              <h1 className="text-2xl font-semibold text-text-primary">{agent.name}</h1>
               <Badge variant="success" pulse>
                 {agent.status}
               </Badge>
@@ -118,23 +141,17 @@ export function AgentDetail({ agentId }: AgentDetailProps) {
         </Card>
         <Card className="text-center">
           <DollarSign className="w-5 h-5 text-chart-4 mx-auto mb-2" />
-          <p className="text-2xl font-semibold text-text-primary">
-            ${agent.totalCost.toFixed(2)}
-          </p>
+          <p className="text-2xl font-semibold text-text-primary">${agent.totalCost.toFixed(2)}</p>
           <p className="text-xs text-text-secondary">Total Cost</p>
         </Card>
         <Card className="text-center">
           <Clock className="w-5 h-5 text-chart-3 mx-auto mb-2" />
-          <p className="text-2xl font-semibold text-text-primary">
-            {agent.avgDuration}s
-          </p>
+          <p className="text-2xl font-semibold text-text-primary">{agent.avgDuration}s</p>
           <p className="text-xs text-text-secondary">Avg Duration</p>
         </Card>
         <Card className="text-center">
           <TrendingUp className="w-5 h-5 text-success mx-auto mb-2" />
-          <p className="text-2xl font-semibold text-text-primary">
-            {agent.successRate}%
-          </p>
+          <p className="text-2xl font-semibold text-text-primary">{agent.successRate}%</p>
           <p className="text-xs text-text-secondary">Success Rate</p>
         </Card>
       </div>
@@ -155,7 +172,12 @@ export function AgentDetail({ agentId }: AgentDetailProps) {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#262626" vertical={false} />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#666666', fontSize: 12 }} />
+                <XAxis
+                  dataKey="date"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#666666', fontSize: 12 }}
+                />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#666666', fontSize: 12 }} />
                 <Tooltip
                   contentStyle={{
@@ -164,7 +186,13 @@ export function AgentDetail({ agentId }: AgentDetailProps) {
                     borderRadius: '8px',
                   }}
                 />
-                <Area type="monotone" dataKey="runs" stroke="#00ff88" strokeWidth={2} fill="url(#colorRuns2)" />
+                <Area
+                  type="monotone"
+                  dataKey="runs"
+                  stroke="#00ff88"
+                  strokeWidth={2}
+                  fill="url(#colorRuns2)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
