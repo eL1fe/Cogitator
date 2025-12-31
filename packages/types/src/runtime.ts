@@ -6,6 +6,7 @@ import type { Message, ToolCall, ToolResult } from './message';
 import type { LLMProvider } from './llm';
 import type { MemoryConfig } from './memory';
 import type { SandboxManagerConfig } from './sandbox';
+import type { ReflectionConfig, Reflection, ReflectionSummary } from './reflection';
 
 export interface CogitatorConfig {
   llm?: {
@@ -27,6 +28,8 @@ export interface CogitatorConfig {
   memory?: MemoryConfig;
   /** Sandbox configuration for isolated tool execution */
   sandbox?: SandboxManagerConfig;
+  /** Reflection configuration for self-analyzing agents */
+  reflection?: ReflectionConfig;
 }
 
 export interface RunOptions {
@@ -77,6 +80,10 @@ export interface RunResult {
     traceId: string;
     spans: Span[];
   };
+  /** Reflections from agent self-analysis (if reflection enabled) */
+  reflections?: Reflection[];
+  /** Summary of agent learning (if reflection enabled) */
+  reflectionSummary?: ReflectionSummary;
 }
 
 export interface Span {

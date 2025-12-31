@@ -16,6 +16,10 @@ import type {
   ToolContext,
   MemoryAdapter,
   Tool,
+  Reflection,
+  ReflectionAction,
+  AgentContext,
+  InsightStore,
 } from '@cogitator-ai/types';
 import {
   InMemoryAdapter,
@@ -31,6 +35,7 @@ import { type Agent } from './agent';
 import { ToolRegistry } from './registry';
 import { createLLMBackend, parseModel } from './llm/index';
 import { getLogger } from './logger';
+import { ReflectionEngine, InMemoryInsightStore } from './reflection/index';
 
 type SandboxManager = {
   initialize(): Promise<void>;
@@ -69,6 +74,10 @@ export class Cogitator {
 
   private sandboxManager?: SandboxManager;
   private sandboxInitialized = false;
+
+  private reflectionEngine?: ReflectionEngine;
+  private insightStore?: InsightStore;
+  private reflectionInitialized = false;
 
   constructor(config: CogitatorConfig = {}) {
     this.config = config;
@@ -152,6 +161,26 @@ export class Cogitator {
     } catch {
       this.sandboxInitialized = true;
     }
+  }
+
+  /**
+   * Initialize reflection engine (lazy, on first run with reflection enabled)
+   */
+  private async initializeReflection(agent: Agent): Promise<void> {
+    if (this.reflectionInitialized || !this.config.reflection?.enabled) return;
+
+    const backend = this.getBackend(
+      this.config.reflection.reflectionModel ?? agent.model
+    );
+
+    this.insightStore = new InMemoryInsightStore();
+    this.reflectionEngine = new ReflectionEngine({
+      llm: backend,
+      insightStore: this.insightStore,
+      config: this.config.reflection,
+    });
+
+    this.reflectionInitialized = true;
   }
 
   /**

@@ -14,6 +14,9 @@ export { calculator, datetime, builtinTools } from './tools/index';
 export { Logger, getLogger, setLogger, createLogger } from './logger';
 export type { LogLevel, LogContext, LogEntry, LoggerOptions } from './logger';
 
+export { ReflectionEngine, InMemoryInsightStore } from './reflection/index';
+export type { ReflectionEngineOptions } from './reflection/index';
+
 export {
   BaseLLMBackend,
   OllamaBackend,
