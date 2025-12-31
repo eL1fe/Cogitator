@@ -213,6 +213,10 @@ export type SwarmEventType =
   | 'swarm:start'
   | 'swarm:complete'
   | 'swarm:error'
+  | 'swarm:paused'
+  | 'swarm:resumed'
+  | 'swarm:aborted'
+  | 'swarm:reset'
   | 'agent:start'
   | 'agent:complete'
   | 'agent:error'
@@ -220,14 +224,23 @@ export type SwarmEventType =
   | 'message:received'
   | 'blackboard:write'
   | 'consensus:vote'
+  | 'consensus:vote:changed'
   | 'consensus:round'
+  | 'consensus:turn'
+  | 'consensus:reached'
+  | 'auction:start'
   | 'auction:bid'
   | 'auction:winner'
+  | 'auction:complete'
   | 'debate:turn'
   | 'debate:round'
   | 'pipeline:stage'
+  | 'pipeline:stage:complete'
   | 'pipeline:gate'
-  | string;
+  | 'pipeline:gate:pass'
+  | 'pipeline:gate:fail'
+  | 'round-robin:assigned'
+  | 'assessor:complete';
 
 export interface SwarmEvent {
   type: SwarmEventType;
@@ -240,9 +253,9 @@ export type SwarmEventHandler = (event: SwarmEvent) => void | Promise<void>;
 
 export interface SwarmEventEmitter {
   on(event: SwarmEventType | '*', handler: SwarmEventHandler): () => void;
-  once(event: SwarmEventType, handler: SwarmEventHandler): () => void;
+  once(event: SwarmEventType | '*', handler: SwarmEventHandler): () => void;
   emit(event: SwarmEventType, data?: unknown, agentName?: string): void;
-  off(event: SwarmEventType, handler: SwarmEventHandler): void;
+  off(event: SwarmEventType | '*', handler: SwarmEventHandler): void;
   removeAllListeners(event?: SwarmEventType): void;
   getEvents(): SwarmEvent[];
 }

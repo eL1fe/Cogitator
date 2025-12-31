@@ -1,5 +1,20 @@
 # @cogitator-ai/types
 
+## 0.3.1
+
+### Patch Changes
+
+- **Type safety**: Remove `| string` from `ToolCategory` to enforce strict literal types
+- **Type safety**: Remove `| string` from `SwarmEventType` to enforce strict literal types
+- **SwarmEventType**: Add missing event literals that were previously hidden by `| string`:
+  - `swarm:paused`, `swarm:resumed`, `swarm:aborted`, `swarm:reset`
+  - `consensus:turn`, `consensus:reached`, `consensus:vote:changed`
+  - `auction:start`, `auction:complete`
+  - `pipeline:stage:complete`, `pipeline:gate:pass`, `pipeline:gate:fail`
+  - `round-robin:assigned`, `assessor:complete`
+- **SwarmEventEmitter**: Allow wildcard `'*'` in `once()` and `off()` methods
+- **Immutability**: Add `readonly` modifiers to `RunResult` interface for safer result handling
+
 ## 0.3.0
 
 ### Minor Changes

@@ -219,7 +219,7 @@ export class ThoughtTreeExecutor {
       this.stats.tokenUsage.output += result.usage.outputTokens;
 
       node.result = { response: result.output };
-      node.messages = result.messages;
+      node.messages = [...result.messages];
       node.status = 'completed';
       node.exploredAt = Date.now();
     } catch (error) {

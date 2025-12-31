@@ -62,28 +62,26 @@ export interface RunOptions {
 }
 
 export interface RunResult {
-  output: string;
-  structured?: unknown;
-  runId: string;
-  agentId: string;
-  threadId: string;
-  usage: {
-    inputTokens: number;
-    outputTokens: number;
-    totalTokens: number;
-    cost: number;
-    duration: number;
+  readonly output: string;
+  readonly structured?: unknown;
+  readonly runId: string;
+  readonly agentId: string;
+  readonly threadId: string;
+  readonly usage: {
+    readonly inputTokens: number;
+    readonly outputTokens: number;
+    readonly totalTokens: number;
+    readonly cost: number;
+    readonly duration: number;
   };
-  toolCalls: ToolCall[];
-  messages: Message[];
-  trace: {
-    traceId: string;
-    spans: Span[];
+  readonly toolCalls: readonly ToolCall[];
+  readonly messages: readonly Message[];
+  readonly trace: {
+    readonly traceId: string;
+    readonly spans: readonly Span[];
   };
-  /** Reflections from agent self-analysis (if reflection enabled) */
-  reflections?: Reflection[];
-  /** Summary of agent learning (if reflection enabled) */
-  reflectionSummary?: ReflectionSummary;
+  readonly reflections?: readonly Reflection[];
+  readonly reflectionSummary?: ReflectionSummary;
 }
 
 export interface Span {

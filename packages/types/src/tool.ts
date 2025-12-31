@@ -5,7 +5,7 @@
 import type { ZodType } from 'zod';
 import type { SandboxConfig } from './sandbox';
 
-export type ToolCategory = 'math' | 'text' | 'file' | 'network' | 'system' | 'utility' | string;
+export type ToolCategory = 'math' | 'text' | 'file' | 'network' | 'system' | 'utility';
 
 export interface ToolConfig<TParams = unknown, TResult = unknown> {
   name: string;
