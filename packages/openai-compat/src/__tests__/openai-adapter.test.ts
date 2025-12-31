@@ -206,6 +206,22 @@ describe('ThreadManager', () => {
       expect(deleted).toBe(true);
       expect(manager.getFile(created.id)).toBeUndefined();
     });
+
+    it('should list all files', () => {
+      const file1 = manager.addFile(Buffer.from('content1'), 'file1.txt');
+      const file2 = manager.addFile(Buffer.from('content2'), 'file2.txt');
+
+      const files = manager.listFiles();
+
+      expect(files).toHaveLength(2);
+      expect(files.map((f) => f.id)).toContain(file1.id);
+      expect(files.map((f) => f.id)).toContain(file2.id);
+    });
+
+    it('should return empty array when no files', () => {
+      const files = manager.listFiles();
+      expect(files).toEqual([]);
+    });
   });
 
   describe('getMessagesForLLM', () => {

@@ -1,5 +1,18 @@
 # @cogitator-ai/openai-compat
 
+## 1.1.0
+
+### Minor Changes
+
+- Add `listFiles()` method to ThreadManager
+- Fix `/v1/files` endpoint returning empty array (now returns actual files)
+- Add console.warn for run execution failures (was silent fire-and-forget)
+- Improve type safety: `unknown[]` → `AssistantTool[]` in StoredAssistant
+
+### Tests
+
+- Add tests for `listFiles()` method
+
 ## 1.0.0
 
 ### Patch Changes

@@ -11,6 +11,7 @@ import { ThreadManager, type StoredAssistant } from './thread-manager';
 import { nanoid } from 'nanoid';
 import type {
   Assistant,
+  AssistantTool,
   Run,
   CreateRunRequest,
   SubmitToolOutputsRequest,
@@ -69,7 +70,7 @@ export class OpenAIAdapter {
     model: string;
     name?: string;
     instructions?: string;
-    tools?: unknown[];
+    tools?: AssistantTool[];
     metadata?: Record<string, string>;
     temperature?: number;
   }): Assistant {
@@ -88,7 +89,7 @@ export class OpenAIAdapter {
       model: string;
       name: string;
       instructions: string;
-      tools: unknown[];
+      tools: AssistantTool[];
       metadata: Record<string, string>;
       temperature: number;
     }>
@@ -114,7 +115,7 @@ export class OpenAIAdapter {
       description: null,
       model: stored.model,
       instructions: stored.instructions,
-      tools: stored.tools as Assistant['tools'],
+      tools: stored.tools,
       metadata: stored.metadata,
       temperature: stored.temperature,
     };
@@ -213,13 +214,16 @@ export class OpenAIAdapter {
     }
 
     this.executeRun(runId, threadId, assistant, request).catch((error) => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn(`[OpenAIAdapter] Run ${runId} failed:`, errorMessage);
+
       const state = this.runs.get(runId);
       if (state) {
         state.run.status = 'failed';
         state.run.failed_at = Math.floor(Date.now() / 1000);
         state.run.last_error = {
           code: 'server_error',
-          message: error instanceof Error ? error.message : String(error),
+          message: errorMessage,
         };
       }
     });

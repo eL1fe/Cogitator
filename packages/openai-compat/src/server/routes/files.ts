@@ -67,9 +67,21 @@ export function registerFileRoutes(fastify: FastifyInstance, adapter: OpenAIAdap
   });
 
   fastify.get<{ Querystring: { purpose?: FilePurpose } }>('/v1/files', async (_request, reply) => {
+    const files = threadManager.listFiles();
+
+    const data: FileObject[] = files.map((file) => ({
+      id: file.id,
+      object: 'file',
+      bytes: file.content.length,
+      created_at: file.created_at,
+      filename: file.filename,
+      purpose: 'assistants' as FilePurpose,
+      status: 'processed' as const,
+    }));
+
     const response: ListResponse<FileObject> = {
       object: 'list',
-      data: [],
+      data,
       has_more: false,
     };
 

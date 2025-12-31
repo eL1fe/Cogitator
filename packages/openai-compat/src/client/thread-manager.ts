@@ -5,7 +5,13 @@
  */
 
 import { nanoid } from 'nanoid';
-import type { Thread, Message, CreateMessageRequest, MessageContent } from '../types/openai-types';
+import type {
+  Thread,
+  Message,
+  CreateMessageRequest,
+  MessageContent,
+  AssistantTool,
+} from '../types/openai-types';
 
 export interface StoredThread {
   thread: Thread;
@@ -17,7 +23,7 @@ export interface StoredAssistant {
   name: string | null;
   model: string;
   instructions: string | null;
-  tools: unknown[];
+  tools: AssistantTool[];
   metadata: Record<string, string>;
   temperature?: number;
   created_at: number;
@@ -40,7 +46,7 @@ export class ThreadManager {
     model: string;
     name?: string;
     instructions?: string;
-    tools?: unknown[];
+    tools?: AssistantTool[];
     metadata?: Record<string, string>;
     temperature?: number;
   }): StoredAssistant {
@@ -256,6 +262,10 @@ export class ThreadManager {
 
   deleteFile(id: string): boolean {
     return this.files.delete(id);
+  }
+
+  listFiles(): { id: string; content: Buffer; filename: string; created_at: number }[] {
+    return Array.from(this.files.values());
   }
 
   private normalizeContent(content: string | unknown[]): MessageContent[] {
