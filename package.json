@@ -38,7 +38,8 @@
   },
   "dependencies": {
     "openai": "^6",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "zod": "^4"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",

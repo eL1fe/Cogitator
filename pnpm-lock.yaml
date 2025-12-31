@@ -10,10 +10,13 @@ importers:
     dependencies:
       openai:
         specifier: ^6
-        version: 6.15.0
+        version: 6.15.0(zod@4.3.2)
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
+      zod:
+        specifier: ^4
+        version: 4.3.2
     devDependencies:
       '@changesets/cli':
         specifier: ^2.27.0
@@ -5307,7 +5310,7 @@ packages:
       - encoding
     dev: false
 
-  /openai@6.15.0:
+  /openai@6.15.0(zod@4.3.2):
     resolution: {integrity: sha512-F1Lvs5BoVvmZtzkUEVyh8mDQPPFolq4F+xdsx/DO8Hee8YF3IGAlZqUIsF+DVGhqf4aU0a3bTghsxB6OIsRy1g==}
     hasBin: true
     peerDependencies:
@@ -5318,6 +5321,8 @@ packages:
         optional: true
       zod:
         optional: true
+    dependencies:
+      zod: 4.3.2
     dev: false
 
   /optionator@0.9.4:
@@ -7238,6 +7243,10 @@ packages:
 
   /zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+    dev: false
+
+  /zod@4.3.2:
+    resolution: {integrity: sha512-b8L8yn4rIVfiXyHAmnr52/ZEpDumlT0bmxiq3Ws1ybrinhflGpt12Hvv54kYnEsGPRs6o/Ka3/ppA2OWY21IVg==}
     dev: false
 
   /zustand@4.5.7(@types/react@19.2.7)(react@19.2.3):
