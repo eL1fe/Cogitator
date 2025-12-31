@@ -10,57 +10,51 @@ pnpm add @cogitator-ai/wasm-tools
 
 ## Usage
 
-### Built-in WASM Tools
+This package provides WASM tool configurations to be used with `@cogitator-ai/sandbox`.
+
+### With Sandbox Executor
 
 ```typescript
-import { wasmCalculator, wasmJsonProcessor } from '@cogitator-ai/wasm-tools';
+import { WasmSandbox } from '@cogitator-ai/sandbox';
+import { calcToolConfig, jsonToolConfig } from '@cogitator-ai/wasm-tools';
 
-// Calculator - safe math expression evaluation
-const calc = wasmCalculator();
-const result = await calc.execute({ expression: '2 + 2 * 3' });
-// { result: 8 }
+// Create executor
+const sandbox = new WasmSandbox(calcToolConfig);
 
-// JSON Processor - JSONPath queries
-const json = wasmJsonProcessor();
-const data = await json.execute({
-  json: '{"users": [{"name": "Alice"}, {"name": "Bob"}]}',
-  query: '$.users[*].name',
+// Calculate expression
+const result = await sandbox.execute({ expression: '2 + 2 * 3' });
+// { result: 8, expression: '2 + 2 * 3' }
+```
+
+### With Cogitator Tools
+
+```typescript
+import { tool } from '@cogitator-ai/core';
+import { WasmSandbox } from '@cogitator-ai/sandbox';
+import { calcToolConfig, calcToolSchema, jsonToolConfig, jsonToolSchema } from '@cogitator-ai/wasm-tools';
+
+const calcSandbox = new WasmSandbox(calcToolConfig);
+
+const calculator = tool({
+  name: 'calculator',
+  description: 'Evaluate mathematical expressions safely',
+  parameters: calcToolSchema,
+  execute: async (input) => {
+    const result = await calcSandbox.execute(input);
+    return result;
+  },
 });
-// { result: ["Alice", "Bob"] }
 ```
 
-### Use with Cogitator
+### Available Exports
 
-```typescript
-import { Cogitator, Agent } from '@cogitator-ai/core';
-import { wasmCalculator, wasmJsonProcessor } from '@cogitator-ai/wasm-tools';
-
-const agent = new Agent({
-  name: 'data-processor',
-  tools: [wasmCalculator(), wasmJsonProcessor()],
-});
-```
-
-### Custom WASM Tools
-
-Build custom WASM tools using Extism PDK:
-
-```typescript
-// tool.ts
-import { Input, Output } from '@extism/js-pdk';
-
-export function run() {
-  const input = JSON.parse(Input.string());
-  const result = processData(input);
-  Output.set(JSON.stringify(result));
-}
-```
-
-Build with:
-
-```bash
-npx @anthropic/extism-js tool.ts -o tool.wasm
-```
+| Export | Description |
+|--------|-------------|
+| `calcToolConfig` | Sandbox config for calculator WASM module |
+| `calcToolSchema` | Zod schema for calculator input |
+| `jsonToolConfig` | Sandbox config for JSON processor WASM module |
+| `jsonToolSchema` | Zod schema for JSON processor input |
+| `getWasmPath(name)` | Get path to a WASM module by name |
 
 ## Security
 

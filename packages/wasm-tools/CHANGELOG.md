@@ -1,5 +1,15 @@
 # @cogitator-ai/wasm-tools
 
+## 0.2.0
+
+### Minor Changes
+
+- **Documentation**: Update README to reflect actual API exports
+  - Old docs showed non-existent `wasmCalculator()` and `wasmJsonProcessor()` functions
+  - Now correctly documents `calcToolConfig`, `jsonToolConfig`, and `getWasmPath()`
+- **Type safety**: Add type guard in JSON processor for safer property access
+  - Added `isRecord()` type guard to properly validate object types before indexing
+
 ## 0.1.1
 
 ### Patch Changes

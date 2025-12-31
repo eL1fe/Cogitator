@@ -20,6 +20,10 @@ interface JsonOutput {
   error?: string;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
 function getByPath(obj: unknown, path: string): unknown {
   if (!path || path === '$') return obj;
 
@@ -35,14 +39,20 @@ function getByPath(obj: unknown, path: string): unknown {
     if (arrayMatch) {
       const [, key, indexStr] = arrayMatch;
       const index = parseInt(indexStr, 10);
-      current = (current as Record<string, unknown>)[key];
+      if (!isRecord(current)) {
+        return undefined;
+      }
+      current = current[key];
       if (Array.isArray(current)) {
         current = current[index];
       } else {
         return undefined;
       }
     } else {
-      current = (current as Record<string, unknown>)[part];
+      if (!isRecord(current)) {
+        return undefined;
+      }
+      current = current[part];
     }
   }
 
