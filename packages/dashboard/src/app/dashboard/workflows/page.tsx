@@ -1,8 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Header } from '@/components/layout/Header';
+import { useState, useCallback, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -229,11 +227,8 @@ export default function WorkflowsPage() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 flex overflow-hidden">
+    <div className="flex h-full -m-6 overflow-hidden">
+      <div className="flex-1 flex overflow-hidden">
           {/* Workflows List Sidebar */}
           <div className="w-72 border-r border-border-subtle bg-bg-secondary flex flex-col">
             <div className="p-4 border-b border-border-subtle">
@@ -375,7 +370,6 @@ export default function WorkflowsPage() {
               </ReactFlow>
             </div>
           </div>
-        </main>
       </div>
 
       <CreateWorkflowModal

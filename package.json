@@ -29,9 +29,9 @@
     "changeset": "changeset",
     "version": "changeset version",
     "release": "turbo run build && changeset publish",
-    "dashboard": "pnpm --filter @cogitator/dashboard dev",
-    "dashboard:build": "pnpm --filter @cogitator/dashboard build",
-    "dashboard:start": "pnpm --filter @cogitator/dashboard start",
+    "dashboard": "pnpm --filter @cogitator-ai/dashboard dev",
+    "dashboard:build": "pnpm --filter @cogitator-ai/dashboard build",
+    "dashboard:start": "pnpm --filter @cogitator-ai/dashboard start",
     "services": "docker-compose up -d",
     "services:down": "docker-compose down",
     "start": "pnpm build && concurrently \"pnpm services\" \"pnpm dashboard\""

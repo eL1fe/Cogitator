@@ -40,21 +40,21 @@ pnpm dev
 ```
 cogitator/
 ├── packages/
-│   ├── core/           # Core runtime and LLM backends (@cogitator/core)
-│   ├── cli/            # CLI tool (@cogitator/cli)
-│   ├── config/         # Configuration loader (@cogitator/config)
-│   ├── types/          # Shared types (@cogitator/types)
-│   ├── memory/         # Memory adapters (@cogitator/memory)
-│   ├── models/         # Model registry and discovery (@cogitator/models)
-│   ├── mcp/            # Model Context Protocol adapter (@cogitator/mcp)
-│   ├── openai-compat/  # OpenAI-compatible API server (@cogitator/openai-compat)
-│   ├── redis/          # Redis client with cluster support (@cogitator/redis)
-│   ├── workflows/      # Workflow engine (@cogitator/workflows)
-│   ├── swarms/         # Swarm coordination (@cogitator/swarms)
-│   ├── sandbox/        # Code execution sandbox (@cogitator/sandbox)
-│   ├── wasm-tools/     # WASM plugin system (@cogitator/wasm-tools)
-│   ├── worker/         # Background job worker (@cogitator/worker)
-│   └── dashboard/      # Web dashboard & API (@cogitator/dashboard)
+│   ├── core/           # Core runtime and LLM backends (@cogitator-ai/core)
+│   ├── cli/            # CLI tool (@cogitator-ai/cli)
+│   ├── config/         # Configuration loader (@cogitator-ai/config)
+│   ├── types/          # Shared types (@cogitator-ai/types)
+│   ├── memory/         # Memory adapters (@cogitator-ai/memory)
+│   ├── models/         # Model registry and discovery (@cogitator-ai/models)
+│   ├── mcp/            # Model Context Protocol adapter (@cogitator-ai/mcp)
+│   ├── openai-compat/  # OpenAI-compatible API server (@cogitator-ai/openai-compat)
+│   ├── redis/          # Redis client with cluster support (@cogitator-ai/redis)
+│   ├── workflows/      # Workflow engine (@cogitator-ai/workflows)
+│   ├── swarms/         # Swarm coordination (@cogitator-ai/swarms)
+│   ├── sandbox/        # Code execution sandbox (@cogitator-ai/sandbox)
+│   ├── wasm-tools/     # WASM plugin system (@cogitator-ai/wasm-tools)
+│   ├── worker/         # Background job worker (@cogitator-ai/worker)
+│   └── dashboard/      # Web dashboard & API (@cogitator-ai/dashboard)
 ├── docs/               # Documentation
 └── scripts/            # Build and utility scripts
 ```
@@ -137,21 +137,21 @@ Types:
 
 Scopes:
 
-- `core`: @cogitator/core
-- `cli`: @cogitator/cli
-- `config`: @cogitator/config
-- `types`: @cogitator/types
-- `memory`: @cogitator/memory
-- `models`: @cogitator/models
-- `mcp`: @cogitator/mcp
-- `openai-compat`: @cogitator/openai-compat
-- `redis`: @cogitator/redis
-- `workflows`: @cogitator/workflows
-- `swarms`: @cogitator/swarms
-- `sandbox`: @cogitator/sandbox
-- `wasm-tools`: @cogitator/wasm-tools
-- `worker`: @cogitator/worker
-- `dashboard`: @cogitator/dashboard
+- `core`: @cogitator-ai/core
+- `cli`: @cogitator-ai/cli
+- `config`: @cogitator-ai/config
+- `types`: @cogitator-ai/types
+- `memory`: @cogitator-ai/memory
+- `models`: @cogitator-ai/models
+- `mcp`: @cogitator-ai/mcp
+- `openai-compat`: @cogitator-ai/openai-compat
+- `redis`: @cogitator-ai/redis
+- `workflows`: @cogitator-ai/workflows
+- `swarms`: @cogitator-ai/swarms
+- `sandbox`: @cogitator-ai/sandbox
+- `wasm-tools`: @cogitator-ai/wasm-tools
+- `worker`: @cogitator-ai/worker
+- `dashboard`: @cogitator-ai/dashboard
 
 Examples:
 
@@ -259,23 +259,23 @@ export function createAgent(config: AgentConfig): Agent {
 
 ```bash
 # Build a specific package
-pnpm --filter @cogitator/core build
+pnpm --filter @cogitator-ai/core build
 
 # Test a specific package
-pnpm --filter @cogitator/core test
+pnpm --filter @cogitator-ai/core test
 
 # Watch mode for development
-pnpm --filter @cogitator/core dev
+pnpm --filter @cogitator-ai/core dev
 ```
 
 ### Adding Dependencies
 
 ```bash
 # Add to a specific package
-pnpm --filter @cogitator/core add zod
+pnpm --filter @cogitator-ai/core add zod
 
 # Add as dev dependency
-pnpm --filter @cogitator/core add -D vitest
+pnpm --filter @cogitator-ai/core add -D vitest
 
 # Add to root (workspace tools)
 pnpm add -w -D typescript
