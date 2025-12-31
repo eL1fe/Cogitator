@@ -68,6 +68,7 @@ Cogitator is a **self-hosted, production-grade runtime** for orchestrating LLM s
 - **Self-Reflection** — Agents learn from actions, accumulate insights, improve over time
 - **Tree of Thoughts** — Branching reasoning with beam search, evaluation, backtracking
 - **Agent Learning** — DSPy-style optimization with trace capture, metrics, and instruction tuning
+- **Time-Travel Debugging** — Checkpoint, replay, fork executions like git bisect for AI agents
 
 ---
 
@@ -516,6 +517,58 @@ console.log('New instructions:', compileResult.instructionsAfter);
 - **MIPROv2-style Optimization** - Failure analysis → candidate generation → evaluation → refinement
 - **DSPy-compatible compile()** - One-line optimization for agents
 
+### ⏪ Time-Travel Debugging
+
+Debug agent executions like `git bisect` — checkpoint, replay, fork, and compare:
+
+```typescript
+import { Cogitator, Agent, TimeTravel } from '@cogitator-ai/core';
+
+const cog = new Cogitator({ /* ... */ });
+const agent = new Agent({ /* ... */ });
+const tt = new TimeTravel(cog);
+
+// Run and checkpoint every step
+const result = await cog.run(agent, { input: 'Research AI trends' });
+const checkpoints = await tt.checkpointAll(result);
+
+console.log(`Created ${checkpoints.length} checkpoints`);
+
+// Replay from step 2 (deterministic - no LLM calls)
+const replay = await tt.replayDeterministic(agent, checkpoints[2].id);
+console.log('Replayed to step:', replay.stepsReplayed);
+
+// Fork with modified context
+const fork = await tt.forkWithContext(
+  agent,
+  checkpoints[2].id,
+  'Focus specifically on generative AI developments'
+);
+
+// Compare original vs fork
+const diff = await tt.compare(result.trace.traceId, fork.result.trace.traceId);
+console.log(tt.formatDiff(diff));
+// Traces diverged at step 3
+// Original: 8 steps, score 0.85
+// Fork: 6 steps, score 0.92
+// Token delta: -1200 (fork more efficient)
+
+// Fork with mocked tool result for testing
+const mockFork = await tt.forkWithMockedTool(
+  agent,
+  checkpoints[1].id,
+  'web_search',
+  { results: [{ title: 'Custom Result', url: '...' }] }
+);
+```
+
+**Features:**
+- **Checkpoint** - Save execution state at any step
+- **Replay** - Deterministic (cached) or live (new LLM calls)
+- **Fork** - Branch execution with modified context or mocked tools
+- **Compare** - Diff traces step-by-step, find divergence point
+- **A/B Testing** - Fork multiple variants to compare approaches
+
 ### 🔒 Sandboxed Execution
 
 ```typescript
@@ -612,6 +665,7 @@ const agent = new Agent({
 | Self-reflection     | ✅        | ❌          | ❌                | ❌          |
 | Tree of Thoughts    | ✅        | ❌          | ❌                | ❌          |
 | Agent Learning      | ✅        | ❌          | ❌                | ❌          |
+| Time-Travel Debug   | ✅        | ❌          | ❌                | ❌          |
 | Dependencies        | ~20       | 150+        | N/A               | ~30         |
 
 ---
