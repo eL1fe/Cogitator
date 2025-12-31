@@ -1,5 +1,15 @@
 # @cogitator-ai/worker
 
+## 0.2.0
+
+### Minor Changes
+
+- **Documentation**: Complete README rewrite to match actual API
+  - Fixed Redis configuration examples (host/port instead of url)
+  - Fixed addAgentJob/addWorkflowJob/addSwarmJob signatures
+  - Fixed MetricsCollector usage examples
+  - Added Redis cluster configuration examples
+
 ## 0.1.1
 
 ### Patch Changes

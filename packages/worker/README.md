@@ -18,27 +18,33 @@ Add jobs for background execution:
 import { JobQueue } from '@cogitator-ai/worker';
 
 const queue = new JobQueue({
-  redis: { url: 'redis://localhost:6379' },
+  redis: { host: 'localhost', port: 6379 },
 });
 
+// Agent config (serialized form)
+const agentConfig = {
+  id: 'my-agent',
+  name: 'My Agent',
+  model: 'openai/gpt-4',
+  instructions: 'You are a helpful assistant',
+  tools: [],
+};
+
 // Add agent job
-await queue.addAgentJob({
-  agentId: 'my-agent',
-  input: 'Process this task',
+await queue.addAgentJob(agentConfig, 'Process this task', {
   threadId: 'thread-123',
+  priority: 1,
 });
 
 // Add workflow job
-await queue.addWorkflowJob({
-  workflowId: 'data-pipeline',
-  input: { data: [...] },
+const workflowConfig = { name: 'data-pipeline', nodes: [] };
+await queue.addWorkflowJob(workflowConfig, { data: [] }, {
+  runId: 'run-456',
 });
 
 // Add swarm job
-await queue.addSwarmJob({
-  swarmId: 'research-team',
-  input: 'Research AI trends',
-});
+const swarmConfig = { name: 'research-team', strategy: 'hierarchical', agents: [] };
+await queue.addSwarmJob(swarmConfig, 'Research AI trends');
 ```
 
 ### Worker Pool
@@ -51,7 +57,7 @@ import { Cogitator } from '@cogitator-ai/core';
 
 const cogitator = new Cogitator();
 const pool = new WorkerPool(cogitator, {
-  redis: { url: 'redis://localhost:6379' },
+  redis: { host: 'localhost', port: 6379 },
   concurrency: 5,
 });
 
@@ -63,14 +69,17 @@ await pool.start();
 Prometheus-compatible metrics for HPA:
 
 ```typescript
-import { MetricsCollector, formatPrometheusMetrics } from '@cogitator-ai/worker';
+import { JobQueue, MetricsCollector, formatPrometheusMetrics } from '@cogitator-ai/worker';
 
-const metrics = new MetricsCollector(queue);
+const queue = new JobQueue({
+  redis: { host: 'localhost', port: 6379 },
+});
+const metrics = new MetricsCollector();
 
 // Expose metrics endpoint
 app.get('/metrics', async (req, res) => {
-  const data = await metrics.collect();
-  res.send(formatPrometheusMetrics(data));
+  const queueMetrics = await queue.getMetrics();
+  res.send(metrics.format(queueMetrics));
 });
 ```
 
@@ -82,11 +91,29 @@ app.get('/metrics', async (req, res) => {
 - `cogitator_queue_completed_total` - Completed jobs
 - `cogitator_queue_failed_total` - Failed jobs
 - `cogitator_workers_total` - Active workers
+- `cogitator_job_duration_seconds` - Job processing time histogram
 
-## Environment Variables
+## Redis Configuration
 
-- `REDIS_URL` - Redis connection URL
-- `WORKER_CONCURRENCY` - Jobs per worker (default: 5)
+```typescript
+// Single node
+const queue = new JobQueue({
+  redis: { host: 'localhost', port: 6379, password: 'secret' },
+});
+
+// Cluster mode
+const queue = new JobQueue({
+  redis: {
+    cluster: {
+      nodes: [
+        { host: 'redis-1', port: 6379 },
+        { host: 'redis-2', port: 6379 },
+      ],
+    },
+    password: 'secret',
+  },
+});
+```
 
 ## Documentation
 
