@@ -43,6 +43,7 @@ export class MCPServer {
   private config: MCPServerConfig;
   private tools = new Map<string, Tool>();
   private started = false;
+  private httpServer?: import('node:http').Server;
 
   constructor(config: MCPServerConfig) {
     this.config = config;
@@ -139,7 +140,7 @@ export class MCPServer {
               },
             ],
             isError: true,
-          } as MCPCallToolResult;
+          };
         }
         validatedArgs = parseResult.data as Record<string, unknown>;
       }
@@ -155,7 +156,7 @@ export class MCPServer {
         return { type: 'text' as const, text: JSON.stringify(item) };
       });
 
-      return { content } as MCPCallToolResult;
+      return { content };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -166,7 +167,7 @@ export class MCPServer {
       return {
         content: [{ type: 'text' as const, text: `Error: ${errorMessage}` }],
         isError: true,
-      } as MCPCallToolResult;
+      };
     }
   }
 
@@ -218,7 +219,7 @@ export class MCPServer {
     const port = this.config.port ?? 3000;
     const host = this.config.host ?? 'localhost';
 
-    const httpServer = createServer(async (req, res) => {
+    this.httpServer = createServer(async (req, res) => {
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -250,7 +251,7 @@ export class MCPServer {
     });
 
     await new Promise<void>((resolve) => {
-      httpServer.listen(port, host, () => {
+      this.httpServer!.listen(port, host, () => {
         if (this.config.logging) {
           console.log(`[MCPServer] HTTP server listening on http://${host}:${port}/mcp`);
         }
@@ -265,6 +266,13 @@ export class MCPServer {
   async stop(): Promise<void> {
     if (!this.started) {
       return;
+    }
+
+    if (this.httpServer) {
+      await new Promise<void>((resolve, reject) => {
+        this.httpServer!.close((err) => (err ? reject(err) : resolve()));
+      });
+      this.httpServer = undefined;
     }
 
     await this.server.close();
