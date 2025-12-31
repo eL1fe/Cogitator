@@ -52,22 +52,17 @@ export class SwarmAssessor implements Assessor {
       }
     }
 
-    // 1. Analyze task requirements
     const taskAnalysis = this.taskAnalyzer.analyze(task);
 
-    // 2. Discover available models
     const discoveredModels = await this.modelDiscovery.discoverAll();
 
-    // 3. Extract agents from swarm config
     const agents = this.roleMatcher.extractAgentsFromConfig(swarmConfig);
 
-    // 4. Analyze each role and generate assignments
     const roleAnalyses = new Map<string, RoleRequirements>();
     const assignments: ModelAssignment[] = [];
     const warnings: string[] = [];
 
     for (const agent of agents) {
-      // Check if model is locked
       if (agent.metadata.locked) {
         assignments.push({
           agentName: agent.agent.name,
@@ -82,17 +77,14 @@ export class SwarmAssessor implements Assessor {
         continue;
       }
 
-      // Analyze role requirements
       const roleReqs = this.roleMatcher.analyzeRole(agent, taskAnalysis);
       roleAnalyses.set(agent.agent.name, roleReqs);
 
-      // Score all available models for this role
       const scoredModels = this.modelScorer.scoreAll(discoveredModels, roleReqs);
       const minScore = this.config.minCapabilityMatch * 100;
       const validModels = scoredModels.filter((s) => s.score >= minScore);
 
       if (validModels.length === 0) {
-        // Fallback to original model
         const originalModel = (agent.agent as { model?: string }).model ?? 'gpt-4o-mini';
         warnings.push(
           `No suitable model found for ${agent.agent.name}, keeping original: ${originalModel}`
@@ -110,7 +102,6 @@ export class SwarmAssessor implements Assessor {
         continue;
       }
 
-      // Apply local preference if enabled
       let selectedModel = validModels[0];
       if (this.config.preferLocal) {
         const localModel = validModels.find((m) => m.model.isLocal);
@@ -131,7 +122,6 @@ export class SwarmAssessor implements Assessor {
       });
     }
 
-    // Apply cost optimization if budget is set
     if (this.config.maxCostPerRun) {
       this.optimizeForBudget(assignments, discoveredModels, this.config.maxCostPerRun);
     }
@@ -276,7 +266,6 @@ export class SwarmAssessor implements Assessor {
     for (const assignment of assignments) {
       const model = discoveredModels.find((m) => m.id === assignment.assignedModel);
       if (model && !model.isLocal) {
-        // Estimate ~1000 tokens per agent interaction
         const estimatedTokens = 1000;
         total +=
           (model.pricing.input * estimatedTokens + model.pricing.output * estimatedTokens) /
@@ -294,7 +283,6 @@ export class SwarmAssessor implements Assessor {
     let currentCost = this.estimateTotalCost(assignments, discoveredModels);
     if (currentCost <= budget) return;
 
-    // Sort by cost (highest first) and try to downgrade
     const byExpense = [...assignments]
       .filter((a) => !a.locked)
       .map((a) => {
@@ -309,7 +297,6 @@ export class SwarmAssessor implements Assessor {
     for (const item of byExpense) {
       if (currentCost <= budget) break;
 
-      // Try fallback models
       for (const fallbackId of item.assignment.fallbackModels) {
         const fallbackModel = discoveredModels.find((m) => m.id === fallbackId);
         if (fallbackModel?.isLocal) {
@@ -320,7 +307,7 @@ export class SwarmAssessor implements Assessor {
           item.assignment.provider = fallbackModel.provider;
           item.assignment.reasons.push('Downgraded for cost optimization');
 
-          currentCost -= oldCost * 0.001; // Rough estimate
+          currentCost -= oldCost * 0.001;
           break;
         }
       }

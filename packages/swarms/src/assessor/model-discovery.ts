@@ -220,7 +220,7 @@ export class ModelDiscovery {
     this.enabledProviders = new Set(
       config.enabledProviders ?? ['ollama', 'openai', 'anthropic', 'google']
     );
-    this.cacheTTL = config.cacheTTL ?? 5 * 60 * 1000; // 5 minutes
+    this.cacheTTL = config.cacheTTL ?? 5 * 60 * 1000;
   }
 
   async discoverAll(): Promise<DiscoveredModel[]> {

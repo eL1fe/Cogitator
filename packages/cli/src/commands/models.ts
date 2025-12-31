@@ -138,9 +138,7 @@ async function pullModel(model: string): Promise<void> {
             }
             lastStatus = data.status;
           }
-        } catch {
-          // ignore parse errors
-        }
+        } catch {}
       }
     }
 

@@ -84,7 +84,6 @@ export class Swarm {
    * Run the swarm with the configured strategy
    */
   async run(options: SwarmRunOptions): Promise<StrategyResult> {
-    // Run assessment if configured and not yet done
     if (this.assessorConfig && !this.assessed) {
       await this.runAssessment(options.input);
     }
@@ -148,10 +147,8 @@ export class Swarm {
       estimatedCost: this.lastAssessment.totalEstimatedCost,
     });
 
-    // Apply model assignments
     this.config = assessor.assignModels(this.config, this.lastAssessment);
 
-    // Reinitialize coordinator and strategy with updated config
     this.coordinator = new SwarmCoordinator(this.cogitator, this.config);
     this.strategy = createStrategy(this.coordinator, this.config);
 

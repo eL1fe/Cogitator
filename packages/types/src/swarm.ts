@@ -432,10 +432,6 @@ export interface IStrategy {
   execute(options: SwarmRunOptions): Promise<StrategyResult>;
 }
 
-// ============================================================================
-// Assessor Types - Dynamic Model Casting
-// ============================================================================
-
 export type ReasoningLevel = 'basic' | 'moderate' | 'advanced';
 export type SpeedPreference = 'fast' | 'balanced' | 'slow-ok';
 export type CostSensitivity = 'low' | 'medium' | 'high';

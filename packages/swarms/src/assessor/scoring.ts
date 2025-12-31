@@ -48,7 +48,6 @@ export class ModelScorer {
     let score = 100;
     const reasons: string[] = [];
 
-    // Hard requirements - disqualify if not met
     if (requirements.needsVision && !model.capabilities.supportsVision) {
       return { model, score: 0, reasons: ['Does not support vision (required)'] };
     }
@@ -57,7 +56,6 @@ export class ModelScorer {
       return { model, score: 0, reasons: ['Does not support tool calling (required)'] };
     }
 
-    // Context window check
     if (requirements.needsLongContext && model.contextWindow < 32000) {
       score -= 30;
       reasons.push(`Limited context window (${model.contextWindow} tokens)`);
@@ -66,13 +64,11 @@ export class ModelScorer {
       reasons.push('Large context window');
     }
 
-    // Local model preference
     if (model.isLocal) {
       score += 15;
       reasons.push('Local model (no API cost)');
     }
 
-    // Cost sensitivity
     if (!model.isLocal) {
       const avgCost = (model.pricing.input + model.pricing.output) / 2;
       if (requirements.costSensitivity === 'high') {
@@ -89,7 +85,6 @@ export class ModelScorer {
       }
     }
 
-    // Reasoning level
     const isAdvanced = this.isAdvancedModel(model);
     if (requirements.needsReasoning === 'advanced') {
       if (isAdvanced) {
@@ -104,7 +99,6 @@ export class ModelScorer {
       reasons.push('Appropriate for basic tasks');
     }
 
-    // Speed preference
     const isFast = this.isFastModel(model);
     if (requirements.needsSpeed === 'fast') {
       if (isFast || model.isLocal) {
@@ -119,7 +113,6 @@ export class ModelScorer {
       reasons.push('Quality over speed');
     }
 
-    // Domain matching
     if (requirements.domains?.includes('code')) {
       if (this.isCodeModel(model)) {
         score += 10;
@@ -127,7 +120,6 @@ export class ModelScorer {
       }
     }
 
-    // Complexity matching
     if (requirements.complexity === 'complex' && isAdvanced) {
       score += 10;
       reasons.push('Suitable for complex tasks');
@@ -136,7 +128,6 @@ export class ModelScorer {
       reasons.push('Efficient for simple tasks');
     }
 
-    // Role-specific adjustments
     if (requirements.role === 'supervisor' && isAdvanced) {
       score += 10;
       reasons.push('Good for supervisory role');

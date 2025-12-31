@@ -165,32 +165,28 @@ describe('ModelScorer', () => {
       const localResult = scorer.score(localModel, reqs);
       const cloudResult = scorer.score(cloudModel, reqs);
 
-      // Local model should have "Local model (no API cost)" in reasons
       expect(localResult.reasons).toContain('Local model (no API cost)');
       expect(cloudResult.reasons).not.toContain('Local model (no API cost)');
 
-      // Local model gets +15 bonus, so should score higher
       expect(localResult.score).toBeGreaterThan(cloudResult.score);
     });
 
     it('should prefer cheaper models when cost sensitivity is high', () => {
-      // Cost sensitivity only applies to cloud models
       const cheapModel = createMockModel({
         id: 'cheap-cloud',
         isLocal: false,
-        pricing: { input: 0.5, output: 0.5 }, // avgCost = 0.5 (< 1 = cheap)
+        pricing: { input: 0.5, output: 0.5 },
       });
       const expensiveModel = createMockModel({
         id: 'expensive-cloud',
         isLocal: false,
-        pricing: { input: 15, output: 15 }, // avgCost = 15 (> 10 = expensive)
+        pricing: { input: 15, output: 15 },
       });
       const reqs = createMockRequirements({ costSensitivity: 'high' });
 
       const cheapResult = scorer.score(cheapModel, reqs);
       const expensiveResult = scorer.score(expensiveModel, reqs);
 
-      // Cheap model gets +10 bonus, expensive gets -25 penalty
       expect(cheapResult.score).toBeGreaterThan(expensiveResult.score);
     });
   });
@@ -207,7 +203,7 @@ describe('ModelScorer', () => {
       const results = scorer.scoreAll(models, reqs);
 
       expect(results).toHaveLength(3);
-      // First result should have highest score
+
       expect(results[0].score).toBeGreaterThanOrEqual(results[1].score);
       expect(results[1].score).toBeGreaterThanOrEqual(results[2].score);
     });

@@ -17,7 +17,6 @@ export class RoleMatcher {
       customHints: [],
     };
 
-    // Adjust requirements based on role
     switch (role) {
       case 'supervisor':
         roleReqs.needsReasoning = 'advanced';
@@ -27,9 +26,8 @@ export class RoleMatcher {
         break;
 
       case 'worker':
-        // Workers inherit task requirements but may have specialized needs
         this.applyExpertiseRequirements(roleReqs, expertise);
-        // Workers can use cheaper models if cost-sensitive
+
         roleReqs.costSensitivity = this.adjustCostSensitivity(taskReqs.costSensitivity, 1);
         break;
 
@@ -83,7 +81,6 @@ export class RoleMatcher {
       }
     }
 
-    // Deduplicate domains
     if (reqs.domains) {
       reqs.domains = [...new Set(reqs.domains)];
     }
