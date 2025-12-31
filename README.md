@@ -128,6 +128,31 @@ console.log(result.output);
 console.log(result.usage); // { tokens: 1234, cost: 0.002, latency: 1.2s }
 ```
 
+---
+
+## Packages
+
+Cogitator is a modular monorepo. Install only what you need:
+
+| Package | Description | Version |
+|---------|-------------|---------|
+| [@cogitator-ai/core](https://www.npmjs.com/package/@cogitator-ai/core) | Core runtime (Agent, Tool, Cogitator) | [![npm](https://img.shields.io/npm/v/@cogitator-ai/core.svg)](https://www.npmjs.com/package/@cogitator-ai/core) |
+| [@cogitator-ai/cli](https://www.npmjs.com/package/@cogitator-ai/cli) | CLI tool (`cogitator init/up/run`) | [![npm](https://img.shields.io/npm/v/@cogitator-ai/cli.svg)](https://www.npmjs.com/package/@cogitator-ai/cli) |
+| [@cogitator-ai/types](https://www.npmjs.com/package/@cogitator-ai/types) | Shared TypeScript interfaces | [![npm](https://img.shields.io/npm/v/@cogitator-ai/types.svg)](https://www.npmjs.com/package/@cogitator-ai/types) |
+| [@cogitator-ai/config](https://www.npmjs.com/package/@cogitator-ai/config) | Configuration management | [![npm](https://img.shields.io/npm/v/@cogitator-ai/config.svg)](https://www.npmjs.com/package/@cogitator-ai/config) |
+| [@cogitator-ai/memory](https://www.npmjs.com/package/@cogitator-ai/memory) | Memory adapters (Postgres, Redis) | [![npm](https://img.shields.io/npm/v/@cogitator-ai/memory.svg)](https://www.npmjs.com/package/@cogitator-ai/memory) |
+| [@cogitator-ai/models](https://www.npmjs.com/package/@cogitator-ai/models) | LLM backends (Ollama, OpenAI, Anthropic) | [![npm](https://img.shields.io/npm/v/@cogitator-ai/models.svg)](https://www.npmjs.com/package/@cogitator-ai/models) |
+| [@cogitator-ai/workflows](https://www.npmjs.com/package/@cogitator-ai/workflows) | DAG-based workflow engine | [![npm](https://img.shields.io/npm/v/@cogitator-ai/workflows.svg)](https://www.npmjs.com/package/@cogitator-ai/workflows) |
+| [@cogitator-ai/swarms](https://www.npmjs.com/package/@cogitator-ai/swarms) | Multi-agent swarm coordination | [![npm](https://img.shields.io/npm/v/@cogitator-ai/swarms.svg)](https://www.npmjs.com/package/@cogitator-ai/swarms) |
+| [@cogitator-ai/mcp](https://www.npmjs.com/package/@cogitator-ai/mcp) | MCP (Model Context Protocol) support | [![npm](https://img.shields.io/npm/v/@cogitator-ai/mcp.svg)](https://www.npmjs.com/package/@cogitator-ai/mcp) |
+| [@cogitator-ai/sandbox](https://www.npmjs.com/package/@cogitator-ai/sandbox) | Docker/WASM sandboxed execution | [![npm](https://img.shields.io/npm/v/@cogitator-ai/sandbox.svg)](https://www.npmjs.com/package/@cogitator-ai/sandbox) |
+| [@cogitator-ai/redis](https://www.npmjs.com/package/@cogitator-ai/redis) | Redis client (standalone + cluster) | [![npm](https://img.shields.io/npm/v/@cogitator-ai/redis.svg)](https://www.npmjs.com/package/@cogitator-ai/redis) |
+| [@cogitator-ai/worker](https://www.npmjs.com/package/@cogitator-ai/worker) | Distributed job queue (BullMQ) | [![npm](https://img.shields.io/npm/v/@cogitator-ai/worker.svg)](https://www.npmjs.com/package/@cogitator-ai/worker) |
+| [@cogitator-ai/openai-compat](https://www.npmjs.com/package/@cogitator-ai/openai-compat) | OpenAI Assistants API compatibility | [![npm](https://img.shields.io/npm/v/@cogitator-ai/openai-compat.svg)](https://www.npmjs.com/package/@cogitator-ai/openai-compat) |
+| [@cogitator-ai/wasm-tools](https://www.npmjs.com/package/@cogitator-ai/wasm-tools) | WASM-based sandboxed tools | [![npm](https://img.shields.io/npm/v/@cogitator-ai/wasm-tools.svg)](https://www.npmjs.com/package/@cogitator-ai/wasm-tools) |
+
+---
+
 ### Multi-Agent Swarm
 
 ```typescript
