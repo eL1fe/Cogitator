@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "pnpm build",
-  "installCommand": "pnpm install",
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@cogitator-ai/dashboard...",
+  "installCommand": "cd ../.. && pnpm install",
   "regions": ["iad1"],
   "functions": {
     "app/api/**/*.ts": {
