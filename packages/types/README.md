@@ -27,18 +27,20 @@ import type {
 
 ## Type Categories
 
-| Category                          | Description                             |
-| --------------------------------- | --------------------------------------- |
-| [Message](#message-types)         | Chat messages, tool calls, tool results |
-| [Tool](#tool-types)               | Tool definitions with Zod schemas       |
-| [Agent](#agent-types)             | Agent configuration and interface       |
-| [LLM](#llm-types)                 | LLM backend and provider types          |
-| [Runtime](#runtime-types)         | Cogitator config, run options, results  |
-| [Errors](#error-types)            | Structured error handling               |
-| [Reflection](#reflection-types)   | Self-analyzing agent types              |
-| [Reasoning](#reasoning-types)     | Tree-of-Thought reasoning               |
-| [Learning](#learning-types)       | DSPy-style optimization                 |
-| [Time Travel](#time-travel-types) | Execution debugging                     |
+| Category                                          | Description                             |
+| ------------------------------------------------- | --------------------------------------- |
+| [Message](#message-types)                         | Chat messages, tool calls, tool results |
+| [Tool](#tool-types)                               | Tool definitions with Zod schemas       |
+| [Agent](#agent-types)                             | Agent configuration and interface       |
+| [LLM](#llm-types)                                 | LLM backend and provider types          |
+| [Runtime](#runtime-types)                         | Cogitator config, run options, results  |
+| [Errors](#error-types)                            | Structured error handling               |
+| [Reflection](#reflection-types)                   | Self-analyzing agent types              |
+| [Reasoning](#reasoning-types)                     | Tree-of-Thought reasoning               |
+| [Learning](#learning-types)                       | DSPy-style optimization                 |
+| [Time Travel](#time-travel-types)                 | Execution debugging                     |
+| [Knowledge Graph](#knowledge-graph-types)         | Entity-relationship memory              |
+| [Prompt Optimization](#prompt-optimization-types) | A/B testing, monitoring, rollback       |
 
 ---
 
@@ -643,6 +645,193 @@ const diff: TraceDiff = {
 ## Memory Types
 
 See [@cogitator-ai/memory](../memory) for detailed memory adapter types.
+
+---
+
+## Knowledge Graph Types
+
+Entity-relationship memory with traversal and inference.
+
+```typescript
+import type {
+  GraphNode,
+  GraphEdge,
+  EntityType,
+  RelationType,
+  GraphAdapter,
+  TraversalOptions,
+  TraversalResult,
+  GraphPath,
+  EntityExtractionResult,
+  InferredEdge,
+} from '@cogitator-ai/types';
+
+// Entity types
+type EntityType = 'person' | 'organization' | 'location' | 'concept' | 'event' | 'object';
+
+// Relationship types
+type RelationType =
+  | 'knows'
+  | 'works_at'
+  | 'located_in'
+  | 'part_of'
+  | 'related_to'
+  | 'created_by'
+  | 'owns'
+  | 'member_of'
+  | 'causes'
+  | 'depends_on';
+
+// Graph node
+const node: GraphNode = {
+  id: 'node_123',
+  agentId: 'agent-1',
+  type: 'person',
+  name: 'Alice',
+  aliases: ['alice_dev'],
+  description: 'Software engineer',
+  properties: { role: 'developer', team: 'platform' },
+  embedding: [0.1, 0.2, ...],
+  confidence: 1.0,
+  source: 'extracted',
+  createdAt: new Date(),
+};
+
+// Graph edge
+const edge: GraphEdge = {
+  id: 'edge_456',
+  agentId: 'agent-1',
+  sourceNodeId: 'node_123',
+  targetNodeId: 'node_789',
+  type: 'works_at',
+  label: 'Senior Developer',
+  weight: 1.0,
+  bidirectional: false,
+  confidence: 0.95,
+  source: 'extracted',
+  properties: { since: '2020' },
+  createdAt: new Date(),
+};
+
+// Traversal options
+const traversalOptions: TraversalOptions = {
+  startNodeId: 'node_123',
+  maxDepth: 3,
+  direction: 'outgoing',
+  edgeTypes: ['works_at', 'knows'],
+  nodeTypes: ['person', 'organization'],
+  minConfidence: 0.7,
+  maxNodes: 100,
+};
+
+// Traversal result
+const result: TraversalResult = {
+  visitedNodes: [node1, node2, ...],
+  traversedEdges: [edge1, edge2, ...],
+  paths: [[node1, edge1, node2], ...],
+  totalNodesVisited: 15,
+  maxDepthReached: 3,
+};
+```
+
+---
+
+## Prompt Optimization Types
+
+A/B testing, monitoring, and version control for agent instructions.
+
+```typescript
+import type {
+  CapturedPrompt,
+  PromptStore,
+  ABTest,
+  ABTestResults,
+  ABTestOutcome,
+  ABTestStore,
+  InstructionVersion,
+  InstructionVersionStore,
+  PromptPerformanceMetrics,
+  DegradationAlert,
+  OptimizationRun,
+} from '@cogitator-ai/types';
+
+// Captured prompt
+const prompt: CapturedPrompt = {
+  id: 'prompt_123',
+  runId: 'run_456',
+  agentId: 'agent-1',
+  model: 'gpt-4o',
+  systemPrompt: 'You are a helpful assistant.',
+  messages: [{ role: 'user', content: 'Hello' }],
+  tools: [{ name: 'calculator', description: '...' }],
+  promptTokens: 150,
+  response: {
+    content: 'Hi there!',
+    completionTokens: 10,
+    latencyMs: 450,
+  },
+  createdAt: new Date(),
+};
+
+// A/B test
+const abTest: ABTest = {
+  id: 'test_123',
+  agentId: 'agent-1',
+  name: 'Instruction Experiment',
+  description: 'Testing concise vs verbose',
+  status: 'running',
+  controlInstructions: 'You are helpful.',
+  treatmentInstructions: 'Be concise and direct.',
+  treatmentAllocation: 0.5,
+  minSampleSize: 100,
+  maxDuration: 7 * 24 * 60 * 60 * 1000,
+  confidenceLevel: 0.95,
+  metricToOptimize: 'score',
+  controlResults: { sampleSize: 50, avgScore: 0.82, ... },
+  treatmentResults: { sampleSize: 48, avgScore: 0.87, ... },
+  createdAt: new Date(),
+  startedAt: new Date(),
+};
+
+// A/B test outcome
+const outcome: ABTestOutcome = {
+  winner: 'treatment',
+  pValue: 0.023,
+  confidenceInterval: [0.02, 0.08],
+  effectSize: 0.45,
+  isSignificant: true,
+  recommendation: 'Treatment performs significantly better.',
+};
+
+// Instruction version
+const version: InstructionVersion = {
+  id: 'ver_123',
+  agentId: 'agent-1',
+  version: 3,
+  instructions: 'Optimized instructions...',
+  source: 'optimization',
+  sourceId: 'opt-run-456',
+  deployedAt: new Date(),
+  metrics: { runCount: 100, avgScore: 0.88, successRate: 0.95 },
+};
+
+// Degradation alert
+const alert: DegradationAlert = {
+  id: 'alert_123',
+  agentId: 'agent-1',
+  type: 'score_drop',
+  severity: 'warning',
+  currentValue: 0.72,
+  baselineValue: 0.85,
+  threshold: 0.15,
+  percentChange: 0.153,
+  detectedAt: new Date(),
+  autoAction: 'rollback',
+  actionTaken: false,
+};
+```
+
+---
 
 ## Sandbox Types
 

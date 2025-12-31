@@ -236,8 +236,8 @@ describe('ConvergenceCalculator', () => {
       const metrics = calculator.calculateOverallConvergence(offers, 1);
 
       expect(metrics.overallConvergence).toBe(1);
-      expect(metrics.termConvergence['price']).toBe(1);
-      expect(metrics.termConvergence['qty']).toBe(1);
+      expect(metrics.termConvergence.price).toBe(1);
+      expect(metrics.termConvergence.qty).toBe(1);
     });
 
     it('should track convergence trend', () => {

@@ -3,6 +3,7 @@
  */
 
 import type { Message, ToolCall, ToolResult } from './message';
+import type { GraphContext } from './knowledge-graph';
 
 export type MemoryType = 'conversation' | 'fact' | 'embedding';
 
@@ -199,12 +200,18 @@ export interface ContextBuilderConfig {
   includeSystemPrompt?: boolean;
   includeFacts?: boolean;
   includeSemanticContext?: boolean;
+  includeGraphContext?: boolean;
+  graphContextOptions?: {
+    maxNodes?: number;
+    maxDepth?: number;
+  };
 }
 
 export interface BuiltContext {
   messages: Message[];
   facts: Fact[];
   semanticResults: (Embedding & { score: number })[];
+  graphContext?: GraphContext;
   tokenCount: number;
   truncated: boolean;
   metadata: {
@@ -212,6 +219,8 @@ export interface BuiltContext {
     includedMessageCount: number;
     factsIncluded: number;
     semanticResultsIncluded: number;
+    graphNodesIncluded: number;
+    graphEdgesIncluded: number;
   };
 }
 

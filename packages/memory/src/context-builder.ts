@@ -45,6 +45,8 @@ export class ContextBuilder {
       includeSystemPrompt: config.includeSystemPrompt ?? true,
       includeFacts: config.includeFacts ?? false,
       includeSemanticContext: config.includeSemanticContext ?? false,
+      includeGraphContext: config.includeGraphContext ?? false,
+      graphContextOptions: config.graphContextOptions ?? {},
     };
     this.deps = deps;
   }
@@ -170,6 +172,8 @@ export class ContextBuilder {
           messages.length - (this.config.includeSystemPrompt && options.systemPrompt ? 1 : 0),
         factsIncluded: facts.length,
         semanticResultsIncluded: semanticResults.length,
+        graphNodesIncluded: 0,
+        graphEdgesIncluded: 0,
       },
     };
   }

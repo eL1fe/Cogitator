@@ -514,6 +514,141 @@ const selectedDemos = selector.select(allDemos, currentInput);
 
 ---
 
+## Prompt Auto-Optimization
+
+Capture prompts, run A/B tests, monitor performance, and automatically optimize agent instructions.
+
+### Prompt Logger
+
+Wrap any LLM backend to capture all prompts:
+
+```typescript
+import { wrapWithPromptLogger, PostgresTraceStore } from '@cogitator-ai/core';
+
+const store = new PostgresTraceStore({
+  connectionString: process.env.DATABASE_URL!,
+});
+
+const wrappedBackend = wrapWithPromptLogger(openaiBackend, store, {
+  captureSystemPrompt: true,
+  captureTools: true,
+  captureResponse: true,
+});
+```
+
+### A/B Testing Framework
+
+Test instruction variants with statistical analysis:
+
+```typescript
+import { ABTestingFramework } from '@cogitator-ai/core';
+
+const abTesting = new ABTestingFramework({
+  store: abTestStore,
+  defaultConfidenceLevel: 0.95,
+  defaultMinSampleSize: 50,
+});
+
+const test = await abTesting.createTest({
+  agentId: 'agent-1',
+  name: 'Instruction Experiment',
+  controlInstructions: 'You are a helpful assistant.',
+  treatmentInstructions: 'You are an expert assistant. Be concise.',
+  treatmentAllocation: 0.5,
+});
+
+await abTesting.startTest(test.id);
+
+const variant = abTesting.selectVariant(test);
+const instructions = abTesting.getInstructionsForVariant(test, variant);
+
+await abTesting.recordResult(test.id, variant, score, latency, cost);
+
+const { test: completed, outcome } = await abTesting.completeTest(test.id);
+console.log('Winner:', outcome.winner);
+console.log('p-value:', outcome.pValue);
+console.log('Effect size:', outcome.effectSize);
+```
+
+### Prompt Monitor
+
+Real-time performance monitoring with degradation detection:
+
+```typescript
+import { PromptMonitor } from '@cogitator-ai/core';
+
+const monitor = new PromptMonitor({
+  windowSize: 60 * 60 * 1000,
+  scoreDropThreshold: 0.15,
+  latencySpikeThreshold: 2.0,
+  errorRateThreshold: 0.1,
+  enableAutoRollback: true,
+  onAlert: (alert) => {
+    console.log(`Alert: ${alert.type} (${alert.severity})`);
+  },
+});
+
+const alerts = monitor.recordExecution(trace);
+
+const metrics = monitor.getCurrentMetrics('agent-1');
+console.log('Avg score:', metrics.avgScore);
+console.log('P95 latency:', metrics.p95Latency);
+```
+
+### Rollback Manager
+
+Version control for agent instructions:
+
+```typescript
+import { RollbackManager } from '@cogitator-ai/core';
+
+const rollback = new RollbackManager({ store: versionStore });
+
+const version = await rollback.deployVersion(
+  'agent-1',
+  'New optimized instructions',
+  'optimization',
+  'opt-run-123'
+);
+
+const result = await rollback.rollbackToPrevious('agent-1');
+if (result.success) {
+  console.log('Rolled back to version:', result.previousVersion?.version);
+}
+
+const history = await rollback.getVersionHistory('agent-1', 10);
+```
+
+### Auto-Optimizer
+
+Automated optimization pipeline with A/B testing and rollback:
+
+```typescript
+import { AutoOptimizer } from '@cogitator-ai/core';
+
+const optimizer = new AutoOptimizer({
+  enabled: true,
+  triggerAfterRuns: 100,
+  minRunsForOptimization: 20,
+  requireABTest: true,
+  maxOptimizationsPerDay: 3,
+  agentOptimizer,
+  abTesting,
+  monitor,
+  rollbackManager,
+  onOptimizationComplete: (run) => {
+    console.log('Optimization completed:', run.status);
+  },
+  onRollback: (agentId, reason) => {
+    console.log('Rollback triggered:', reason);
+  },
+});
+
+await optimizer.recordExecution(trace);
+```
+
+---
+
 ## Time Travel Debugging
 
 Checkpoint, replay, fork, and compare agent executions:

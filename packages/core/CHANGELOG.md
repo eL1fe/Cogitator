@@ -1,5 +1,36 @@
 # @cogitator-ai/core
 
+## 0.3.0
+
+### Minor Changes
+
+- feat: add Knowledge Graph Memory and Prompt Auto-Optimization
+
+  **Knowledge Graph Memory:**
+  - PostgresGraphAdapter for entity-relationship storage with pgvector
+  - Multi-hop graph traversal with BFS/DFS algorithms
+  - Shortest path finding between nodes
+  - Semantic node search with embeddings
+  - LLMEntityExtractor for extracting entities/relations from text
+  - GraphInferenceEngine for rule-based relationship inference
+  - GraphContextBuilder for graph-aware context building
+
+  **Prompt Auto-Optimization:**
+  - PostgresTraceStore for persistent trace and prompt storage
+  - PromptLogger wrapper for capturing all LLM prompts
+  - ABTestingFramework with Welch's t-test statistical analysis
+  - PromptMonitor for real-time performance monitoring with degradation detection
+  - RollbackManager for instruction version control
+  - AutoOptimizer for automated optimization pipeline with A/B testing
+
+### Patch Changes
+
+- Updated dependencies
+  - @cogitator-ai/types@0.4.0
+  - @cogitator-ai/memory@0.3.0
+  - @cogitator-ai/models@2.0.0
+  - @cogitator-ai/sandbox@0.2.1
+
 ## 0.2.0
 
 ### Minor Changes

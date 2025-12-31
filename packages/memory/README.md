@@ -501,6 +501,140 @@ const vector = await embeddings.embed(content);
 
 ---
 
+## Knowledge Graph
+
+Entity-relationship memory with multi-hop traversal and semantic reasoning.
+
+### PostgresGraphAdapter
+
+```typescript
+import { PostgresGraphAdapter } from '@cogitator-ai/memory';
+
+const graph = new PostgresGraphAdapter({
+  connectionString: process.env.DATABASE_URL!,
+});
+
+await graph.connect();
+
+const person = await graph.addNode({
+  agentId: 'agent-1',
+  type: 'person',
+  name: 'Alice',
+  description: 'Software engineer',
+  properties: { role: 'developer' },
+  confidence: 1.0,
+  source: 'user',
+});
+
+const company = await graph.addNode({
+  agentId: 'agent-1',
+  type: 'organization',
+  name: 'TechCorp',
+  confidence: 1.0,
+  source: 'extracted',
+});
+
+await graph.addEdge({
+  agentId: 'agent-1',
+  sourceNodeId: person.id,
+  targetNodeId: company.id,
+  type: 'works_at',
+  weight: 1.0,
+  confidence: 0.95,
+  source: 'extracted',
+});
+```
+
+### Multi-hop Traversal
+
+```typescript
+const result = await graph.traverse({
+  startNodeId: person.id,
+  maxDepth: 3,
+  direction: 'outgoing',
+  edgeTypes: ['works_at', 'knows', 'located_in'],
+});
+
+console.log('Visited nodes:', result.visitedNodes);
+console.log('Paths found:', result.paths);
+```
+
+### Shortest Path
+
+```typescript
+const path = await graph.findShortestPath(startNodeId, endNodeId);
+if (path) {
+  console.log('Path:', path.nodes.map((n) => n.name).join(' -> '));
+  console.log('Total weight:', path.totalWeight);
+}
+```
+
+### Semantic Node Search
+
+```typescript
+const similar = await graph.searchNodesSemantic({
+  agentId: 'agent-1',
+  query: 'machine learning engineer',
+  limit: 10,
+  threshold: 0.7,
+});
+```
+
+### LLM Entity Extraction
+
+```typescript
+import { LLMEntityExtractor } from '@cogitator-ai/memory';
+
+const extractor = new LLMEntityExtractor(llmBackend, {
+  minConfidence: 0.7,
+  maxEntitiesPerText: 20,
+});
+
+const result = await extractor.extract(
+  'Alice works at TechCorp in San Francisco. She knows Bob from the AI conference.'
+);
+
+console.log('Entities:', result.entities);
+console.log('Relations:', result.relations);
+```
+
+### Graph Inference Engine
+
+```typescript
+import { GraphInferenceEngine } from '@cogitator-ai/memory';
+
+const engine = new GraphInferenceEngine(graph, {
+  minConfidence: 0.5,
+  maxInferredEdges: 100,
+});
+
+const inferred = await engine.infer('agent-1');
+console.log('Inferred edges:', inferred.edges);
+console.log('Rules applied:', inferred.rulesApplied);
+```
+
+### Graph Context Builder
+
+```typescript
+import { GraphContextBuilder } from '@cogitator-ai/memory';
+
+const contextBuilder = new GraphContextBuilder(graph, embeddingService, {
+  maxNodes: 20,
+  maxEdges: 50,
+  includeInferred: true,
+});
+
+const context = await contextBuilder.buildContext({
+  agentId: 'agent-1',
+  query: 'Tell me about Alice and her work',
+});
+
+console.log('Relevant nodes:', context.nodes);
+console.log('Relationships:', context.edges);
+```
+
+---
+
 ## License
 
 MIT

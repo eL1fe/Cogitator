@@ -9,6 +9,8 @@ import type { SandboxManagerConfig } from './sandbox';
 import type { ReflectionConfig, Reflection, ReflectionSummary } from './reflection';
 import type { GuardrailConfig } from './constitutional';
 import type { CostRoutingConfig } from './cost-routing';
+import type { PromptOptimizationConfig } from './prompt-optimization';
+import type { KnowledgeGraphConfig } from './knowledge-graph';
 
 export interface CogitatorConfig {
   llm?: {
@@ -36,6 +38,10 @@ export interface CogitatorConfig {
   guardrails?: GuardrailConfig;
   /** Cost-aware model routing configuration */
   costRouting?: CostRoutingConfig;
+  /** Knowledge graph memory configuration */
+  knowledgeGraph?: KnowledgeGraphConfig;
+  /** Prompt inspection and auto-optimization configuration */
+  promptOptimization?: PromptOptimizationConfig;
 }
 
 export interface RunOptions {

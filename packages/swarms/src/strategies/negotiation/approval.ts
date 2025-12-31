@@ -80,7 +80,7 @@ export class ApprovalIntegration {
     }
 
     if (condition.startsWith('term:')) {
-      const termMatch = condition.match(/term:(\w+)(>|<|>=|<=|==)(\d+)/);
+      const termMatch = /term:(\w+)(>|<|>=|<=|==)(\d+)/.exec(condition);
       if (termMatch) {
         const [, termId, op, valueStr] = termMatch;
         const value = parseFloat(valueStr);

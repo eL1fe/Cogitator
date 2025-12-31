@@ -28,3 +28,16 @@ export type {
   InstructionEvaluation,
   InstructionRefinement,
 } from './prompts';
+
+export { PostgresTraceStore } from './postgres-trace-store';
+export type { PostgresTraceStoreConfig } from './postgres-trace-store';
+export { PromptLogger, wrapWithPromptLogger } from './prompt-logger';
+export type { PromptLoggerContext, PromptLoggerConfig } from './prompt-logger';
+export { ABTestingFramework } from './ab-testing';
+export type { ABTestingFrameworkConfig } from './ab-testing';
+export { PromptMonitor } from './prompt-monitor';
+export type { PromptMonitorConfig } from './prompt-monitor';
+export { RollbackManager } from './rollback-manager';
+export type { RollbackManagerConfig, RollbackResult } from './rollback-manager';
+export { AutoOptimizer } from './auto-optimizer';
+export type { AutoOptimizerConfig } from './auto-optimizer';
