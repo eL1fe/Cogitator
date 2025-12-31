@@ -8,7 +8,7 @@ import { execSync, spawn } from 'node:child_process';
 import { resolve, dirname } from 'node:path';
 import ora from 'ora';
 import chalk from 'chalk';
-import { log } from '../utils/logger';
+import { log } from '../utils/logger.js';
 
 function findDockerCompose(): string | null {
   if (existsSync('docker-compose.yml')) {

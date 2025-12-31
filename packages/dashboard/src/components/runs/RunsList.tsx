@@ -151,7 +151,7 @@ export function RunsList() {
             return (
               <Link
                 key={run.id}
-                href={`/runs/${run.id}`}
+                href={`/dashboard/runs/${run.id}`}
                 className="flex items-center gap-4 px-4 py-4 hover:bg-bg-hover transition-colors animate-fade-in"
                 style={{ animationDelay: `${index * 30}ms` }}
               >

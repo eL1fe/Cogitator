@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -169,12 +167,7 @@ export default function RunsPage() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-auto p-6 bg-bg-primary bg-noise">
-          <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between animate-fade-in">
               <div>
@@ -283,7 +276,7 @@ export default function RunsPage() {
                     return (
                       <Link
                         key={run.id}
-                        href={`/runs/${run.id}`}
+                        href={`/dashboard/runs/${run.id}`}
                         className="flex items-center gap-4 p-4 hover:bg-bg-tertiary transition-colors"
                       >
                         <div
@@ -350,9 +343,6 @@ export default function RunsPage() {
                 </div>
               )}
             </Card>
-          </div>
-        </main>
-      </div>
     </div>
   );
 }

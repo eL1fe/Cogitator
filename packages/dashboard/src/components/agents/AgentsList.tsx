@@ -135,7 +135,7 @@ export function AgentsList() {
         {agents.map((agent, index) => {
           const config = statusConfig[agent.status];
           return (
-            <Link key={agent.id} href={`/agents/${agent.id}`}>
+            <Link key={agent.id} href={`/dashboard/agents/${agent.id}`}>
               <Card
                 hover
                 className="h-full animate-fade-in"

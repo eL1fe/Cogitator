@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Header } from '@/components/layout/Header';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -104,11 +102,7 @@ export default function MemoryPage() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 flex overflow-hidden">
+    <div className="flex h-full overflow-hidden -m-6">
           {/* Thread List */}
           <div className="w-96 border-r border-border-subtle bg-bg-secondary flex flex-col">
             <div className="p-4 border-b border-border-subtle space-y-4">
@@ -310,8 +304,6 @@ export default function MemoryPage() {
               </div>
             )}
           </div>
-        </main>
-      </div>
     </div>
   );
 }

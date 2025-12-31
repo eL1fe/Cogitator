@@ -65,7 +65,7 @@ export function AgentDetail({ agentId }: AgentDetailProps) {
   return (
     <div className="space-y-6">
       {/* Back button */}
-      <Link href="/agents">
+      <Link href="/dashboard/agents">
         <Button variant="ghost" size="sm" className="gap-2">
           <ArrowLeft className="w-4 h-4" />
           Back to Agents
@@ -188,7 +188,7 @@ export function AgentDetail({ agentId }: AgentDetailProps) {
       <Card padding="none">
         <CardHeader className="px-4 pt-4">
           <CardTitle>Recent Runs</CardTitle>
-          <Link href={`/runs?agent=${agentId}`}>
+          <Link href={`/dashboard/runs?agent=${agentId}`}>
             <Button variant="ghost" size="sm">
               View all
             </Button>
@@ -198,7 +198,7 @@ export function AgentDetail({ agentId }: AgentDetailProps) {
           {recentRuns.map((run) => (
             <Link
               key={run.id}
-              href={`/runs/${run.id}`}
+              href={`/dashboard/runs/${run.id}`}
               className="flex items-center gap-4 px-4 py-3 hover:bg-bg-hover transition-colors"
             >
               <div

@@ -100,7 +100,7 @@ export function RecentRuns() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-text-primary">Recent Runs</h3>
         <Link
-          href="/runs"
+          href="/dashboard/runs"
           className="text-sm text-accent hover:text-accent-hover transition-colors"
         >
           View all
@@ -122,7 +122,7 @@ export function RecentRuns() {
             return (
               <Link
                 key={run.id}
-                href={`/runs/${run.id}`}
+                href={`/dashboard/runs/${run.id}`}
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-bg-tertiary transition-colors group"
               >
                 <div

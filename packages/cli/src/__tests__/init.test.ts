@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const CLI_PATH = join(__dirname, '../../dist/index.js');
+const CLI_PATH = join(__dirname, '../index.ts');
 
 describe('cogitator init', () => {
   const testDir = join(tmpdir(), 'cogitator-test-' + Date.now());
@@ -27,7 +27,7 @@ describe('cogitator init', () => {
   });
 
   it('creates project directory structure', () => {
-    execSync(`node ${CLI_PATH} init ${projectName} --no-install`, {
+    execSync(`npx tsx ${CLI_PATH} init ${projectName} --no-install`, {
       cwd: testDir,
       stdio: 'pipe',
     });
@@ -42,7 +42,7 @@ describe('cogitator init', () => {
   });
 
   it('creates valid package.json', () => {
-    execSync(`node ${CLI_PATH} init ${projectName} --no-install`, {
+    execSync(`npx tsx ${CLI_PATH} init ${projectName} --no-install`, {
       cwd: testDir,
       stdio: 'pipe',
     });
@@ -53,13 +53,13 @@ describe('cogitator init', () => {
   });
 
   it('fails if directory already exists', () => {
-    execSync(`node ${CLI_PATH} init ${projectName} --no-install`, {
+    execSync(`npx tsx ${CLI_PATH} init ${projectName} --no-install`, {
       cwd: testDir,
       stdio: 'pipe',
     });
 
     expect(() => {
-      execSync(`node ${CLI_PATH} init ${projectName} --no-install`, {
+      execSync(`npx tsx ${CLI_PATH} init ${projectName} --no-install`, {
         cwd: testDir,
         stdio: 'pipe',
       });

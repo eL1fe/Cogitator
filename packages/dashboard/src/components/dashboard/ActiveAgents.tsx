@@ -77,7 +77,7 @@ export function ActiveAgents() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-text-primary">Agents</h3>
         <Link
-          href="/agents"
+          href="/dashboard/agents"
           className="text-sm text-accent hover:text-accent-hover transition-colors"
         >
           View all
@@ -98,7 +98,7 @@ export function ActiveAgents() {
             return (
               <Link
                 key={agent.id}
-                href={`/agents/${agent.id}`}
+                href={`/dashboard/agents/${agent.id}`}
                 className="flex items-center gap-3 p-2 rounded-lg hover:bg-bg-tertiary transition-colors"
               >
                 <div className="relative">

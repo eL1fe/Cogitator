@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Header } from '@/components/layout/Header';
 import { Briefcase, Clock, CheckCircle2, XCircle, Loader2, Ban, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 
@@ -81,12 +79,7 @@ export default function JobsPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-auto p-6 bg-bg-primary bg-noise">
-          <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex items-center justify-between animate-fade-in">
               <div>
                 <h1 className="text-2xl font-semibold text-text-primary flex items-center gap-3">
@@ -156,7 +149,7 @@ export default function JobsPage() {
                               <Icon className={`w-5 h-5 ${config.color} ${config.animate ? 'animate-spin' : ''}`} />
                             </div>
                             <div>
-                              <Link href={`/jobs/${job.id}`} className="text-text-primary hover:text-accent-primary transition-colors font-medium">
+                              <Link href={`/dashboard/jobs/${job.id}`} className="text-text-primary hover:text-accent-primary transition-colors font-medium">
                                 {job.id}
                               </Link>
                               <div className="text-sm text-text-secondary">
@@ -196,9 +189,6 @@ export default function JobsPage() {
                 </div>
               )}
             </div>
-          </div>
-        </main>
-      </div>
     </div>
   );
 }
