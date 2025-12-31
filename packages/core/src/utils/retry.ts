@@ -9,6 +9,7 @@ import {
   getRetryDelay,
 } from '@cogitator-ai/types';
 
+
 export interface RetryOptions {
   /** Maximum number of retry attempts (default: 3) */
   maxRetries?: number;
@@ -75,13 +76,8 @@ function calculateDelay(
  */
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
-    const abortError = new CogitatorError({
-      message: 'Retry aborted',
-      code: ErrorCode.INTERNAL_ERROR,
-    });
-
     if (signal?.aborted) {
-      reject(abortError);
+      reject(new Error('Retry aborted'));
       return;
     }
 
@@ -89,7 +85,7 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
 
     signal?.addEventListener('abort', () => {
       clearTimeout(timeout);
-      reject(abortError);
+      reject(new Error('Retry aborted'));
     });
   });
 }
