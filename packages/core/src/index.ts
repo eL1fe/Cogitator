@@ -42,6 +42,20 @@ export type {
 } from './learning/index';
 
 export {
+  TimeTravel,
+  InMemoryCheckpointStore,
+  ExecutionReplayer,
+  ExecutionForker,
+  TraceComparator,
+} from './time-travel/index';
+export type {
+  TimeTravelOptions,
+  ExecutionReplayerOptions,
+  ExecutionForkerOptions,
+  TraceComparatorOptions,
+} from './time-travel/index';
+
+export {
   BaseLLMBackend,
   OllamaBackend,
   OpenAIBackend,
@@ -132,4 +146,24 @@ export type {
   CompileOptions,
   LearningStats,
 } from '@cogitator-ai/types';
-export { DEFAULT_TOT_CONFIG, DEFAULT_LEARNING_CONFIG, DEFAULT_OPTIMIZER_CONFIG } from '@cogitator-ai/types';
+export {
+  DEFAULT_TOT_CONFIG,
+  DEFAULT_LEARNING_CONFIG,
+  DEFAULT_OPTIMIZER_CONFIG,
+  DEFAULT_TIME_TRAVEL_CONFIG,
+} from '@cogitator-ai/types';
+
+export type {
+  ExecutionCheckpoint,
+  TimeTravelCheckpointStore,
+  CheckpointQuery,
+  ReplayOptions,
+  ReplayResult,
+  ReplayMode,
+  ForkOptions,
+  ForkResult,
+  TraceDiff,
+  StepDiff,
+  StepDiffStatus,
+  TimeTravelConfig,
+} from '@cogitator-ai/types';
