@@ -56,6 +56,34 @@ export type {
 } from './time-travel/index';
 
 export {
+  ConstitutionalAI,
+  InputFilter,
+  OutputFilter,
+  ToolGuard,
+  CritiqueReviser,
+  DEFAULT_CONSTITUTION,
+  DEFAULT_PRINCIPLES,
+  createConstitution,
+  extendConstitution,
+  filterPrinciplesByLayer,
+  getPrinciplesByCategory,
+  getPrinciplesBySeverity,
+  buildInputEvaluationPrompt,
+  buildOutputEvaluationPrompt,
+  buildCritiquePrompt,
+  buildRevisionPrompt,
+  parseEvaluationResponse,
+  parseCritiqueResponse,
+} from './constitutional/index';
+export type {
+  ConstitutionalAIOptions,
+  InputFilterOptions,
+  OutputFilterOptions,
+  ToolGuardOptions,
+  CritiqueReviserOptions,
+} from './constitutional/index';
+
+export {
   BaseLLMBackend,
   OllamaBackend,
   OpenAIBackend,
@@ -167,3 +195,19 @@ export type {
   StepDiffStatus,
   TimeTravelConfig,
 } from '@cogitator-ai/types';
+
+export type {
+  HarmCategory,
+  Severity,
+  FilterLayer,
+  PrincipleCategory,
+  ConstitutionalPrinciple,
+  Constitution,
+  HarmScore,
+  FilterResult,
+  CritiqueResult,
+  RevisionResult,
+  GuardrailConfig,
+  ToolGuardResult,
+} from '@cogitator-ai/types';
+export { DEFAULT_GUARDRAIL_CONFIG } from '@cogitator-ai/types';

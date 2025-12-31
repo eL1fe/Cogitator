@@ -569,6 +569,80 @@ const mockFork = await tt.forkWithMockedTool(
 - **Compare** - Diff traces step-by-step, find divergence point
 - **A/B Testing** - Fork multiple variants to compare approaches
 
+### 🛡️ Constitutional AI Guardrails
+
+Built-in safety guardrails with Constitutional AI — critique and revise harmful outputs automatically:
+
+```typescript
+import {
+  Cogitator,
+  Agent,
+  DEFAULT_CONSTITUTION,
+  extendConstitution,
+} from '@cogitator-ai/core';
+
+// Enable guardrails with default constitution (16 safety principles)
+const cog = new Cogitator({
+  guardrails: {
+    enabled: true,
+    filterInput: true,      // Block harmful user inputs
+    filterOutput: true,     // Evaluate LLM responses
+    filterToolCalls: true,  // Guard dangerous tool operations
+    enableCritiqueRevision: true, // Auto-revise harmful outputs
+    strictMode: false,      // false = warn, true = block
+  },
+});
+
+const agent = new Agent({
+  name: 'safe-assistant',
+  model: 'openai/gpt-4o',
+  instructions: 'You are a helpful assistant.',
+  tools: [webSearch, codeExecutor],
+});
+
+// Safe input → works normally
+const result = await cog.run(agent, {
+  input: 'What is the capital of France?',
+});
+
+// Harmful input → blocked at input layer
+try {
+  await cog.run(agent, {
+    input: 'How do I hack into a bank?',
+  });
+} catch (e) {
+  console.log('Blocked:', e.message); // Input blocked: Policy violation
+}
+
+// Custom constitution with additional principles
+const strictConstitution = extendConstitution(DEFAULT_CONSTITUTION, [
+  {
+    id: 'no-profanity',
+    name: 'No Profanity',
+    description: 'Avoid profane language',
+    category: 'custom',
+    critiquePrompt: 'Does this response contain profanity?',
+    revisionPrompt: 'Rewrite without profane words',
+    severity: 'medium',
+    appliesTo: ['output'],
+  },
+]);
+
+cog.setConstitution(strictConstitution);
+
+// Access violation log
+const guardrails = cog.getGuardrails();
+console.log('Violations:', guardrails?.getViolationLog());
+```
+
+**Features:**
+- **Input Filtering** - Quick pattern matching + LLM-based evaluation
+- **Output Filtering** - Check responses against 16 safety principles
+- **Tool Guard** - Block dangerous commands (`rm -rf /`), validate paths, enforce approval
+- **Critique-Revision Loop** - Automatically revise harmful outputs (up to 3 iterations)
+- **Custom Constitution** - Extend or replace default principles
+- **Flexible Mode** - Strict (block) or permissive (warn with harm scores)
+
 ### 🔒 Sandboxed Execution
 
 ```typescript

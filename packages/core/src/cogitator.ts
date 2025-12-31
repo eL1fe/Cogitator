@@ -20,6 +20,7 @@ import type {
   ReflectionAction,
   AgentContext,
   InsightStore,
+  Constitution,
 } from '@cogitator-ai/types';
 import {
   InMemoryAdapter,
@@ -36,6 +37,7 @@ import { ToolRegistry } from './registry';
 import { createLLMBackend, parseModel } from './llm/index';
 import { getLogger } from './logger';
 import { ReflectionEngine, InMemoryInsightStore } from './reflection/index';
+import { ConstitutionalAI } from './constitutional/index';
 
 type SandboxManager = {
   initialize(): Promise<void>;
@@ -78,6 +80,9 @@ export class Cogitator {
   private reflectionEngine?: ReflectionEngine;
   private insightStore?: InsightStore;
   private reflectionInitialized = false;
+
+  private constitutionalAI?: ConstitutionalAI;
+  private guardrailsInitialized = false;
 
   constructor(config: CogitatorConfig = {}) {
     this.config = config;
@@ -181,6 +186,25 @@ export class Cogitator {
     });
 
     this.reflectionInitialized = true;
+  }
+
+  /**
+   * Initialize constitutional AI guardrails (lazy, on first run with guardrails enabled)
+   */
+  private initializeGuardrails(agent: Agent): void {
+    if (this.guardrailsInitialized || !this.config.guardrails?.enabled) return;
+
+    const backend = this.getBackend(
+      this.config.guardrails.model ?? agent.model
+    );
+
+    this.constitutionalAI = new ConstitutionalAI({
+      llm: backend,
+      constitution: this.config.guardrails.constitution,
+      config: this.config.guardrails,
+    });
+
+    this.guardrailsInitialized = true;
   }
 
   /**
@@ -318,6 +342,10 @@ export class Cogitator {
         await this.initializeReflection(agent);
       }
 
+      if (this.config.guardrails?.enabled && !this.guardrailsInitialized) {
+        this.initializeGuardrails(agent);
+      }
+
       const registry = new ToolRegistry();
       if (agent.tools && agent.tools.length > 0) {
         registry.registerMany(agent.tools);
@@ -327,6 +355,13 @@ export class Cogitator {
       const { model } = parseModel(agent.model);
 
       const messages = await this.buildInitialMessages(agent, options, threadId);
+
+      if (this.constitutionalAI && this.config.guardrails?.filterInput) {
+        const inputResult = await this.constitutionalAI.filterInput(options.input);
+        if (!inputResult.allowed) {
+          throw new Error(`Input blocked: ${inputResult.blockedReason ?? 'Policy violation'}`);
+        }
+      }
 
       if (options.context && messages.length > 0 && messages[0].role === 'system') {
         const contextStr = Object.entries(options.context)
@@ -426,9 +461,22 @@ export class Cogitator {
         totalInputTokens += response.usage.inputTokens;
         totalOutputTokens += response.usage.outputTokens;
 
+        let outputContent = response.content;
+
+        if (this.constitutionalAI && this.config.guardrails?.filterOutput) {
+          const outputResult = await this.constitutionalAI.filterOutput(outputContent, messages);
+          if (!outputResult.allowed) {
+            if (outputResult.suggestedRevision) {
+              outputContent = outputResult.suggestedRevision;
+            } else {
+              throw new Error(`Output blocked: ${outputResult.blockedReason ?? 'Policy violation'}`);
+            }
+          }
+        }
+
         const assistantMessage: Message = {
           role: 'assistant',
-          content: response.content,
+          content: outputContent,
         };
         messages.push(assistantMessage);
 
@@ -741,6 +789,23 @@ export class Cogitator {
       };
     }
 
+    if (this.constitutionalAI && this.config.guardrails?.filterToolCalls) {
+      const context: ToolContext = {
+        agentId,
+        runId,
+        signal: signal ?? new AbortController().signal,
+      };
+      const guardResult = await this.constitutionalAI.guardTool(tool, toolCall.arguments, context);
+      if (!guardResult.approved) {
+        return {
+          callId: toolCall.id,
+          name: toolCall.name,
+          result: null,
+          error: `Tool blocked: ${guardResult.reason ?? 'Policy violation'}`,
+        };
+      }
+    }
+
     if (tool.sandbox?.type === 'docker' || tool.sandbox?.type === 'wasm') {
       return this.executeInSandbox(tool, toolCall, runId, agentId);
     }
@@ -905,6 +970,20 @@ export class Cogitator {
   }
 
   /**
+   * Get the constitutional AI guardrails instance
+   */
+  getGuardrails(): ConstitutionalAI | undefined {
+    return this.constitutionalAI;
+  }
+
+  /**
+   * Set the constitution for guardrails
+   */
+  setConstitution(constitution: Constitution): void {
+    this.constitutionalAI?.setConstitution(constitution);
+  }
+
+  /**
    * Close all connections
    */
   async close(): Promise<void> {
@@ -922,6 +1001,8 @@ export class Cogitator {
     this.reflectionEngine = undefined;
     this.insightStore = undefined;
     this.reflectionInitialized = false;
+    this.constitutionalAI = undefined;
+    this.guardrailsInitialized = false;
     this.backends.clear();
   }
 }
