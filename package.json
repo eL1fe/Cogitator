@@ -37,6 +37,7 @@
     "start": "pnpm build && concurrently \"pnpm services\" \"pnpm dashboard\""
   },
   "dependencies": {
+    "openai": "^6",
     "typescript": "^5.3.0"
   },
   "devDependencies": {
