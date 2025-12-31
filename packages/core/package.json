@@ -29,7 +29,7 @@
     "zod": "^3.22.4",
     "zod-to-json-schema": "^3.22.4",
     "openai": "^4.24.0",
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@anthropic-ai/sdk": "^0.71.2",
     "nanoid": "^5.0.4"
   },
   "devDependencies": {
