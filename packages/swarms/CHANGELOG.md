@@ -1,5 +1,19 @@
 # @cogitator-ai/swarms
 
+## 0.3.0
+
+### Minor Changes
+
+- Fix type safety: remove unsafe `as unknown as number` cast in AssessorConfig defaults
+- Fix cost calculation: correctly compute savings when downgrading to local models
+- Improve token estimation: use task complexity (simple/moderate/complex) for cost estimates
+- Add proper error logging in event handlers (EventEmitter, MessageBus, Blackboard, CircuitBreaker)
+
+### Bug Fixes
+
+- Cost optimization now properly calculates the difference between old and new model costs
+- Token estimates now vary by task complexity (500/1500/4000 tokens)
+
 ## 0.2.0
 
 ### Minor Changes

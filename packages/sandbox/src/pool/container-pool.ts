@@ -121,10 +121,20 @@ export class ContainerPool {
   private async destroyContainer(container: DockerContainer): Promise<void> {
     try {
       await container.stop({ t: 1 });
-    } catch {}
+    } catch (error) {
+      console.warn(
+        `[container-pool] Failed to stop container ${container.id}:`,
+        error instanceof Error ? error.message : String(error)
+      );
+    }
     try {
       await container.remove({ force: true });
-    } catch {}
+    } catch (error) {
+      console.warn(
+        `[container-pool] Failed to remove container ${container.id}:`,
+        error instanceof Error ? error.message : String(error)
+      );
+    }
   }
 
   private async cleanup(): Promise<void> {

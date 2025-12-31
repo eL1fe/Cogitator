@@ -1,5 +1,19 @@
 # @cogitator-ai/sandbox
 
+## 0.2.0
+
+### Minor Changes
+
+- Add error logging for Docker/WASM initialization failures in SandboxManager
+- Add error logging for container stop/remove failures in ContainerPool
+- Add error logging for WASM plugin close failures
+- Fix WASM cache cleanup: plugin entries now deleted even if close() throws
+- Add command validation in native and docker executors (reject empty arrays)
+
+### Tests
+
+- Add test for empty command array validation
+
 ## 0.1.1
 
 ### Patch Changes

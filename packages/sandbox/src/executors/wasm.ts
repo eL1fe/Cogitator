@@ -61,10 +61,15 @@ export class WasmSandboxExecutor extends BaseSandboxExecutor {
   }
 
   async disconnect(): Promise<SandboxResult<void>> {
-    for (const plugin of this.pluginCache.values()) {
+    for (const [key, plugin] of this.pluginCache.entries()) {
       try {
         await plugin.close();
-      } catch {}
+      } catch (error) {
+        console.warn(
+          `[wasm] Failed to close plugin ${key}:`,
+          error instanceof Error ? error.message : String(error)
+        );
+      }
     }
     this.pluginCache.clear();
     this.cacheOrder = [];
@@ -134,8 +139,16 @@ export class WasmSandboxExecutor extends BaseSandboxExecutor {
       const oldKey = this.cacheOrder.shift()!;
       const oldPlugin = this.pluginCache.get(oldKey);
       if (oldPlugin) {
-        await oldPlugin.close();
-        this.pluginCache.delete(oldKey);
+        try {
+          await oldPlugin.close();
+        } catch (error) {
+          console.warn(
+            `[wasm] Failed to close cached plugin ${oldKey}:`,
+            error instanceof Error ? error.message : String(error)
+          );
+        } finally {
+          this.pluginCache.delete(oldKey);
+        }
       }
     }
 

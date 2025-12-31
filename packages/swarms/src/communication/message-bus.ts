@@ -119,18 +119,18 @@ export class InMemoryMessageBus implements MessageBus {
       const handlers = this.subscriptions.get(message.to);
       if (handlers) {
         for (const handler of handlers) {
-          try {
-            handler(message);
-          } catch {}
+          void Promise.resolve(handler(message)).catch((error) => {
+            console.warn('[MessageBus] Handler error:', error);
+          });
         }
       }
     } else {
       for (const [agentName, handlers] of this.subscriptions) {
         if (agentName !== message.from) {
           for (const handler of handlers) {
-            try {
-              handler(message);
-            } catch {}
+            void Promise.resolve(handler(message)).catch((error) => {
+              console.warn('[MessageBus] Broadcast handler error:', error);
+            });
           }
         }
       }

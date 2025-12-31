@@ -59,7 +59,7 @@ export async function subscribe(
 
   return () => {
     sub.off('message', handler as (...args: unknown[]) => void);
-    sub.unsubscribe(channel);
+    void sub.unsubscribe(channel);
   };
 }
 

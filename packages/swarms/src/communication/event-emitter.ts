@@ -30,7 +30,9 @@ export class SwarmEventEmitterImpl implements SwarmEventEmitter {
   once(event: SwarmEventType, handler: SwarmEventHandler): () => void {
     const wrapper: SwarmEventHandler = (e) => {
       this.off(event, wrapper);
-      handler(e);
+      void Promise.resolve(handler(e)).catch((error) => {
+        console.warn('[SwarmEventEmitter] Once handler error:', error);
+      });
     };
     return this.on(event, wrapper);
   }
@@ -52,18 +54,18 @@ export class SwarmEventEmitterImpl implements SwarmEventEmitter {
     const handlers = this.handlers.get(event);
     if (handlers) {
       for (const handler of handlers) {
-        try {
-          handler(swarmEvent);
-        } catch {}
+        void Promise.resolve(handler(swarmEvent)).catch((error) => {
+          console.warn('[SwarmEventEmitter] Handler error:', error);
+        });
       }
     }
 
     const wildcardHandlers = this.handlers.get('*');
     if (wildcardHandlers) {
       for (const handler of wildcardHandlers) {
-        try {
-          handler(swarmEvent);
-        } catch {}
+        void Promise.resolve(handler(swarmEvent)).catch((error) => {
+          console.warn('[SwarmEventEmitter] Wildcard handler error:', error);
+        });
       }
     }
   }

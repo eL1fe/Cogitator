@@ -89,9 +89,9 @@ export class CircuitBreaker {
     if (this.state !== newState) {
       this.state = newState;
       for (const listener of this.stateChangeListeners) {
-        try {
-          listener(newState);
-        } catch {}
+        void Promise.resolve(listener(newState)).catch((error) => {
+          console.warn('[CircuitBreaker] State change listener error:', error);
+        });
       }
     }
   }

@@ -9,17 +9,21 @@ import type {
   DiscoveredModel,
   Assessor,
   ModelProvider,
+  TaskComplexity,
 } from '@cogitator-ai/types';
 import { TaskAnalyzer } from './task-analyzer';
 import { ModelDiscovery } from './model-discovery';
 import { ModelScorer } from './scoring';
 import { RoleMatcher } from './role-matcher';
 
-const DEFAULT_CONFIG: Required<AssessorConfig> = {
+type ResolvedAssessorConfig = Omit<Required<AssessorConfig>, 'maxCostPerRun'> & {
+  maxCostPerRun?: number;
+};
+
+const DEFAULT_CONFIG: ResolvedAssessorConfig = {
   mode: 'rules',
   assessorModel: 'gpt-4o-mini',
   preferLocal: true,
-  maxCostPerRun: undefined as unknown as number,
   minCapabilityMatch: 0.3,
   ollamaUrl: 'http://localhost:11434',
   enabledProviders: ['ollama', 'openai', 'anthropic', 'google'],
@@ -27,8 +31,14 @@ const DEFAULT_CONFIG: Required<AssessorConfig> = {
   cacheTTL: 5 * 60 * 1000,
 };
 
+const TOKEN_ESTIMATES: Record<TaskComplexity, number> = {
+  simple: 500,
+  moderate: 1500,
+  complex: 4000,
+};
+
 export class SwarmAssessor implements Assessor {
-  private config: Required<AssessorConfig>;
+  private config: ResolvedAssessorConfig;
   private taskAnalyzer: TaskAnalyzer;
   private modelDiscovery: ModelDiscovery;
   private modelScorer: ModelScorer;
@@ -36,7 +46,7 @@ export class SwarmAssessor implements Assessor {
   private assessmentCache = new Map<string, { result: AssessmentResult; timestamp: number }>();
 
   constructor(config: AssessorConfig = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config } as Required<AssessorConfig>;
+    this.config = { ...DEFAULT_CONFIG, ...config };
     this.taskAnalyzer = new TaskAnalyzer();
     this.modelDiscovery = new ModelDiscovery(this.config);
     this.modelScorer = new ModelScorer();
@@ -123,14 +133,23 @@ export class SwarmAssessor implements Assessor {
     }
 
     if (this.config.maxCostPerRun) {
-      this.optimizeForBudget(assignments, discoveredModels, this.config.maxCostPerRun);
+      this.optimizeForBudget(
+        assignments,
+        discoveredModels,
+        this.config.maxCostPerRun,
+        taskAnalysis.complexity
+      );
     }
 
     const result: AssessmentResult = {
       taskAnalysis,
       roleAnalyses,
       assignments,
-      totalEstimatedCost: this.estimateTotalCost(assignments, discoveredModels),
+      totalEstimatedCost: this.estimateTotalCost(
+        assignments,
+        discoveredModels,
+        taskAnalysis.complexity
+      ),
       warnings,
       discoveredModels,
     };
@@ -260,13 +279,14 @@ export class SwarmAssessor implements Assessor {
 
   private estimateTotalCost(
     assignments: ModelAssignment[],
-    discoveredModels: DiscoveredModel[]
+    discoveredModels: DiscoveredModel[],
+    complexity: TaskComplexity = 'moderate'
   ): number {
+    const estimatedTokens = TOKEN_ESTIMATES[complexity];
     let total = 0;
     for (const assignment of assignments) {
       const model = discoveredModels.find((m) => m.id === assignment.assignedModel);
       if (model && !model.isLocal) {
-        const estimatedTokens = 1000;
         total +=
           (model.pricing.input * estimatedTokens + model.pricing.output * estimatedTokens) /
           1_000_000;
@@ -275,12 +295,24 @@ export class SwarmAssessor implements Assessor {
     return total;
   }
 
+  private estimateModelCost(
+    model: DiscoveredModel,
+    complexity: TaskComplexity = 'moderate'
+  ): number {
+    if (model.isLocal) return 0;
+    const estimatedTokens = TOKEN_ESTIMATES[complexity];
+    return (
+      (model.pricing.input * estimatedTokens + model.pricing.output * estimatedTokens) / 1_000_000
+    );
+  }
+
   private optimizeForBudget(
     assignments: ModelAssignment[],
     discoveredModels: DiscoveredModel[],
-    budget: number
+    budget: number,
+    complexity: TaskComplexity = 'moderate'
   ): void {
-    let currentCost = this.estimateTotalCost(assignments, discoveredModels);
+    let currentCost = this.estimateTotalCost(assignments, discoveredModels, complexity);
     if (currentCost <= budget) return;
 
     const byExpense = [...assignments]
@@ -289,7 +321,8 @@ export class SwarmAssessor implements Assessor {
         const model = discoveredModels.find((m) => m.id === a.assignedModel);
         return {
           assignment: a,
-          cost: model ? (model.pricing.input + model.pricing.output) / 2 : 0,
+          model,
+          cost: model ? this.estimateModelCost(model, complexity) : 0,
         };
       })
       .sort((a, b) => b.cost - a.cost);
@@ -300,14 +333,14 @@ export class SwarmAssessor implements Assessor {
       for (const fallbackId of item.assignment.fallbackModels) {
         const fallbackModel = discoveredModels.find((m) => m.id === fallbackId);
         if (fallbackModel?.isLocal) {
-          const oldModel = discoveredModels.find((m) => m.id === item.assignment.assignedModel);
-          const oldCost = oldModel ? (oldModel.pricing.input + oldModel.pricing.output) / 2 : 0;
+          const oldCost = item.model ? this.estimateModelCost(item.model, complexity) : 0;
+          const newCost = this.estimateModelCost(fallbackModel, complexity);
 
           item.assignment.assignedModel = fallbackId;
           item.assignment.provider = fallbackModel.provider;
           item.assignment.reasons.push('Downgraded for cost optimization');
 
-          currentCost -= oldCost * 0.001;
+          currentCost -= oldCost - newCost;
           break;
         }
       }

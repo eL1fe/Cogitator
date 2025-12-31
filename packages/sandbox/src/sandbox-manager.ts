@@ -40,7 +40,12 @@ export class SandboxManager {
       if (result.success) {
         this.executors.set('docker', docker);
       }
-    } catch {}
+    } catch (error) {
+      console.warn(
+        '[sandbox] Docker initialization failed:',
+        error instanceof Error ? error.message : String(error)
+      );
+    }
 
     try {
       const wasm = new WasmSandboxExecutor({
@@ -50,7 +55,12 @@ export class SandboxManager {
       if (result.success) {
         this.executors.set('wasm', wasm);
       }
-    } catch {}
+    } catch (error) {
+      console.warn(
+        '[sandbox] WASM initialization failed:',
+        error instanceof Error ? error.message : String(error)
+      );
+    }
 
     this.initialized = true;
   }

@@ -37,6 +37,10 @@ export class NativeSandboxExecutor extends BaseSandboxExecutor {
     request: SandboxExecutionRequest,
     config: SandboxConfig
   ): Promise<SandboxResult<SandboxExecutionResult>> {
+    if (!request.command || request.command.length === 0) {
+      return this.failure('Command array is empty');
+    }
+
     const startTime = Date.now();
     const timeout = request.timeout ?? config.timeout ?? 30_000;
 

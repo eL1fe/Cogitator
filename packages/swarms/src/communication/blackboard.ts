@@ -146,9 +146,9 @@ export class InMemoryBlackboard implements Blackboard {
     const handlers = this.subscriptions.get(section);
     if (handlers) {
       for (const handler of handlers) {
-        try {
-          handler(data, agentName);
-        } catch {}
+        void Promise.resolve(handler(data, agentName)).catch((error) => {
+          console.warn('[Blackboard] Handler error:', error);
+        });
       }
     }
   }

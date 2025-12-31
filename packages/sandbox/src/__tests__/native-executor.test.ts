@@ -40,6 +40,18 @@ describe('NativeSandboxExecutor', () => {
   });
 
   describe('execute', () => {
+    it('rejects empty command array', async () => {
+      const request: SandboxExecutionRequest = {
+        command: [],
+      };
+
+      const result = await executor.execute(request, defaultConfig);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe('Command array is empty');
+      }
+    });
+
     it('executes simple command', async () => {
       const request: SandboxExecutionRequest = {
         command: ['echo', 'hello'],

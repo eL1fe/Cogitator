@@ -87,6 +87,10 @@ export class DockerSandboxExecutor extends BaseSandboxExecutor {
       return this.failure('Docker executor not connected');
     }
 
+    if (!request.command || request.command.length === 0) {
+      return this.failure('Command array is empty');
+    }
+
     const startTime = Date.now();
     const timeout = request.timeout ?? config.timeout ?? DEFAULT_TIMEOUT;
     const image = config.image ?? DEFAULT_IMAGE;
