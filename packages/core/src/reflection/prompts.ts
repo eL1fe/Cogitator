@@ -180,7 +180,10 @@ export function parseReflectionResponse(response: string): ParsedReflection | nu
     }
 
     parsed.insights = parsed.insights.filter(
-      i => typeof i.type === 'string' && typeof i.content === 'string' && typeof i.context === 'string'
+      i => i && typeof i === 'object' &&
+           typeof i.type === 'string' &&
+           typeof i.content === 'string' &&
+           typeof i.context === 'string'
     );
 
     return parsed;

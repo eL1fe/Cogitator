@@ -34,6 +34,10 @@ export class ToolRegistry {
     return this.getAll().map(toolToSchema);
   }
 
+  getNames(): string[] {
+    return Array.from(this.tools.keys());
+  }
+
   clear(): void {
     this.tools.clear();
   }

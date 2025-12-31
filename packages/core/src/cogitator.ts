@@ -314,6 +314,10 @@ export class Cogitator {
         await this.initializeMemory();
       }
 
+      if (this.config.reflection?.enabled && !this.reflectionInitialized) {
+        await this.initializeReflection(agent);
+      }
+
       const registry = new ToolRegistry();
       if (agent.tools && agent.tools.length > 0) {
         registry.registerMany(agent.tools);
@@ -347,12 +351,34 @@ export class Cogitator {
       let iterations = 0;
       const maxIterations = agent.config?.maxIterations ?? 10;
 
+      const allReflections: Reflection[] = [];
+      const allActions: ReflectionAction[] = [];
+      const agentContext: AgentContext = {
+        agentId: agent.id,
+        agentName: agent.name,
+        runId,
+        threadId,
+        goal: options.input,
+        iterationIndex: 0,
+        previousActions: [],
+        availableTools: registry.getNames(),
+      };
+
+      if (this.reflectionEngine && this.config.reflection?.enabled) {
+        const insights = await this.reflectionEngine.getRelevantInsights(agentContext);
+        if (insights.length > 0 && messages.length > 0 && messages[0].role === 'system') {
+          messages[0].content += `\n\nPast learnings that may help:\n${insights.map(i => `- ${i.content}`).join('\n')}`;
+        }
+      }
+
       while (iterations < maxIterations) {
         if (abortController.signal.aborted) {
           throw abortController.signal.reason ?? new Error('Run aborted');
         }
 
         iterations++;
+        agentContext.iterationIndex = iterations - 1;
+        agentContext.previousActions = [...allActions];
 
         const llmSpanStart = Date.now();
 
@@ -473,6 +499,41 @@ export class Cogitator {
                 options.onMemoryError
               );
             }
+
+            const action: ReflectionAction = {
+              type: 'tool_call',
+              toolName: toolCall.name,
+              input: toolCall.arguments,
+              output: result.result,
+              error: result.error,
+              duration: toolSpanEnd - toolSpanStart,
+            };
+            allActions.push(action);
+
+            if (
+              this.reflectionEngine &&
+              this.config.reflection?.enabled &&
+              this.config.reflection.reflectAfterToolCall
+            ) {
+              try {
+                const reflectionResult = await this.reflectionEngine.reflectOnToolCall(
+                  action,
+                  agentContext
+                );
+                allReflections.push(reflectionResult.reflection);
+
+                if (reflectionResult.shouldAdjustStrategy && reflectionResult.suggestedAction) {
+                  messages.push({
+                    role: 'system',
+                    content: `Reflection: ${reflectionResult.reflection.analysis.reasoning}. Consider: ${reflectionResult.suggestedAction}`,
+                  });
+                }
+              } catch (reflectionError) {
+                getLogger().warn('Reflection failed', {
+                  error: reflectionError instanceof Error ? reflectionError.message : String(reflectionError),
+                });
+              }
+            }
           }
         } else {
           break;
@@ -481,6 +542,27 @@ export class Cogitator {
 
       const endTime = Date.now();
       const lastAssistantMessage = messages.filter((m) => m.role === 'assistant').pop();
+      const finalOutput = lastAssistantMessage?.content ?? '';
+
+      if (
+        this.reflectionEngine &&
+        this.config.reflection?.enabled &&
+        this.config.reflection.reflectAtEnd
+      ) {
+        try {
+          const runReflection = await this.reflectionEngine.reflectOnRun(
+            agentContext,
+            allActions,
+            finalOutput,
+            true
+          );
+          allReflections.push(runReflection.reflection);
+        } catch (reflectionError) {
+          getLogger().warn('End-of-run reflection failed', {
+            error: reflectionError instanceof Error ? reflectionError.message : String(reflectionError),
+          });
+        }
+      }
 
       const rootSpan = this.createSpan(
         'agent.run',
@@ -506,7 +588,7 @@ export class Cogitator {
       spans.unshift(rootSpan);
 
       const result: RunResult = {
-        output: lastAssistantMessage?.content ?? '',
+        output: finalOutput,
         runId,
         agentId: agent.id,
         threadId,
@@ -523,6 +605,10 @@ export class Cogitator {
           traceId,
           spans,
         },
+        reflections: allReflections.length > 0 ? allReflections : undefined,
+        reflectionSummary: this.reflectionEngine
+          ? await this.reflectionEngine.getSummary(agent.id)
+          : undefined,
       };
 
       options.onRunComplete?.(result);
@@ -803,6 +889,22 @@ export class Cogitator {
   }
 
   /**
+   * Get accumulated insights for an agent
+   */
+  async getInsights(agentId: string) {
+    if (!this.insightStore) return [];
+    return this.insightStore.getAll(agentId);
+  }
+
+  /**
+   * Get reflection summary for an agent
+   */
+  async getReflectionSummary(agentId: string) {
+    if (!this.reflectionEngine) return null;
+    return this.reflectionEngine.getSummary(agentId);
+  }
+
+  /**
    * Close all connections
    */
   async close(): Promise<void> {
@@ -817,6 +919,9 @@ export class Cogitator {
       this.sandboxManager = undefined;
       this.sandboxInitialized = false;
     }
+    this.reflectionEngine = undefined;
+    this.insightStore = undefined;
+    this.reflectionInitialized = false;
     this.backends.clear();
   }
 }

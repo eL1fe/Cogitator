@@ -179,6 +179,7 @@ export class ReflectionEngine {
 
   private async callLLM(prompt: string): Promise<string> {
     const response = await this.llm.chat({
+      model: this.config.reflectionModel ?? '',
       messages: [
         {
           role: 'system',
