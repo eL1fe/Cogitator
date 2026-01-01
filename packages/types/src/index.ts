@@ -25,3 +25,4 @@ export * from './knowledge-graph';
 export * from './prompt-optimization';
 export * from './neuro-symbolic';
 export * from './self-modifying';
+export * from './causal';

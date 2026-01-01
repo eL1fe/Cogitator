@@ -7,17 +7,23 @@ import {
   buildMetaAssessmentPrompt,
   parseMetaAssessmentResponse,
 } from '../meta-reasoning';
-import type { LLMBackend } from '@cogitator-ai/types';
+import type { LLMBackend, MetaObservation } from '@cogitator-ai/types';
 
 const mockLLM: LLMBackend = {
-  complete: vi.fn().mockResolvedValue({
+  chat: vi.fn().mockResolvedValue({
     content: JSON.stringify({
-      isOnTrack: true,
+      onTrack: true,
       confidence: 0.8,
       issues: [],
-      recommendations: ['Continue current approach'],
-      requiresAdaptation: false,
+      opportunities: [],
+      reasoning: 'Continue current approach',
+      recommendation: {
+        action: 'continue',
+        confidence: 0.8,
+        reasoning: 'Making good progress',
+      },
     }),
+    usage: { outputTokens: 100 },
   }),
   name: 'mock',
   supportsTool: () => true,
@@ -27,90 +33,126 @@ const mockLLM: LLMBackend = {
 
 describe('ObservationCollector', () => {
   let collector: ObservationCollector;
+  const runId = 'test-run';
 
   beforeEach(() => {
     collector = new ObservationCollector();
+    collector.initializeRun(runId);
   });
 
   it('collects observations', () => {
-    collector.recordAction({
+    collector.recordAction(runId, {
       type: 'tool_call',
-      name: 'calculator',
-      success: true,
+      toolName: 'calculator',
+      timestamp: Date.now(),
       duration: 100,
     });
 
-    collector.recordAction({
+    collector.recordAction(runId, {
       type: 'tool_call',
-      name: 'search',
-      success: false,
+      toolName: 'search',
+      error: 'Not found',
+      timestamp: Date.now(),
       duration: 200,
     });
 
-    const observation = collector.collect({
-      currentProgress: 'Some progress',
-      tokensUsed: 500,
-      timeElapsed: 5000,
-      toolCallsCount: 2,
-      errorCount: 1,
-    });
+    const observation = collector.collect(
+      {
+        runId,
+        iteration: 1,
+        goal: 'Test goal',
+        currentMode: 'analytical',
+        tokensUsed: 500,
+        timeElapsed: 5000,
+        iterationsRemaining: 10,
+        budgetRemaining: 0.9,
+      },
+      []
+    );
 
-    expect(observation.actionCount).toBe(2);
-    expect(observation.failedActions).toBe(1);
-    expect(observation.metrics.tokensUsed).toBe(500);
+    expect(observation.tokensUsed).toBe(500);
+    expect(observation.currentMode).toBe('analytical');
   });
 
   it('calculates repetition score', () => {
     for (let i = 0; i < 5; i++) {
-      collector.recordAction({
+      collector.recordAction(runId, {
         type: 'tool_call',
-        name: 'same_tool',
-        success: true,
+        toolName: 'same_tool',
+        input: { key: 'value' },
+        timestamp: Date.now(),
         duration: 100,
       });
     }
 
-    const observation = collector.collect({
-      currentProgress: 'Progress',
-      tokensUsed: 100,
-      timeElapsed: 1000,
-      toolCallsCount: 5,
-      errorCount: 0,
-    });
+    const observation = collector.collect(
+      {
+        runId,
+        iteration: 1,
+        goal: 'Test',
+        currentMode: 'analytical',
+        tokensUsed: 100,
+        timeElapsed: 1000,
+        iterationsRemaining: 5,
+        budgetRemaining: 0.8,
+      },
+      []
+    );
 
     expect(observation.repetitionScore).toBeGreaterThan(0.5);
   });
 
   it('tracks tool success rate', () => {
-    collector.recordAction({ type: 'tool_call', name: 'a', success: true, duration: 100 });
-    collector.recordAction({ type: 'tool_call', name: 'b', success: true, duration: 100 });
-    collector.recordAction({ type: 'tool_call', name: 'c', success: false, duration: 100 });
-    collector.recordAction({ type: 'tool_call', name: 'd', success: true, duration: 100 });
-
-    const observation = collector.collect({
-      currentProgress: '',
-      tokensUsed: 0,
-      timeElapsed: 0,
-      toolCallsCount: 4,
-      errorCount: 1,
+    collector.recordAction(runId, {
+      type: 'tool_call',
+      toolName: 'a',
+      timestamp: Date.now(),
     });
+    collector.recordAction(runId, {
+      type: 'tool_call',
+      toolName: 'b',
+      timestamp: Date.now(),
+    });
+    collector.recordAction(runId, {
+      type: 'tool_call',
+      toolName: 'c',
+      error: 'Failed',
+      timestamp: Date.now(),
+    });
+    collector.recordAction(runId, {
+      type: 'tool_call',
+      toolName: 'd',
+      timestamp: Date.now(),
+    });
+
+    const observation = collector.collect(
+      {
+        runId,
+        iteration: 1,
+        goal: 'Test',
+        currentMode: 'analytical',
+        tokensUsed: 0,
+        timeElapsed: 0,
+        iterationsRemaining: 5,
+        budgetRemaining: 0.8,
+      },
+      []
+    );
 
     expect(observation.toolSuccessRate).toBe(0.75);
   });
 
-  it('resets state', () => {
-    collector.recordAction({ type: 'tool_call', name: 'test', success: true, duration: 100 });
-    collector.reset();
-
-    const observation = collector.collect({
-      currentProgress: '',
-      tokensUsed: 0,
-      timeElapsed: 0,
-      toolCallsCount: 0,
-      errorCount: 0,
+  it('cleans up run state', () => {
+    collector.recordAction(runId, {
+      type: 'tool_call',
+      toolName: 'test',
+      timestamp: Date.now(),
     });
 
-    expect(observation.actionCount).toBe(0);
+    collector.cleanupRun(runId);
+
+    const observations = collector.getObservations(runId);
+    expect(observations).toHaveLength(0);
   });
 });
 
@@ -118,11 +160,14 @@ describe('StrategySelector', () => {
   let selector: StrategySelector;
 
   beforeEach(() => {
-    selector = new StrategySelector();
+    selector = new StrategySelector({
+      allowedModes: ['analytical', 'creative', 'systematic', 'intuitive'],
+      modeProfiles: DEFAULT_MODE_PROFILES,
+    });
   });
 
   it('selects mode based on task profile', () => {
-    const result = selector.selectMode({
+    const mode = selector.selectForTask({
       complexity: 'complex',
       domain: 'coding',
       estimatedTokens: 5000,
@@ -132,33 +177,31 @@ describe('StrategySelector', () => {
       creativityLevel: 'low',
       accuracyRequirement: 'high',
       timeConstraint: 'none',
+      requiresReasoning: true,
     });
 
-    expect(result.mode).toBeDefined();
-    expect(result.confidence).toBeGreaterThan(0);
+    expect(mode).toBeDefined();
   });
 
-  it('suggests mode switch', () => {
-    selector.selectMode({
-      complexity: 'simple',
-      domain: 'general',
-      estimatedTokens: 500,
-      requiresTools: false,
-      toolIntensity: 'none',
-      reasoningDepth: 'shallow',
-      creativityLevel: 'moderate',
-      accuracyRequirement: 'moderate',
-      timeConstraint: 'none',
-    });
+  it('suggests mode switch on stagnation', () => {
+    const observation: MetaObservation = {
+      runId: 'test',
+      iteration: 5,
+      timestamp: Date.now(),
+      currentMode: 'analytical',
+      currentConfidence: 0.5,
+      progressScore: 0.3,
+      progressDelta: 0.01,
+      stagnationCount: 4,
+      confidenceHistory: [0.6, 0.5, 0.4],
+      tokensUsed: 2000,
+      timeElapsed: 10000,
+      toolSuccessRate: 0.6,
+      repetitionScore: 0.6,
+      confidenceTrend: 'falling',
+    };
 
-    const suggestion = selector.suggestModeSwitch({
-      currentIssues: ['Low confidence in outputs'],
-      performanceMetrics: {
-        tokensUsed: 2000,
-        timeElapsed: 10000,
-        qualityScore: 0.4,
-      },
-    });
+    const suggestion = selector.suggestSwitch(observation);
 
     expect(suggestion).toBeDefined();
   });
@@ -172,168 +215,216 @@ describe('StrategySelector', () => {
 
 describe('MetaReasoner', () => {
   let reasoner: MetaReasoner;
+  const runId = 'test-run';
 
   beforeEach(() => {
     vi.clearAllMocks();
     reasoner = new MetaReasoner({
       llm: mockLLM,
+      model: 'gpt-4o',
       config: {
         enabled: true,
         maxAssessmentsPerRun: 5,
         maxAdaptationsPerRun: 3,
-        assessmentCooldown: 1000,
-        triggers: ['on_failure', 'periodic'],
+        assessmentCooldown: 0,
+        metaAssessmentCooldown: 0,
+        adaptationCooldown: 0,
+        triggers: ['iteration_complete', 'confidence_drop', 'progress_stall'],
         tokenBudget: 2000,
       },
     });
   });
 
   it('initializes run with mode config', () => {
-    const config = reasoner.initializeRun('run-1');
+    const config = reasoner.initializeRun(runId);
 
+    expect(config).toBeDefined();
     expect(config.mode).toBeDefined();
-    expect(config.parameters).toBeDefined();
+    expect(config.temperature).toBeDefined();
   });
 
   it('determines trigger conditions', () => {
-    reasoner.initializeRun('run-1');
+    reasoner.initializeRun(runId);
 
-    const shouldTrigger = reasoner.shouldTrigger('run-1', 'on_failure', {
-      currentProgress: 'Error occurred',
-      tokensUsed: 500,
-      timeElapsed: 5000,
-      toolCallsCount: 2,
-      errorCount: 3,
+    const shouldTrigger = reasoner.shouldTrigger(runId, 'progress_stall', {
+      iteration: 5,
+      confidence: 0.5,
+      progressDelta: 0.01,
+      stagnationCount: 3,
     });
 
     expect(shouldTrigger).toBe(true);
   });
 
   it('collects observations', () => {
+    reasoner.initializeRun(runId);
+
     const observation = reasoner.observe(
       {
-        currentProgress: 'Making progress',
+        runId,
+        iteration: 1,
+        goal: 'Test goal',
+        currentMode: 'analytical',
         tokensUsed: 1000,
         timeElapsed: 10000,
-        toolCallsCount: 5,
-        errorCount: 0,
+        iterationsRemaining: 5,
+        budgetRemaining: 0.8,
       },
-      {
-        confidence: 0.8,
-        relevance: 0.9,
-        coherence: 0.85,
-      }
+      [{ type: 'observation', content: 'Test insight', confidence: 0.8 }]
     );
 
-    expect(observation.insights.confidence).toBe(0.8);
-    expect(observation.metrics.tokensUsed).toBe(1000);
+    expect(observation.tokensUsed).toBe(1000);
   });
 
   it('performs assessment', async () => {
-    reasoner.initializeRun('run-1');
+    reasoner.initializeRun(runId);
 
-    const observation = reasoner.observe(
-      {
-        currentProgress: 'Some output',
-        tokensUsed: 500,
-        timeElapsed: 3000,
-        toolCallsCount: 2,
-        errorCount: 0,
-      },
-      { confidence: 0.7, relevance: 0.8, coherence: 0.9 }
-    );
+    const observation: MetaObservation = {
+      runId,
+      iteration: 1,
+      timestamp: Date.now(),
+      goal: 'Test goal',
+      currentMode: 'analytical',
+      currentConfidence: 0.7,
+      progressScore: 0.5,
+      progressDelta: 0.1,
+      stagnationCount: 0,
+      confidenceHistory: [0.6, 0.7],
+      tokensUsed: 500,
+      timeElapsed: 3000,
+      iterationsRemaining: 5,
+      budgetRemaining: 0.9,
+      toolSuccessRate: 0.8,
+      repetitionScore: 0.2,
+      confidenceTrend: 'stable',
+    };
 
     const assessment = await reasoner.assess(observation);
 
-    expect(assessment.isOnTrack).toBeDefined();
+    expect(assessment.onTrack).toBeDefined();
     expect(assessment.confidence).toBeDefined();
   });
 
   it('adapts strategy when needed', async () => {
-    reasoner.initializeRun('run-1');
+    reasoner.initializeRun(runId);
 
     const assessment = {
-      isOnTrack: false,
-      confidence: 0.4,
-      issues: ['Low quality outputs'],
-      recommendations: ['Switch to more analytical mode'],
-      requiresAdaptation: true,
-      suggestedMode: 'analytical' as const,
+      id: 'assess-1',
+      observationId: 'obs-1',
+      timestamp: Date.now(),
+      onTrack: false,
+      confidence: 0.7,
+      issues: [],
+      opportunities: [],
+      reasoning: 'Need to switch mode',
+      recommendation: {
+        action: 'switch_mode' as const,
+        newMode: 'creative' as const,
+        confidence: 0.8,
+        reasoning: 'Creative mode better for current task',
+      },
+      assessmentDuration: 100,
+      assessmentCost: 0.001,
     };
 
-    const adaptation = await reasoner.adapt('run-1', assessment);
+    const adaptation = await reasoner.adapt(runId, assessment);
 
     expect(adaptation).not.toBeNull();
     if (adaptation) {
-      expect(adaptation.newMode).toBe('analytical');
+      expect(adaptation.type).toBe('mode_switch');
     }
   });
 
-  it('supports rollback', () => {
-    reasoner.initializeRun('run-1');
+  it('supports rollback', async () => {
+    reasoner.initializeRun(runId);
 
-    reasoner.adapt('run-1', {
-      isOnTrack: false,
-      confidence: 0.3,
+    const assessment = {
+      id: 'assess-1',
+      observationId: 'obs-1',
+      timestamp: Date.now(),
+      onTrack: false,
+      confidence: 0.7,
       issues: [],
-      recommendations: [],
-      requiresAdaptation: true,
-      suggestedMode: 'creative',
-    });
+      opportunities: [],
+      reasoning: 'Switch needed',
+      recommendation: {
+        action: 'switch_mode' as const,
+        newMode: 'creative' as const,
+        confidence: 0.8,
+        reasoning: 'Try creative mode',
+      },
+      assessmentDuration: 100,
+      assessmentCost: 0.001,
+    };
 
-    const rollback = reasoner.rollback('run-1');
+    await reasoner.adapt(runId, assessment);
+    const rollback = reasoner.rollback(runId);
 
     expect(rollback).not.toBeNull();
     if (rollback) {
-      expect(rollback.isRollback).toBe(true);
+      expect(rollback.type).toBe('rollback');
     }
   });
 });
 
 describe('Meta-reasoning prompts', () => {
   it('builds assessment prompt', () => {
-    const prompt = buildMetaAssessmentPrompt({
-      id: 'obs-1',
-      timestamp: new Date(),
-      metrics: {
-        tokensUsed: 1000,
-        timeElapsed: 5000,
-        progressPercentage: 50,
-      },
-      insights: {
-        confidence: 0.7,
-        relevance: 0.8,
-        coherence: 0.9,
-      },
-      actionCount: 5,
-      failedActions: 1,
-      repetitionScore: 0.2,
+    const observation: MetaObservation = {
+      runId: 'test',
+      iteration: 3,
+      timestamp: Date.now(),
+      goal: 'Complete the task',
+      currentMode: 'analytical',
+      currentConfidence: 0.7,
+      progressScore: 0.5,
+      progressDelta: 0.1,
+      stagnationCount: 0,
+      confidenceHistory: [0.6, 0.65, 0.7],
+      tokensUsed: 1000,
+      timeElapsed: 5000,
+      iterationsRemaining: 7,
+      budgetRemaining: 0.8,
       toolSuccessRate: 0.8,
+      repetitionScore: 0.2,
       confidenceTrend: 'stable',
+      recentActions: [
+        { type: 'tool_call', toolName: 'search' },
+        { type: 'tool_call', toolName: 'calculator' },
+      ],
+    };
+
+    const prompt = buildMetaAssessmentPrompt(observation, {
+      allowedModes: ['analytical', 'creative'],
+      currentModeConfig: { mode: 'analytical', temperature: 0.3, depth: 3 },
     });
 
-    expect(prompt).toContain('tokensUsed');
-    expect(prompt).toContain('confidence');
+    expect(prompt).toContain('1000');
+    expect(prompt).toContain('analytical');
   });
 
   it('parses assessment response', () => {
     const response = `
     Here is my assessment:
     {
-      "isOnTrack": true,
+      "onTrack": true,
       "confidence": 0.85,
-      "issues": ["Minor formatting issues"],
-      "recommendations": ["Continue with current approach"],
-      "requiresAdaptation": false
+      "issues": [{"type": "minor", "severity": "low", "description": "Minor formatting issues"}],
+      "opportunities": [],
+      "reasoning": "Good progress",
+      "recommendation": {
+        "action": "continue",
+        "confidence": 0.9,
+        "reasoning": "Continue with current approach"
+      }
     }
     `;
 
     const parsed = parseMetaAssessmentResponse(response);
 
     expect(parsed).not.toBeNull();
-    expect(parsed?.isOnTrack).toBe(true);
+    expect(parsed?.onTrack).toBe(true);
     expect(parsed?.confidence).toBe(0.85);
-    expect(parsed?.issues).toContain('Minor formatting issues');
+    expect(parsed?.issues).toHaveLength(1);
   });
 
   it('handles malformed response', () => {

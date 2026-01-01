@@ -70,6 +70,7 @@ Cogitator is a **self-hosted, production-grade runtime** for orchestrating LLM s
 - **Tree of Thoughts** — Branching reasoning with beam search, evaluation, backtracking
 - **Agent Learning** — DSPy-style optimization with trace capture, metrics, and instruction tuning
 - **Time-Travel Debugging** — Checkpoint, replay, fork executions like git bisect for AI agents
+- **Causal Reasoning** — Pearl's Ladder of Causation with d-separation, do-calculus, and counterfactuals
 
 ---
 
@@ -533,6 +534,74 @@ console.log('Final config:', result.finalConfig);
 - **Constraint Validation** — SAT-based safety checks prevent unsafe modifications
 - **Rollback System** — Checkpoint before changes, auto-revert on performance decline
 
+### 🔬 Causal Reasoning Engine
+
+Full causal inference framework implementing Pearl's Ladder of Causation — association, intervention, and counterfactual reasoning:
+
+```typescript
+import { CausalReasoner, CausalGraphBuilder } from '@cogitator-ai/core';
+
+// Build a causal graph
+const graph = CausalGraphBuilder.create('sales-model')
+  .treatment('marketing_spend', 'Marketing Budget')
+  .outcome('sales', 'Total Sales')
+  .confounder('seasonality', 'Seasonal Effects')
+  .mediator('brand_awareness', 'Brand Awareness')
+  .from('seasonality')
+  .causes('marketing_spend')
+  .from('seasonality')
+  .causes('sales', { strength: 0.3 })
+  .from('marketing_spend')
+  .causes('brand_awareness', { strength: 0.7 })
+  .from('brand_awareness')
+  .causes('sales', { strength: 0.8 })
+  .from('marketing_spend')
+  .causes('sales', { strength: 0.5 })
+  .build();
+
+const reasoner = new CausalReasoner({ llmBackend: cog.getDefaultBackend() });
+await reasoner.loadGraph(graph);
+
+// Level 2: Intervention — "What if we increase marketing spend?"
+const effect = await reasoner.predictEffect('Increase marketing_spend by 20%', context);
+console.log(effect.effects);
+// [{ variable: 'sales', direction: 'increase', magnitude: 0.65, probability: 0.85 }]
+
+// Level 3: Root Cause Analysis — "Why did sales drop?"
+const explanation = await reasoner.explainCause('sales', 0.2, context);
+console.log(explanation.rootCauses);
+// [{ variable: 'brand_awareness', contribution: 0.6, mechanism: '...' }]
+console.log(explanation.counterfactuals);
+// [{ change: 'If marketing_spend was higher', wouldPrevent: true }]
+
+// Causal Planning — "How to achieve sales = 1.0?"
+const plan = await reasoner.planForGoal('sales', 1.0, context);
+console.log(plan.steps);
+// [{ action: 'Set marketing_spend to 1.5', target: 'marketing_spend', ... }]
+console.log(plan.robustness.vulnerabilities);
+// ['Uncontrolled confounder: seasonality affects sales']
+```
+
+**Three Levels of Causation:**
+
+| Level              | Question                                   | Example                                           |
+| ------------------ | ------------------------------------------ | ------------------------------------------------- |
+| **Association**    | P(Y\|X) — What do we observe?              | "Sales are high when marketing is high"           |
+| **Intervention**   | P(Y\|do(X)) — What if we act?              | "If we increase marketing, sales will rise"       |
+| **Counterfactual** | P(Y_x\|X', Y') — What would have happened? | "Would sales have dropped without that campaign?" |
+
+**Capabilities:**
+
+- **Causal Graph Construction** — Fluent API for building DAGs with typed nodes and edges
+- **D-Separation** — Bayes-Ball algorithm for conditional independence testing
+- **Backdoor/Frontdoor Adjustment** — Automatic identification of valid adjustment sets
+- **Effect Prediction** — Predict intervention effects with side-effect analysis
+- **Root Cause Analysis** — Trace causal chains back to actionable root causes
+- **Counterfactual Reasoning** — Three-phase algorithm: Abduction → Action → Prediction
+- **Causal Planning** — Find optimal intervention sequences to achieve goals
+- **LLM-Powered Discovery** — Extract causal relationships from text, traces, and observations
+- **Hypothesis Generation & Validation** — Generate and test causal hypotheses from execution data
+
 ### 📈 Agent Learning (DSPy-Style)
 
 Agents automatically improve through execution trace analysis and instruction optimization:
@@ -864,6 +933,7 @@ const agent = new Agent({
 | Time-Travel Debug   | ✅        | ❌          | ❌                | ❌          |
 | Cost-Aware Routing  | ✅        | ❌          | ❌                | ❌          |
 | Self-Modifying      | ✅        | ❌          | ❌                | ❌          |
+| Causal Reasoning    | ✅        | ❌          | ❌                | ❌          |
 | Dependencies        | ~20       | 150+        | N/A               | ~30         |
 
 ---

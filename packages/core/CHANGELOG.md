@@ -1,5 +1,58 @@
 # @cogitator-ai/core
 
+## 0.4.0
+
+### Minor Changes
+
+- feat(causal): add causal reasoning engine
+
+  Implement full causal reasoning framework based on Pearl's Ladder of Causation:
+
+  **Causal Graphs**
+  - CausalGraphImpl with Map-based storage
+  - CausalGraphBuilder fluent API
+  - Node/edge operations (parents, children, ancestors, descendants)
+  - Path finding with strength accumulation
+  - Cycle detection and Markov blanket computation
+
+  **Inference Engine**
+  - D-separation algorithm (Bayes-Ball)
+  - Backdoor and frontdoor adjustment criteria
+  - Interventional effect computation
+  - Average Treatment Effect (ATE) estimation
+  - Effect identifiability checking
+
+  **Counterfactual Reasoning**
+  - Three-phase algorithm: Abduction → Action → Prediction
+  - Structural equation evaluation (linear/logistic)
+  - Counterfactual query handling
+
+  **Causal Discovery**
+  - LLM-based causal extraction from tool results
+  - Hypothesis generation from traces
+  - Counterfactual validation via forking
+  - Pattern recognition and evidence accumulation
+
+  **Types**
+  - CausalNode, CausalEdge, CausalGraph interfaces
+  - CausalRelationType: causes, enables, prevents, mediates, confounds, moderates
+  - InterventionQuery and CounterfactualQuery types
+  - StructuralEquation with linear/logistic/custom support
+
+  **Fixes**
+  - self-modifying: Fix test API compatibility issues
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies [05de0f1]
+- Updated dependencies [fb21b64]
+- Updated dependencies [05de0f1]
+  - @cogitator-ai/types@0.5.0
+  - @cogitator-ai/memory@0.3.1
+  - @cogitator-ai/models@3.0.0
+  - @cogitator-ai/sandbox@0.2.2
+
 ## 0.3.0
 
 ### Minor Changes

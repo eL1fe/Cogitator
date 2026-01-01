@@ -1,5 +1,113 @@
 # @cogitator-ai/types
 
+## 0.5.0
+
+### Minor Changes
+
+- 05de0f1: feat(neuro-symbolic): add neuro-symbolic AI package
+
+### Patch Changes
+
+- feat(causal): add causal reasoning engine
+
+  Implement full causal reasoning framework based on Pearl's Ladder of Causation:
+
+  **Causal Graphs**
+  - CausalGraphImpl with Map-based storage
+  - CausalGraphBuilder fluent API
+  - Node/edge operations (parents, children, ancestors, descendants)
+  - Path finding with strength accumulation
+  - Cycle detection and Markov blanket computation
+
+  **Inference Engine**
+  - D-separation algorithm (Bayes-Ball)
+  - Backdoor and frontdoor adjustment criteria
+  - Interventional effect computation
+  - Average Treatment Effect (ATE) estimation
+  - Effect identifiability checking
+
+  **Counterfactual Reasoning**
+  - Three-phase algorithm: Abduction → Action → Prediction
+  - Structural equation evaluation (linear/logistic)
+  - Counterfactual query handling
+
+  **Causal Discovery**
+  - LLM-based causal extraction from tool results
+  - Hypothesis generation from traces
+  - Counterfactual validation via forking
+  - Pattern recognition and evidence accumulation
+
+  **Types**
+  - CausalNode, CausalEdge, CausalGraph interfaces
+  - CausalRelationType: causes, enables, prevents, mediates, confounds, moderates
+  - InterventionQuery and CounterfactualQuery types
+  - StructuralEquation with linear/logistic/custom support
+
+  **Fixes**
+  - self-modifying: Fix test API compatibility issues
+
+- fb21b64: feat(neuro-symbolic): add neuro-symbolic AI package
+
+  Introduce @cogitator-ai/neuro-symbolic - a hybrid neural-symbolic reasoning package with four modules:
+
+  **Logic Programming**
+  - Prolog-style parser and knowledge base
+  - Robinson unification algorithm
+  - SLD resolution with backward chaining
+  - Built-in predicates (member, append, findall, etc.)
+  - Proof tree generation and visualization
+
+  **Knowledge Graph Queries**
+  - SPARQL-like query builder with fluent API
+  - Natural language query interface
+  - Multi-hop reasoning engine
+  - Transitive, inverse, and composition inference
+
+  **Constraint Solving**
+  - Fluent DSL for building constraint problems
+  - Z3 WASM solver integration (optional)
+  - Pure TypeScript SAT solver fallback
+  - Support for bool, int, real, bitvec variables
+  - Global constraints (allDifferent, atMost, atLeast)
+
+  **Plan Verification**
+  - PDDL-like action schema builder
+  - Plan validation with precondition/effect checking
+  - Safety property verification (invariant, eventually, always, never)
+  - LLM-assisted plan repair
+  - Dependency graph analysis
+
+- 05de0f1: feat(self-modifying): add Self-Modifying Agents package
+
+  Initial release of @cogitator-ai/self-modifying with comprehensive capabilities:
+
+  **Tool Self-Generation**
+  - GapAnalyzer: Detects missing capabilities by comparing user intent with available tools
+  - ToolGenerator: LLM-based synthesis of new tools at runtime
+  - ToolValidator: Security scanning + correctness validation
+  - ToolSandbox: Safe execution environment for generated tools
+  - InMemoryGeneratedToolStore: Persistence and learning from tool usage
+
+  **Meta-Reasoning**
+  - MetaReasoner: Core metacognitive layer monitoring agent's reasoning
+  - StrategySelector: Dynamic reasoning mode switching (analytical, creative, systematic, etc.)
+  - ObservationCollector: Real-time metrics gathering for reasoning quality
+
+  **Architecture Evolution**
+  - CapabilityAnalyzer: Task profiling and complexity estimation
+  - EvolutionStrategy: Selection algorithms (UCB, Thompson sampling, epsilon-greedy)
+  - ParameterOptimizer: Multi-armed bandit optimization for model parameters
+
+  **Constraints & Safety**
+  - ModificationValidator: Constraint checking for all self-modifications
+  - RollbackManager: Checkpoint and undo system for safe experimentation
+  - Default safety constraints preventing arbitrary code execution and infinite loops
+
+  **Event System**
+  - SelfModifyingEventEmitter: Observability events for all self-modification activities
+
+  Also adds new types to @cogitator-ai/types for self-modifying capabilities.
+
 ## 0.4.0
 
 ### Minor Changes

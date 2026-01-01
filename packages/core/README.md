@@ -51,6 +51,7 @@ console.log(result.output);
 - **Tree-of-Thought** - Advanced reasoning with branch exploration
 - **Agent Optimizer** - DSPy-style learning from traces
 - **Time Travel** - Checkpoint, replay, fork, and compare executions
+- **Causal Reasoning** - Pearl's do-calculus, counterfactuals, d-separation
 - **Resilience** - Retry, circuit breaker, and fallback patterns
 - **Observability** - Full tracing with spans and callbacks
 
@@ -717,6 +718,106 @@ const liveReplay = await timeTravel.replayLive(agent, checkpointId, {
 
 ---
 
+## Causal Reasoning
+
+Full causal reasoning framework implementing Pearl's Ladder of Causation:
+
+- **Level 1 (Association)**: Observational queries P(Y|X)
+- **Level 2 (Intervention)**: do-calculus P(Y|do(X))
+- **Level 3 (Counterfactual)**: "What if" queries P(Y_x|X', Y')
+
+### Building Causal Graphs
+
+```typescript
+import { CausalGraphBuilder, CausalInferenceEngine } from '@cogitator-ai/core';
+
+const graph = CausalGraphBuilder.create('medical-study')
+  .treatment('X', 'Drug Treatment')
+  .outcome('Y', 'Recovery')
+  .confounder('Z', 'Age')
+  .from('Z')
+  .causes('X')
+  .from('Z')
+  .causes('Y')
+  .from('X')
+  .causes('Y', { strength: 0.8 })
+  .build();
+
+const engine = new CausalInferenceEngine(graph);
+```
+
+### Effect Identification
+
+```typescript
+const identifiable = engine.isIdentifiable('X', 'Y');
+if (identifiable.identifiable) {
+  console.log('Effect is identifiable via:', identifiable.method);
+  console.log('Adjustment set:', identifiable.adjustmentSet);
+}
+```
+
+### Interventional Queries
+
+```typescript
+const effect = engine.computeInterventionalEffect({
+  target: 'Y',
+  interventions: { X: 1 },
+  observed: { Z: 0.5 },
+});
+
+console.log('Expected effect:', effect.effect);
+console.log('Confidence:', effect.confidence);
+```
+
+### Counterfactual Reasoning
+
+```typescript
+import { evaluateCounterfactual } from '@cogitator-ai/core';
+
+const result = evaluateCounterfactual(graph, {
+  target: 'Y',
+  intervention: { X: 1 },
+  factual: { X: 0, Y: 0.2 },
+  question: 'What would Y be if X was 1?',
+});
+
+console.log('Factual value:', result.factualValue);
+console.log('Counterfactual value:', result.counterfactualValue);
+```
+
+### D-Separation Analysis
+
+```typescript
+import { dSeparation, findBackdoorAdjustment } from '@cogitator-ai/core';
+
+const separated = dSeparation(graph, 'X', 'Y', ['Z']);
+console.log('D-separated:', separated.separated);
+
+const backdoor = findBackdoorAdjustment(graph, 'X', 'Y');
+if (backdoor?.isValid) {
+  console.log('Backdoor adjustment set:', backdoor.variables);
+}
+```
+
+### Causal Discovery from Traces
+
+```typescript
+import { CausalExtractor, CausalHypothesisGenerator } from '@cogitator-ai/core';
+
+const extractor = new CausalExtractor({ llmBackend: backend });
+
+const relations = await extractor.extractFromToolResult(
+  { name: 'database_query', arguments: { table: 'users' } },
+  { rows: 100, cached: true },
+  { agentId: 'agent-1' }
+);
+
+const generator = new CausalHypothesisGenerator({ llmBackend: backend });
+const hypotheses = await generator.generateFromFailure(trace, { agentId: 'agent-1' });
+```
+
+---
+
 ## Error Handling & Resilience
 
 ### Retry with Backoff
@@ -891,6 +992,22 @@ import type {
   ForkResult,
   TraceDiff,
   TimeTravelConfig,
+} from '@cogitator-ai/core';
+```
+
+### Causal Types
+
+```typescript
+import type {
+  CausalNode,
+  CausalEdge,
+  CausalGraph,
+  CausalRelationType,
+  InterventionQuery,
+  CounterfactualQuery,
+  CausalHypothesis,
+  CausalEvidence,
+  StructuralEquation,
 } from '@cogitator-ai/core';
 ```
 

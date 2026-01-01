@@ -4,8 +4,6 @@ import {
   RollbackManager,
   InMemoryCheckpointStore,
   DEFAULT_SAFETY_CONSTRAINTS,
-  DEFAULT_CAPABILITY_CONSTRAINTS,
-  DEFAULT_RESOURCE_CONSTRAINTS,
   mergeSafetyConstraints,
 } from '../constraints';
 
@@ -13,11 +11,7 @@ describe('ModificationValidator', () => {
   let validator: ModificationValidator;
 
   beforeEach(() => {
-    validator = new ModificationValidator({
-      safetyConstraints: DEFAULT_SAFETY_CONSTRAINTS,
-      capabilityConstraints: DEFAULT_CAPABILITY_CONSTRAINTS,
-      resourceConstraints: DEFAULT_RESOURCE_CONSTRAINTS,
-    });
+    validator = new ModificationValidator();
   });
 
   it('validates safe modifications', async () => {
@@ -26,15 +20,15 @@ describe('ModificationValidator', () => {
       target: 'temperature',
       changes: { temperature: 0.7 },
       reason: 'Adjust for creativity',
-      context: {
+      payload: {
         sandboxExecution: true,
         linesOfCode: 50,
         modificationDepth: 1,
       },
     });
 
-    expect(result.isValid).toBe(true);
-    expect(result.violations).toHaveLength(0);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 
   it('rejects modifications violating safety constraints', async () => {
@@ -43,29 +37,31 @@ describe('ModificationValidator', () => {
       target: 'new_tool',
       changes: { code: 'eval("malicious")' },
       reason: 'Create tool',
-      context: {
+      payload: {
         sandboxExecution: false,
         linesOfCode: 50,
         modificationDepth: 1,
       },
     });
 
-    expect(result.isValid).toBe(false);
-    expect(result.violations.length).toBeGreaterThan(0);
+    expect(result.valid).toBe(false);
+    expect(result.errors!.length).toBeGreaterThan(0);
   });
 
   it('handles complex constraint expressions', async () => {
     const customValidator = new ModificationValidator({
-      safetyConstraints: [
-        {
-          id: 'complex_rule',
-          rule: 'temperature <= 1.5 AND maxTokens <= 8000',
-          severity: 'error',
-          description: 'Complex constraint',
-        },
-      ],
-      capabilityConstraints: [],
-      resourceConstraints: [],
+      constraints: {
+        safety: [
+          {
+            id: 'complex_rule',
+            rule: 'temperature <= 1.5 AND maxTokens <= 8000',
+            severity: 'error',
+            description: 'Complex constraint',
+          },
+        ],
+        capability: [],
+        resource: [],
+      },
     });
 
     const validResult = await customValidator.validate({
@@ -73,26 +69,38 @@ describe('ModificationValidator', () => {
       target: 'config',
       changes: {},
       reason: 'Test',
-      context: { temperature: 1.0, maxTokens: 4000 },
+      payload: {
+        temperature: 1.0,
+        maxTokens: 4000,
+        sandboxExecution: true,
+        linesOfCode: 50,
+        modificationDepth: 1,
+      },
     });
 
-    expect(validResult.isValid).toBe(true);
+    expect(validResult.valid).toBe(true);
 
     const invalidResult = await customValidator.validate({
       type: 'config_change',
       target: 'config',
       changes: {},
       reason: 'Test',
-      context: { temperature: 2.0, maxTokens: 4000 },
+      payload: {
+        temperature: 2.0,
+        maxTokens: 4000,
+        sandboxExecution: true,
+        linesOfCode: 50,
+        modificationDepth: 1,
+      },
     });
 
-    expect(invalidResult.isValid).toBe(false);
+    expect(invalidResult.valid).toBe(false);
   });
 
   it('adds custom constraints', async () => {
     validator.addSafetyConstraint({
       id: 'custom_test',
-      rule: 'customValue == true',
+      rule: 'customValue = true',
       severity: 'error',
       description: 'Custom test constraint',
     });
@@ -102,10 +110,15 @@ describe('ModificationValidator', () => {
       target: 'test',
       changes: {},
       reason: 'Test',
-      context: { customValue: false },
+      payload: {
+        customValue: false,
+        sandboxExecution: true,
+        linesOfCode: 50,
+        modificationDepth: 1,
+      },
     });
 
-    expect(result.isValid).toBe(false);
+    expect(result.valid).toBe(false);
   });
 });
 
@@ -113,7 +126,7 @@ describe('RollbackManager', () => {
   let manager: RollbackManager;
 
   beforeEach(() => {
-    manager = new RollbackManager();
+    manager = new RollbackManager({ maxCheckpoints: 10 });
   });
 
   it('creates checkpoints', async () => {
@@ -170,12 +183,12 @@ describe('RollbackManager', () => {
       []
     );
 
-    const diff = manager.compareCheckpoints(cp1.id, cp2.id);
+    const diff = manager.compareCheckpoints(cp1, cp2);
 
     expect(diff).not.toBeNull();
-    expect(diff?.configChanges).toContain('model');
-    expect(diff?.configChanges).toContain('temperature');
-    expect(diff?.toolsAdded).toContain('tool2');
+    expect(diff.configChanges.map((c) => c.key)).toContain('model');
+    expect(diff.configChanges.map((c) => c.key)).toContain('temperature');
+    expect(diff.toolsAdded).toContain('tool2');
   });
 
   it('maintains checkpoint limit', async () => {
@@ -185,7 +198,7 @@ describe('RollbackManager', () => {
       await customManager.createCheckpoint('agent-1', { iteration: i }, [], []);
     }
 
-    const checkpoints = customManager.listCheckpoints('agent-1');
+    const checkpoints = await customManager.listCheckpoints('agent-1');
     expect(checkpoints.length).toBeLessThanOrEqual(3);
   });
 });
@@ -232,7 +245,7 @@ describe('InMemoryCheckpointStore', () => {
       modifications: [],
     });
 
-    const agent1Checkpoints = await store.listByAgent('agent-1');
+    const agent1Checkpoints = await store.list('agent-1');
     expect(agent1Checkpoints).toHaveLength(1);
     expect(agent1Checkpoints[0].id).toBe('cp-1');
   });
@@ -257,10 +270,10 @@ describe('InMemoryCheckpointStore', () => {
 describe('Constraint merging', () => {
   it('merges safety constraints', () => {
     const custom = [
-      { id: 'custom', rule: 'x == 1', severity: 'error' as const, description: 'Custom' },
+      { id: 'custom', rule: 'x = 1', severity: 'error' as const, description: 'Custom' },
     ];
 
-    const merged = mergeSafetyConstraints(custom);
+    const merged = mergeSafetyConstraints(DEFAULT_SAFETY_CONSTRAINTS, custom);
 
     expect(merged.length).toBeGreaterThan(custom.length);
     expect(merged.find((c) => c.id === 'custom')).toBeDefined();
