@@ -23,3 +23,4 @@ export * from './cost-routing';
 export * from './negotiation';
 export * from './knowledge-graph';
 export * from './prompt-optimization';
+export * from './neuro-symbolic';

@@ -2,12 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TurnManager } from '../strategies/negotiation/turn-manager';
 import { ConvergenceCalculator } from '../strategies/negotiation/convergence';
 import { ApprovalIntegration } from '../strategies/negotiation/approval';
-import type {
-  NegotiationOffer,
-  NegotiationState,
-  NegotiationAgreement,
-  SwarmEventEmitter,
-} from '@cogitator-ai/types';
+import type { NegotiationOffer, NegotiationState, SwarmEventEmitter } from '@cogitator-ai/types';
 
 describe('TurnManager', () => {
   describe('round-robin mode', () => {
@@ -412,7 +407,7 @@ describe('ApprovalIntegration', () => {
         timeoutAction: 'approve' as const,
       };
 
-      integration.requestApproval(gate, state, mockEvents);
+      void integration.requestApproval(gate, state, mockEvents);
 
       expect(mockEvents.emit).toHaveBeenCalledWith(
         'negotiation:approval-required',
@@ -502,7 +497,7 @@ describe('ApprovalIntegration', () => {
       const state = createState();
       const gate = { trigger: 'deadlock' as const, timeout: 1000 };
 
-      integration.requestApproval(gate, state, mockEvents);
+      void integration.requestApproval(gate, state, mockEvents);
 
       expect(integration.getPendingCount()).toBe(1);
 
@@ -518,8 +513,8 @@ describe('ApprovalIntegration', () => {
       const state = createState();
       const gate = { trigger: 'deadlock' as const, timeout: 10000 };
 
-      integration.requestApproval(gate, state, mockEvents);
-      integration.requestApproval(gate, state, mockEvents);
+      void integration.requestApproval(gate, state, mockEvents);
+      void integration.requestApproval(gate, state, mockEvents);
 
       expect(integration.getPendingCount()).toBe(2);
 
