@@ -44,7 +44,7 @@ export class CausalReasoner {
   private config: CausalReasoningConfig;
   private llm: LLMBackend;
 
-  private graphs: Map<string, CausalGraph> = new Map();
+  private graphs = new Map<string, CausalGraph>();
   private graphStore: InMemoryCausalGraphStore;
   private patternStore: InMemoryCausalPatternStore;
   private interventionLog: InMemoryInterventionLog;

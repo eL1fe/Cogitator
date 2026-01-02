@@ -154,7 +154,7 @@ export class SelfModifyingAgent {
       checkpoints: [],
     };
 
-    this.emitter.emit({
+    void this.emitter.emit({
       type: 'run_started',
       runId,
       timestamp: new Date(),
@@ -172,7 +172,7 @@ export class SelfModifyingAgent {
 
       const modeConfig = this.metaReasoner.initializeRun(runId);
 
-      this.emitter.emit({
+      void this.emitter.emit({
         type: 'strategy_changed',
         runId,
         timestamp: new Date(),
@@ -192,7 +192,7 @@ export class SelfModifyingAgent {
         finalConfig: { ...this.currentContext.currentConfig },
       };
 
-      this.emitter.emit({
+      void this.emitter.emit({
         type: 'run_completed',
         runId,
         timestamp: new Date(),
@@ -205,7 +205,7 @@ export class SelfModifyingAgent {
 
       return result;
     } catch (error) {
-      this.emitter.emit({
+      void this.emitter.emit({
         type: 'run_completed',
         runId,
         timestamp: new Date(),
@@ -232,7 +232,7 @@ export class SelfModifyingAgent {
     if (result.success && result.tool) {
       await this.toolStore.save(result.tool);
 
-      this.emitter.emit({
+      void this.emitter.emit({
         type: 'tool_generation_completed',
         runId: this.currentContext?.runId || 'manual',
         timestamp: new Date(),
@@ -247,7 +247,7 @@ export class SelfModifyingAgent {
       return result.tool;
     }
 
-    this.emitter.emit({
+    void this.emitter.emit({
       type: 'tool_generation_completed',
       runId: this.currentContext?.runId || 'manual',
       timestamp: new Date(),
@@ -295,7 +295,7 @@ export class SelfModifyingAgent {
 
     this.currentContext.checkpoints.push(checkpoint);
 
-    this.emitter.emit({
+    void this.emitter.emit({
       type: 'checkpoint_created',
       runId: this.currentContext.runId,
       timestamp: new Date(),
@@ -313,7 +313,7 @@ export class SelfModifyingAgent {
       this.currentContext.tools = restored.tools;
     }
 
-    this.emitter.emit({
+    void this.emitter.emit({
       type: 'rollback_performed',
       runId: this.currentContext?.runId || 'manual',
       timestamp: new Date(),
@@ -329,11 +329,7 @@ export class SelfModifyingAgent {
   private async ensureInitialized(): Promise<void> {
     if (this.isInitialized) return;
 
-    const activeToos = await this.toolStore.list({ status: 'active' });
-    for (const tool of activeToos) {
-      if (tool.validationScore && tool.validationScore > 0.8) {
-      }
-    }
+    await this.toolStore.list({ status: 'active' });
 
     this.isInitialized = true;
   }
@@ -444,7 +440,7 @@ export class SelfModifyingAgent {
         if (validation.valid) {
           this.currentContext.currentConfig = result.recommendedConfig;
 
-          this.emitter.emit({
+          void this.emitter.emit({
             type: 'architecture_evolved',
             runId: this.currentContext.runId,
             timestamp: new Date(),
@@ -467,7 +463,7 @@ export class SelfModifyingAgent {
 
       for (const gap of analysis.gaps) {
         if (gap.confidence >= this.config.toolGeneration.minConfidenceForGeneration) {
-          this.emitter.emit({
+          void this.emitter.emit({
             type: 'tool_generation_started',
             runId: this.currentContext.runId,
             timestamp: new Date(),
@@ -525,7 +521,7 @@ export class SelfModifyingAgent {
       ) {
         const assessment = await this.metaReasoner.assess(observation);
 
-        this.emitter.emit({
+        void this.emitter.emit({
           type: 'meta_assessment',
           runId,
           timestamp: new Date(),
@@ -541,7 +537,7 @@ export class SelfModifyingAgent {
           if (adaptation) {
             this.currentContext.adaptations.push(adaptation);
 
-            this.emitter.emit({
+            void this.emitter.emit({
               type: 'strategy_changed',
               runId,
               timestamp: new Date(),

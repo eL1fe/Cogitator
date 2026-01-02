@@ -205,7 +205,7 @@ export function parseGapAnalysisResponse(response: string): {
   canProceed: boolean;
   alternativeApproach?: string;
 } {
-  const jsonMatch = response.match(/\{[\s\S]*\}/);
+  const jsonMatch = /\{[\s\S]*\}/.exec(response);
   if (!jsonMatch) {
     return { hasGap: false, gaps: [], canProceed: true };
   }
@@ -238,7 +238,7 @@ export function parseGapAnalysisResponse(response: string): {
 }
 
 export function parseToolGenerationResponse(response: string): GeneratedTool | null {
-  const jsonMatch = response.match(/\{[\s\S]*\}/);
+  const jsonMatch = /\{[\s\S]*\}/.exec(response);
   if (!jsonMatch) {
     return null;
   }
@@ -268,7 +268,7 @@ export function parseToolGenerationResponse(response: string): GeneratedTool | n
 }
 
 export function parseValidationResponse(response: string): ToolValidationResult | null {
-  const jsonMatch = response.match(/\{[\s\S]*\}/);
+  const jsonMatch = /\{[\s\S]*\}/.exec(response);
   if (!jsonMatch) {
     return null;
   }

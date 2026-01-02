@@ -140,7 +140,7 @@ Respond with:
 }
 
 export function parseTaskProfileResponse(response: string): TaskProfile | null {
-  const jsonMatch = response.match(/\{[\s\S]*\}/);
+  const jsonMatch = /\{[\s\S]*\}/.exec(response);
   if (!jsonMatch) return null;
 
   try {
@@ -163,7 +163,7 @@ export function parseTaskProfileResponse(response: string): TaskProfile | null {
 }
 
 export function parseCandidateGenerationResponse(response: string): EvolutionCandidate[] {
-  const jsonMatch = response.match(/\[[\s\S]*\]/);
+  const jsonMatch = /\[[\s\S]*\]/.exec(response);
   if (!jsonMatch) return [];
 
   try {
@@ -197,7 +197,7 @@ export function parsePerformanceAnalysisResponse(response: string): {
   shouldAdopt: boolean;
   analysis: string;
 } | null {
-  const jsonMatch = response.match(/\{[\s\S]*\}/);
+  const jsonMatch = /\{[\s\S]*\}/.exec(response);
   if (!jsonMatch) return null;
 
   try {

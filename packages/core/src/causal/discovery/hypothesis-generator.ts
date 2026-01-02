@@ -25,7 +25,7 @@ export class CausalHypothesisGenerator {
   private model: string;
   private maxHypothesesPerBatch: number;
   private minExpectedStrength: number;
-  private pendingHypotheses: Map<string, CausalHypothesis[]> = new Map();
+  private pendingHypotheses = new Map<string, CausalHypothesis[]>();
 
   constructor(options: HypothesisGeneratorOptions) {
     this.llm = options.llmBackend;

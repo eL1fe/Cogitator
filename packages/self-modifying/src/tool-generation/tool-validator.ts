@@ -56,9 +56,9 @@ const STATIC_VALIDATION_RULES: ValidationRule[] = [
     name: 'No prototype pollution',
     severity: 'error',
     check: (code) => {
-      if (/__proto__/.test(code)) return 'Uses __proto__';
+      if (code.includes('__proto__')) return 'Uses __proto__';
       if (/\.prototype\s*=/.test(code)) return 'Modifies prototype';
-      if (/Object\.setPrototypeOf/.test(code)) return 'Uses setPrototypeOf';
+      if (code.includes('Object.setPrototypeOf')) return 'Uses setPrototypeOf';
       return null;
     },
   },
@@ -67,10 +67,10 @@ const STATIC_VALIDATION_RULES: ValidationRule[] = [
     name: 'No obvious infinite loops',
     severity: 'warning',
     check: (code) => {
-      if (/while\s*\(\s*true\s*\)/.test(code) && !/break/.test(code)) {
+      if (/while\s*\(\s*true\s*\)/.test(code) && !code.includes('break')) {
         return 'Contains while(true) without break';
       }
-      if (/for\s*\(\s*;\s*;\s*\)/.test(code) && !/break/.test(code)) {
+      if (/for\s*\(\s*;\s*;\s*\)/.test(code) && !code.includes('break')) {
         return 'Contains for(;;) without break';
       }
       return null;
@@ -107,7 +107,7 @@ const STATIC_VALIDATION_RULES: ValidationRule[] = [
     name: 'No shell command execution',
     severity: 'error',
     check: (code) => {
-      if (/child_process/.test(code)) return 'Uses child_process';
+      if (code.includes('child_process')) return 'Uses child_process';
       if (/\bexec\s*\(/.test(code)) return 'Uses exec()';
       if (/\bspawn\s*\(/.test(code)) return 'Uses spawn()';
       if (/\bexecSync\s*\(/.test(code)) return 'Uses execSync()';

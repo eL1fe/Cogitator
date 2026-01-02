@@ -116,12 +116,12 @@ export class ModificationValidator {
     const conditions: boolean[] = [];
     const operators: string[] = [];
 
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i].trim();
-      if (part.toUpperCase() === 'AND' || part.toUpperCase() === 'OR') {
-        operators.push(part.toUpperCase());
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (trimmed.toUpperCase() === 'AND' || trimmed.toUpperCase() === 'OR') {
+        operators.push(trimmed.toUpperCase());
       } else {
-        conditions.push(this.evaluateSimpleCondition(part, context));
+        conditions.push(this.evaluateSimpleCondition(trimmed, context));
       }
     }
 

@@ -189,7 +189,7 @@ export function findMinimalSeparatingSet(
   graph: CausalGraph,
   x: string | string[],
   y: string | string[],
-  forbidden: Set<string> = new Set()
+  forbidden = new Set<string>()
 ): string[] | null {
   const xSet = new Set(Array.isArray(x) ? x : [x]);
   const ySet = new Set(Array.isArray(y) ? y : [y]);

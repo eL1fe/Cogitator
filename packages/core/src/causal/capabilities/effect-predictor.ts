@@ -333,7 +333,7 @@ Respond in JSON:
         temperature: 0.3,
       });
 
-      const match = response.content.match(/\{[\s\S]*\}/);
+      const match = /\{[\s\S]*\}/.exec(response.content);
       if (match) {
         const parsed = JSON.parse(match[0]);
         return {

@@ -13,7 +13,7 @@ let edgeCounter = 0;
 export class CausalGraphBuilder {
   private graphId: string;
   private graphName: string;
-  private nodes: Map<string, CausalNode> = new Map();
+  private nodes = new Map<string, CausalNode>();
   private pendingEdges: Array<Omit<CausalEdge, 'id'>> = [];
   private currentNode: string | null = null;
 

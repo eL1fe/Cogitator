@@ -215,7 +215,7 @@ export class CounterfactualReasoner {
     noiseTerms: Record<string, number>
   ): number | string | boolean {
     const node = graph.getNode(target);
-    if (!node || !node.equation) {
+    if (!node?.equation) {
       return observed[target] ?? 0;
     }
 

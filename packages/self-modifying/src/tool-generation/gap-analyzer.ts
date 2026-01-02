@@ -148,7 +148,7 @@ Consider tool composition before suggesting new tools.`,
       return 1.0;
     }
 
-    const intentWords = userIntent.toLowerCase().split(/\s+/).length;
+    const _intentWords = userIntent.toLowerCase().split(/\s+/).length;
     const toolDescriptionWords = availableTools
       .map((t) => t.description.toLowerCase().split(/\s+/))
       .flat();

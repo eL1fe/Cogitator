@@ -11,11 +11,11 @@ export class CausalGraphImpl implements CausalGraph {
   readonly id: string;
   readonly name: string;
 
-  private nodes: Map<string, CausalNode> = new Map();
-  private edges: Map<string, CausalEdge> = new Map();
-  private parentMap: Map<string, Set<string>> = new Map();
-  private childMap: Map<string, Set<string>> = new Map();
-  private edgeIndex: Map<string, string> = new Map();
+  private nodes = new Map<string, CausalNode>();
+  private edges = new Map<string, CausalEdge>();
+  private parentMap = new Map<string, Set<string>>();
+  private childMap = new Map<string, Set<string>>();
+  private edgeIndex = new Map<string, string>();
   private createdAt: number;
   private updatedAt: number;
   private version: number;

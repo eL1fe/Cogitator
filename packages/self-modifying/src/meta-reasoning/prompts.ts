@@ -111,7 +111,7 @@ export interface ParsedAssessment {
 
 export function parseMetaAssessmentResponse(content: string): ParsedAssessment | null {
   try {
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    const jsonMatch = /\{[\s\S]*\}/.exec(content);
     if (!jsonMatch) return null;
     return JSON.parse(jsonMatch[0]) as ParsedAssessment;
   } catch {

@@ -7,7 +7,7 @@ import type {
   EvolutionMetrics,
 } from '@cogitator-ai/types';
 import { CapabilityAnalyzer } from './capability-analyzer';
-import { EvolutionStrategy, type SelectionResult } from './evolution-strategy';
+import { EvolutionStrategy, type SelectionResult as _SelectionResult } from './evolution-strategy';
 import {
   buildCandidateGenerationPrompt,
   buildPerformanceAnalysisPrompt,
@@ -202,7 +202,7 @@ export class ParameterOptimizer {
 
   private async generateOffspring(
     parents: EvolutionCandidate[],
-    profile: TaskProfile
+    _profile: TaskProfile
   ): Promise<EvolutionCandidate[]> {
     const offspring: EvolutionCandidate[] = [];
 

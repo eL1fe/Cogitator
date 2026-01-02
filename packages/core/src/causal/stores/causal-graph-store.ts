@@ -1,8 +1,8 @@
 import type { CausalGraphData, CausalGraphStore } from '@cogitator-ai/types';
 
 export class InMemoryCausalGraphStore implements CausalGraphStore {
-  private graphs: Map<string, CausalGraphData> = new Map();
-  private agentIndex: Map<string, string[]> = new Map();
+  private graphs = new Map<string, CausalGraphData>();
+  private agentIndex = new Map<string, string[]>();
 
   async save(graph: CausalGraphData): Promise<void> {
     this.graphs.set(graph.id, { ...graph });

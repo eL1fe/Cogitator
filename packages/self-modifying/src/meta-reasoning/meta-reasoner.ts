@@ -286,7 +286,7 @@ export class MetaReasoner {
     const runAdaptations = this.adaptations.get(runId) ?? [];
     const lastAdaptation = runAdaptations[runAdaptations.length - 1];
 
-    if (!lastAdaptation || !lastAdaptation.rollbackable) {
+    if (!lastAdaptation?.rollbackable) {
       return null;
     }
 

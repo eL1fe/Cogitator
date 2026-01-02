@@ -195,7 +195,7 @@ export interface CausalExtractionResult {
 
 export function parseCausalExtractionResponse(response: string): CausalExtractionResult | null {
   try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    const jsonMatch = /\{[\s\S]*\}/.exec(response);
     if (!jsonMatch) return null;
 
     const parsed = JSON.parse(jsonMatch[0]);
@@ -236,7 +236,7 @@ export interface HypothesisGenerationResult {
 
 export function parseHypothesisResponse(response: string): HypothesisGenerationResult | null {
   try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    const jsonMatch = /\{[\s\S]*\}/.exec(response);
     if (!jsonMatch) return null;
 
     const parsed = JSON.parse(jsonMatch[0]);
@@ -271,7 +271,7 @@ export interface ValidationResult {
 
 export function parseValidationResponse(response: string): ValidationResult | null {
   try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    const jsonMatch = /\{[\s\S]*\}/.exec(response);
     if (!jsonMatch) return null;
 
     const parsed = JSON.parse(jsonMatch[0]);
@@ -320,7 +320,7 @@ export interface RootCauseAnalysisResult {
 
 export function parseRootCauseResponse(response: string): RootCauseAnalysisResult | null {
   try {
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    const jsonMatch = /\{[\s\S]*\}/.exec(response);
     if (!jsonMatch) return null;
 
     const parsed = JSON.parse(jsonMatch[0]);

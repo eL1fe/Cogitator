@@ -176,18 +176,16 @@ export class ToolSandbox {
   }
 
   private createContext(): SandboxContext {
-    const sandbox = this;
-
     return {
       console: {
         log: (...args: unknown[]) => {
-          sandbox.logs.push(`[LOG] ${args.map(String).join(' ')}`);
+          this.logs.push(`[LOG] ${args.map(String).join(' ')}`);
         },
         warn: (...args: unknown[]) => {
-          sandbox.logs.push(`[WARN] ${args.map(String).join(' ')}`);
+          this.logs.push(`[WARN] ${args.map(String).join(' ')}`);
         },
         error: (...args: unknown[]) => {
-          sandbox.logs.push(`[ERROR] ${args.map(String).join(' ')}`);
+          this.logs.push(`[ERROR] ${args.map(String).join(' ')}`);
         },
       },
       Math,
@@ -244,13 +242,13 @@ export class ToolSandbox {
             clearTimeout(timer);
             resolve(result);
           })
-          .catch((error) => {
+          .catch((error: unknown) => {
             clearTimeout(timer);
-            reject(error);
+            reject(error instanceof Error ? error : new Error(String(error)));
           });
       } catch (error) {
         clearTimeout(timer);
-        reject(error);
+        reject(error instanceof Error ? error : new Error(String(error)));
       }
     });
   }

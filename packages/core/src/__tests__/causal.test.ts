@@ -440,7 +440,7 @@ describe('CausalInferenceEngine', () => {
 
 describe('CounterfactualReasoner', () => {
   let graph: CausalGraphImpl;
-  let reasoner: CounterfactualReasoner;
+  let _reasoner: CounterfactualReasoner;
 
   beforeEach(() => {
     graph = CausalGraphBuilder.create('test')
@@ -451,7 +451,7 @@ describe('CounterfactualReasoner', () => {
       .withEquation('Y', { type: 'linear', coefficients: { X: 0.8 }, intercept: 0.1 })
       .build() as CausalGraphImpl;
 
-    reasoner = new CounterfactualReasoner({ config: {} });
+    _reasoner = new CounterfactualReasoner({ config: {} });
   });
 
   it('should evaluate counterfactual with structural equations', () => {

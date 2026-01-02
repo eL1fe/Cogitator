@@ -1,8 +1,8 @@
 import type { CausalPattern, CausalPatternStore } from '@cogitator-ai/types';
 
 export class InMemoryCausalPatternStore implements CausalPatternStore {
-  private patterns: Map<string, CausalPattern> = new Map();
-  private agentIndex: Map<string, Set<string>> = new Map();
+  private patterns = new Map<string, CausalPattern>();
+  private agentIndex = new Map<string, Set<string>>();
 
   async save(pattern: CausalPattern): Promise<void> {
     this.patterns.set(pattern.id, { ...pattern });

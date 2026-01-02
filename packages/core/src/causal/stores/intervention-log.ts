@@ -1,8 +1,8 @@
 import type { InterventionRecord, InterventionLog } from '@cogitator-ai/types';
 
 export class InMemoryInterventionLog implements InterventionLog {
-  private records: Map<string, InterventionRecord> = new Map();
-  private agentIndex: Map<string, string[]> = new Map();
+  private records = new Map<string, InterventionRecord>();
+  private agentIndex = new Map<string, string[]>();
 
   async log(record: InterventionRecord): Promise<void> {
     this.records.set(record.id, { ...record });

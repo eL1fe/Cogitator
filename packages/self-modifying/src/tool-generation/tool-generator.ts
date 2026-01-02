@@ -6,7 +6,7 @@ import type {
   ToolValidationResult,
   ToolSelfGenerationConfig,
 } from '@cogitator-ai/types';
-import type { ZodType } from 'zod';
+import { z, type ZodType } from 'zod';
 import { ToolValidator } from './tool-validator';
 import {
   TOOL_GENERATION_SYSTEM_PROMPT,
@@ -119,7 +119,7 @@ export class ToolGenerator {
   async generateQuick(
     description: string,
     name: string,
-    parameters: Record<string, unknown>
+    _parameters: Record<string, unknown>
   ): Promise<GeneratedTool | null> {
     const gap: CapabilityGap = {
       id: `quick_${Date.now()}`,
@@ -204,7 +204,6 @@ export class ToolGenerator {
 
   createExecutableTool(generated: GeneratedTool): Tool {
     const execute = this.compileImplementation(generated.implementation);
-    const { z } = require('zod');
 
     return {
       name: generated.name,
