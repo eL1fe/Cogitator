@@ -9,6 +9,8 @@ export interface AgentConfig {
   id?: string;
   name: string;
   description?: string;
+  /** Explicit provider override (e.g., 'openai' for OpenRouter) */
+  provider?: string;
   model: string;
   instructions: string;
   tools?: Tool[];

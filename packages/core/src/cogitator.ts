@@ -384,7 +384,7 @@ export class Cogitator {
         }
       }
 
-      const backend = this.getBackend(effectiveModel);
+      const backend = this.getBackend(effectiveModel, agent.config.provider);
       const { model } = parseModel(effectiveModel);
 
       const messages = await this.buildInitialMessages(agent, options, threadId);
@@ -982,10 +982,16 @@ export class Cogitator {
 
   /**
    * Get or create an LLM backend
+   * @param modelString - Model string (e.g., "x-ai/grok-4.1-fast")
+   * @param explicitProvider - Explicit provider override (e.g., 'openai' for OpenRouter)
    */
-  private getBackend(modelString: string): LLMBackend {
-    const { provider } = parseModel(modelString);
-    const actualProvider = provider ?? this.config.llm?.defaultProvider ?? 'ollama';
+  private getBackend(modelString: string, explicitProvider?: string): LLMBackend {
+    const { provider: parsedProvider } = parseModel(modelString);
+
+    const actualProvider = (explicitProvider ??
+      parsedProvider ??
+      this.config.llm?.defaultProvider ??
+      'ollama') as LLMProvider;
 
     let backend = this.backends.get(actualProvider);
     if (!backend) {
