@@ -1,5 +1,11 @@
 # @cogitator-ai/core
 
+## 0.6.1
+
+### Patch Changes
+
+- 29ce518: fix(core): preserve full model name when explicit provider is set
+
 ## 0.6.0
 
 ### Minor Changes
