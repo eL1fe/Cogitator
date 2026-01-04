@@ -205,6 +205,12 @@ class Lexer {
       return { type: 'cut' };
     }
 
+    if (ch === '\\' && this.input[this.pos + 1] === '+') {
+      this.advance();
+      this.advance();
+      return { type: 'atom', value: '\\+' };
+    }
+
     if (ch === ':' && this.input[this.pos + 1] === '-') {
       this.advance();
       this.advance();
