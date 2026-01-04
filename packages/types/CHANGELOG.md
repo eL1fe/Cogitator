@@ -1,5 +1,13 @@
 # @cogitator-ai/types
 
+## 0.7.0
+
+### Minor Changes
+
+- a7c2b43: feat(core): add explicit provider override in AgentConfig
+
+  Allows specifying provider directly in AgentConfig (e.g., 'openai' for OpenRouter) instead of relying only on model string parsing.
+
 ## 0.6.0
 
 ### Minor Changes

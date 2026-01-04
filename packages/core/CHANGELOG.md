@@ -1,5 +1,21 @@
 # @cogitator-ai/core
 
+## 0.6.0
+
+### Minor Changes
+
+- a7c2b43: feat(core): add explicit provider override in AgentConfig
+
+  Allows specifying provider directly in AgentConfig (e.g., 'openai' for OpenRouter) instead of relying only on model string parsing.
+
+### Patch Changes
+
+- Updated dependencies [a7c2b43]
+  - @cogitator-ai/types@0.7.0
+  - @cogitator-ai/memory@0.4.1
+  - @cogitator-ai/models@5.0.0
+  - @cogitator-ai/sandbox@0.2.4
+
 ## 0.5.0
 
 ### Minor Changes

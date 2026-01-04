@@ -1,5 +1,14 @@
 # @cogitator-ai/neuro-symbolic
 
+## 3.0.0
+
+### Patch Changes
+
+- Updated dependencies [a7c2b43]
+  - @cogitator-ai/core@0.6.0
+  - @cogitator-ai/types@0.7.0
+  - @cogitator-ai/memory@0.4.1
+
 ## 2.0.1
 
 ### Patch Changes
