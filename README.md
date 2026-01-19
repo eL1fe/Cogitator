@@ -59,7 +59,7 @@ Cogitator is a **self-hosted, production-grade runtime** for orchestrating LLM s
 ### Why Cogitator?
 
 - **OpenAI-Compatible API** — Drop-in replacement for Assistants API, works with existing SDKs
-- **Run Any LLM** — Ollama, vLLM, llama.cpp, OpenAI, Anthropic, Google — all unified
+- **Run Any LLM** — Ollama, OpenAI, Anthropic, Google, Mistral, Groq, Together, DeepSeek — all unified
 - **Production Memory** — Hybrid storage: Redis (fast) + pgvector (semantic) + SQLite (portable)
 - **Tool Ecosystem** — MCP-compatible, build once, use everywhere
 - **Workflow Engine** — DAG-based orchestration with retry, compensation, human-in-the-loop
@@ -230,7 +230,7 @@ const result = await cog.run(devTeam, {
 │  └───────────────────────────────────────────────────────────────────────┘  │
 │                                                                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  LLM Backends:  Ollama │ vLLM │ llama.cpp │ OpenAI │ Anthropic │ Google    │
+│  LLM Backends: Ollama │ OpenAI │ Anthropic │ Google │ Mistral │ Groq │ ... │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -258,9 +258,13 @@ const result = await cog.run(devTeam, {
 // Same code, any provider
 const agent = new Agent({
   model: 'ollama/llama3.2:70b', // Local
-  // model: 'openai/gpt-4o',         // OpenAI
+  // model: 'openai/gpt-4o',              // OpenAI
   // model: 'anthropic/claude-3-5-sonnet', // Anthropic
-  // model: 'google/gemini-pro',     // Google
+  // model: 'google/gemini-pro',           // Google
+  // model: 'mistral/mistral-large',       // Mistral
+  // model: 'groq/llama-3.3-70b',          // Groq (ultra-fast)
+  // model: 'together/meta-llama/Llama-3-70b', // Together
+  // model: 'deepseek/deepseek-chat',      // DeepSeek
 });
 ```
 
@@ -877,7 +881,7 @@ const agent = new Agent({
 
 - [x] Project structure and monorepo setup
 - [x] Core runtime (Agent, Tool, Cogitator)
-- [x] Universal LLM interface (Ollama, OpenAI, Anthropic, Google)
+- [x] Universal LLM interface (Ollama, OpenAI, Anthropic, Google, Mistral, Groq, Together, DeepSeek)
 - [x] Basic memory (Redis + Postgres)
 - [x] Docker-based agent sandboxing
 - [x] CLI tool (`cogitator init/up/run`)
