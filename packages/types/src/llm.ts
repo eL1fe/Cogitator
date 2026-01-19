@@ -5,7 +5,16 @@
 import type { Message, ToolCall } from './message';
 import type { ToolSchema } from './tool';
 
-export type LLMProvider = 'ollama' | 'openai' | 'anthropic' | 'google' | 'vllm';
+export type LLMProvider =
+  | 'ollama'
+  | 'openai'
+  | 'anthropic'
+  | 'google'
+  | 'vllm'
+  | 'mistral'
+  | 'groq'
+  | 'together'
+  | 'deepseek';
 
 export interface LLMConfig {
   provider: LLMProvider;

@@ -22,6 +22,10 @@ export interface CogitatorConfig {
       anthropic?: { apiKey: string };
       google?: { apiKey: string };
       vllm?: { baseUrl: string };
+      mistral?: { apiKey: string };
+      groq?: { apiKey: string };
+      together?: { apiKey: string };
+      deepseek?: { apiKey: string };
     };
   };
   limits?: {

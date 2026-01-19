@@ -54,6 +54,42 @@ export function createLLMBackend(
         apiKey: providers.google.apiKey,
       });
 
+    case 'mistral':
+      if (!providers.mistral?.apiKey) {
+        throw new Error('Mistral API key is required');
+      }
+      return new OpenAIBackend({
+        apiKey: providers.mistral.apiKey,
+        baseUrl: 'https://api.mistral.ai/v1',
+      });
+
+    case 'groq':
+      if (!providers.groq?.apiKey) {
+        throw new Error('Groq API key is required');
+      }
+      return new OpenAIBackend({
+        apiKey: providers.groq.apiKey,
+        baseUrl: 'https://api.groq.com/openai/v1',
+      });
+
+    case 'together':
+      if (!providers.together?.apiKey) {
+        throw new Error('Together API key is required');
+      }
+      return new OpenAIBackend({
+        apiKey: providers.together.apiKey,
+        baseUrl: 'https://api.together.xyz/v1',
+      });
+
+    case 'deepseek':
+      if (!providers.deepseek?.apiKey) {
+        throw new Error('DeepSeek API key is required');
+      }
+      return new OpenAIBackend({
+        apiKey: providers.deepseek.apiKey,
+        baseUrl: 'https://api.deepseek.com/v1',
+      });
+
     case 'vllm':
       throw new Error(`Provider ${provider} not yet implemented`);
 
