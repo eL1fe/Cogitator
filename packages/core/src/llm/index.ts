@@ -7,12 +7,16 @@ export { OllamaBackend } from './ollama';
 export { OpenAIBackend } from './openai';
 export { AnthropicBackend } from './anthropic';
 export { GoogleBackend } from './google';
+export { AzureOpenAIBackend } from './azure';
+export { BedrockBackend } from './bedrock';
 
 import type { LLMBackend, LLMProvider, CogitatorConfig } from '@cogitator-ai/types';
 import { OllamaBackend } from './ollama';
 import { OpenAIBackend } from './openai';
 import { AnthropicBackend } from './anthropic';
 import { GoogleBackend } from './google';
+import { AzureOpenAIBackend } from './azure';
+import { BedrockBackend } from './bedrock';
 
 /**
  * Create an LLM backend from configuration
@@ -52,6 +56,24 @@ export function createLLMBackend(
       }
       return new GoogleBackend({
         apiKey: providers.google.apiKey,
+      });
+
+    case 'azure':
+      if (!providers.azure?.endpoint || !providers.azure?.apiKey) {
+        throw new Error('Azure OpenAI endpoint and API key are required');
+      }
+      return new AzureOpenAIBackend({
+        endpoint: providers.azure.endpoint,
+        apiKey: providers.azure.apiKey,
+        apiVersion: providers.azure.apiVersion,
+        deployment: providers.azure.deployment,
+      });
+
+    case 'bedrock':
+      return new BedrockBackend({
+        region: providers.bedrock?.region,
+        accessKeyId: providers.bedrock?.accessKeyId,
+        secretAccessKey: providers.bedrock?.secretAccessKey,
       });
 
     case 'mistral':

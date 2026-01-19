@@ -1,0 +1,407 @@
+/**
+ * AWS Bedrock LLM Backend
+ *
+ * Uses AWS Bedrock's Converse API for unified chat interface.
+ * Supports Claude, Llama, Mistral, Cohere, and Amazon Titan models.
+ */
+
+import type {
+  ChatRequest,
+  ChatResponse,
+  ChatStreamChunk,
+  ToolCall,
+  ToolChoice,
+  Message,
+  MessageContent,
+  ContentPart,
+  ToolSchema,
+} from '@cogitator-ai/types';
+import { BaseLLMBackend } from './base';
+
+import type {
+  BedrockRuntimeClient as BedrockRuntimeClientType,
+  ConverseCommandInput,
+  ConverseCommandOutput,
+  ConverseStreamCommandInput,
+  Message as BedrockMessage,
+  ContentBlock,
+  Tool,
+  ToolConfiguration,
+  InferenceConfiguration,
+} from '@aws-sdk/client-bedrock-runtime';
+
+type DocumentType =
+  | null
+  | boolean
+  | number
+  | string
+  | DocumentType[]
+  | { [key: string]: DocumentType };
+
+interface BedrockConfig {
+  region?: string;
+  accessKeyId?: string;
+  secretAccessKey?: string;
+}
+
+export class BedrockBackend extends BaseLLMBackend {
+  readonly provider = 'bedrock' as const;
+  private config: BedrockConfig;
+  private clientPromise: Promise<BedrockRuntimeClientType> | null = null;
+
+  constructor(config: BedrockConfig) {
+    super();
+    this.config = config;
+  }
+
+  private async getClient(): Promise<BedrockRuntimeClientType> {
+    if (!this.clientPromise) {
+      this.clientPromise = (async () => {
+        try {
+          const { BedrockRuntimeClient } = await import('@aws-sdk/client-bedrock-runtime');
+
+          const clientConfig: Record<string, unknown> = {};
+          if (this.config.region) {
+            clientConfig.region = this.config.region;
+          }
+          if (this.config.accessKeyId && this.config.secretAccessKey) {
+            clientConfig.credentials = {
+              accessKeyId: this.config.accessKeyId,
+              secretAccessKey: this.config.secretAccessKey,
+            };
+          }
+
+          return new BedrockRuntimeClient(clientConfig);
+        } catch {
+          throw new Error('AWS SDK not installed. Run: pnpm add @aws-sdk/client-bedrock-runtime');
+        }
+      })();
+    }
+    return this.clientPromise;
+  }
+
+  async chat(request: ChatRequest): Promise<ChatResponse> {
+    const client = await this.getClient();
+    const { ConverseCommand } = await import('@aws-sdk/client-bedrock-runtime');
+
+    const { system, messages } = this.convertMessages(request.messages);
+    const input: ConverseCommandInput = {
+      modelId: request.model,
+      messages,
+    };
+
+    if (system) {
+      input.system = [{ text: system }];
+    }
+
+    if (request.tools && request.tools.length > 0) {
+      input.toolConfig = {
+        tools: request.tools.map((t) => this.convertTool(t)),
+      };
+
+      const toolChoice = this.convertToolChoice(request.toolChoice);
+      if (toolChoice) {
+        input.toolConfig.toolChoice = toolChoice;
+      }
+    }
+
+    const inferenceConfig: InferenceConfiguration = {};
+    if (request.maxTokens) inferenceConfig.maxTokens = request.maxTokens;
+    if (request.temperature) inferenceConfig.temperature = request.temperature;
+    if (request.topP) inferenceConfig.topP = request.topP;
+    if (request.stop) inferenceConfig.stopSequences = request.stop;
+
+    if (Object.keys(inferenceConfig).length > 0) {
+      input.inferenceConfig = inferenceConfig;
+    }
+
+    const command = new ConverseCommand(input);
+    const response = await client.send(command);
+
+    return this.parseResponse(response);
+  }
+
+  async *chatStream(request: ChatRequest): AsyncGenerator<ChatStreamChunk> {
+    const client = await this.getClient();
+    const { ConverseStreamCommand } = await import('@aws-sdk/client-bedrock-runtime');
+
+    const { system, messages } = this.convertMessages(request.messages);
+    const input: ConverseStreamCommandInput = {
+      modelId: request.model,
+      messages,
+    };
+
+    if (system) {
+      input.system = [{ text: system }];
+    }
+
+    if (request.tools && request.tools.length > 0) {
+      input.toolConfig = {
+        tools: request.tools.map((t) => this.convertTool(t)),
+      };
+
+      const toolChoice = this.convertToolChoice(request.toolChoice);
+      if (toolChoice) {
+        input.toolConfig.toolChoice = toolChoice;
+      }
+    }
+
+    const inferenceConfig: InferenceConfiguration = {};
+    if (request.maxTokens) inferenceConfig.maxTokens = request.maxTokens;
+    if (request.temperature) inferenceConfig.temperature = request.temperature;
+    if (request.topP) inferenceConfig.topP = request.topP;
+    if (request.stop) inferenceConfig.stopSequences = request.stop;
+
+    if (Object.keys(inferenceConfig).length > 0) {
+      input.inferenceConfig = inferenceConfig;
+    }
+
+    const command = new ConverseStreamCommand(input);
+    const response = await client.send(command);
+
+    const id = this.generateId();
+    const toolCalls: ToolCall[] = [];
+    const toolCallInputs = new Map<number, { id: string; name: string; input: string }>();
+
+    if (!response.stream) {
+      return;
+    }
+
+    for await (const event of response.stream) {
+      if (event.contentBlockStart?.start?.toolUse) {
+        const idx = event.contentBlockStart.contentBlockIndex ?? 0;
+        toolCallInputs.set(idx, {
+          id: event.contentBlockStart.start.toolUse.toolUseId ?? '',
+          name: event.contentBlockStart.start.toolUse.name ?? '',
+          input: '',
+        });
+      }
+
+      if (event.contentBlockDelta) {
+        const idx = event.contentBlockDelta.contentBlockIndex ?? 0;
+        const delta = event.contentBlockDelta.delta;
+
+        if (delta?.text) {
+          yield {
+            id,
+            delta: { content: delta.text },
+          };
+        }
+
+        if (delta?.toolUse?.input) {
+          const existing = toolCallInputs.get(idx);
+          if (existing) {
+            existing.input += delta.toolUse.input;
+          }
+        }
+      }
+
+      if (event.contentBlockStop) {
+        const idx = event.contentBlockStop.contentBlockIndex ?? 0;
+        const toolCall = toolCallInputs.get(idx);
+        if (toolCall) {
+          toolCalls.push({
+            id: toolCall.id,
+            name: toolCall.name,
+            arguments: this.tryParseJson(toolCall.input),
+          });
+        }
+      }
+
+      if (event.messageStop) {
+        const finishReason = this.mapStopReason(event.messageStop.stopReason);
+        yield {
+          id,
+          delta: {
+            toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+          },
+          finishReason,
+        };
+      }
+
+      if (event.metadata?.usage) {
+        yield {
+          id,
+          delta: {},
+          usage: {
+            inputTokens: event.metadata.usage.inputTokens ?? 0,
+            outputTokens: event.metadata.usage.outputTokens ?? 0,
+            totalTokens: event.metadata.usage.totalTokens ?? 0,
+          },
+        };
+      }
+    }
+  }
+
+  private convertMessages(messages: Message[]): {
+    system: string | null;
+    messages: BedrockMessage[];
+  } {
+    let system: string | null = null;
+    const bedrockMessages: BedrockMessage[] = [];
+
+    for (const msg of messages) {
+      switch (msg.role) {
+        case 'system':
+          system = this.getTextContent(msg.content);
+          break;
+
+        case 'user':
+          bedrockMessages.push({
+            role: 'user',
+            content: this.convertContentToBlocks(msg.content),
+          });
+          break;
+
+        case 'assistant':
+          bedrockMessages.push({
+            role: 'assistant',
+            content: this.convertContentToBlocks(msg.content),
+          });
+          break;
+
+        case 'tool':
+          bedrockMessages.push({
+            role: 'user',
+            content: [
+              {
+                toolResult: {
+                  toolUseId: msg.toolCallId ?? '',
+                  content: [{ text: this.getTextContent(msg.content) }],
+                },
+              },
+            ],
+          });
+          break;
+      }
+    }
+
+    return { system, messages: bedrockMessages };
+  }
+
+  private convertContentToBlocks(content: MessageContent): ContentBlock[] {
+    if (typeof content === 'string') {
+      return content ? [{ text: content }] : [];
+    }
+
+    return content
+      .map((part) => this.convertContentPart(part))
+      .filter((b): b is ContentBlock => b !== null);
+  }
+
+  private convertContentPart(part: ContentPart): ContentBlock | null {
+    switch (part.type) {
+      case 'text':
+        return { text: part.text };
+      case 'image_base64':
+        return {
+          image: {
+            format: (part.image_base64.media_type.split('/')[1] || 'png') as
+              | 'png'
+              | 'jpeg'
+              | 'gif'
+              | 'webp',
+            source: {
+              bytes: Uint8Array.from(atob(part.image_base64.data), (c) => c.charCodeAt(0)),
+            },
+          },
+        };
+      case 'image_url':
+        return null;
+    }
+  }
+
+  private getTextContent(content: MessageContent): string {
+    if (typeof content === 'string') {
+      return content;
+    }
+    return content
+      .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
+      .map((part) => part.text)
+      .join(' ');
+  }
+
+  private convertTool(tool: ToolSchema): Tool {
+    return {
+      toolSpec: {
+        name: tool.name,
+        description: tool.description,
+        inputSchema: {
+          json: tool.parameters as DocumentType,
+        },
+      },
+    };
+  }
+
+  private convertToolChoice(
+    choice: ToolChoice | undefined
+  ): ToolConfiguration['toolChoice'] | undefined {
+    if (!choice) return undefined;
+
+    if (typeof choice === 'string') {
+      switch (choice) {
+        case 'auto':
+          return { auto: {} };
+        case 'none':
+          return undefined;
+        case 'required':
+          return { any: {} };
+      }
+    }
+
+    return { tool: { name: choice.function.name } };
+  }
+
+  private parseResponse(response: ConverseCommandOutput): ChatResponse {
+    const message = response.output?.message;
+    let content = '';
+    const toolCalls: ToolCall[] = [];
+
+    if (message?.content) {
+      for (const block of message.content) {
+        if ('text' in block && block.text) {
+          content += block.text;
+        } else if ('toolUse' in block && block.toolUse) {
+          toolCalls.push({
+            id: block.toolUse.toolUseId ?? '',
+            name: block.toolUse.name ?? '',
+            arguments: (block.toolUse.input as Record<string, unknown>) ?? {},
+          });
+        }
+      }
+    }
+
+    return {
+      id: this.generateId(),
+      content,
+      toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+      finishReason: this.mapStopReason(response.stopReason),
+      usage: {
+        inputTokens: response.usage?.inputTokens ?? 0,
+        outputTokens: response.usage?.outputTokens ?? 0,
+        totalTokens: response.usage?.totalTokens ?? 0,
+      },
+    };
+  }
+
+  private mapStopReason(reason: string | undefined): ChatResponse['finishReason'] {
+    switch (reason) {
+      case 'end_turn':
+        return 'stop';
+      case 'tool_use':
+        return 'tool_calls';
+      case 'max_tokens':
+        return 'length';
+      default:
+        return 'stop';
+    }
+  }
+
+  private tryParseJson(str: string): Record<string, unknown> {
+    try {
+      return JSON.parse(str) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  }
+}

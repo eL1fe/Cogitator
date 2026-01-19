@@ -21,6 +21,8 @@ export interface CogitatorConfig {
       openai?: { apiKey: string; baseUrl?: string };
       anthropic?: { apiKey: string };
       google?: { apiKey: string };
+      azure?: { endpoint: string; apiKey: string; apiVersion?: string; deployment?: string };
+      bedrock?: { region?: string; accessKeyId?: string; secretAccessKey?: string };
       vllm?: { baseUrl: string };
       mistral?: { apiKey: string };
       groq?: { apiKey: string };
