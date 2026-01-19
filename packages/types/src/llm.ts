@@ -10,6 +10,8 @@ export type LLMProvider =
   | 'openai'
   | 'anthropic'
   | 'google'
+  | 'azure'
+  | 'bedrock'
   | 'vllm'
   | 'mistral'
   | 'groq'
