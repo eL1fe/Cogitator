@@ -1,9 +1,3 @@
-/**
- * Thread Manager
- *
- * Manages the mapping between OpenAI threads and Cogitator internal state.
- */
-
 import { nanoid } from 'nanoid';
 import type {
   Thread,
@@ -12,6 +6,7 @@ import type {
   MessageContent,
   AssistantTool,
 } from '../types/openai-types';
+import { type ThreadStorage, type StoredFile, InMemoryThreadStorage } from './storage';
 
 export interface StoredThread {
   thread: Thread;
@@ -30,26 +25,57 @@ export interface StoredAssistant {
 }
 
 /**
- * Manages threads, messages, and assistants in memory
+ * Manages threads, messages, and assistants with pluggable storage.
  *
- * In production, this should be backed by a database
+ * By default uses in-memory storage. For production, use Redis or PostgreSQL.
+ *
+ * @example In-memory (default)
+ * ```ts
+ * const manager = new ThreadManager();
+ * ```
+ *
+ * @example Redis persistence
+ * ```ts
+ * import { RedisThreadStorage, ThreadManager } from '@cogitator-ai/openai-compat';
+ *
+ * const storage = new RedisThreadStorage({ url: 'redis://localhost:6379' });
+ * await storage.connect();
+ *
+ * const manager = new ThreadManager(storage);
+ * ```
+ *
+ * @example PostgreSQL persistence
+ * ```ts
+ * import { PostgresThreadStorage, ThreadManager } from '@cogitator-ai/openai-compat';
+ *
+ * const storage = new PostgresThreadStorage({
+ *   connectionString: 'postgresql://user:pass@localhost/db',
+ * });
+ * await storage.connect();
+ *
+ * const manager = new ThreadManager(storage);
+ * ```
  */
 export class ThreadManager {
-  private threads = new Map<string, StoredThread>();
-  private assistants = new Map<string, StoredAssistant>();
-  private files = new Map<
-    string,
-    { id: string; content: Buffer; filename: string; created_at: number }
-  >();
+  private storage: ThreadStorage;
+  private cache = {
+    threads: new Map<string, StoredThread>(),
+    assistants: new Map<string, StoredAssistant>(),
+    files: new Map<string, StoredFile>(),
+  };
 
-  createAssistant(params: {
+  constructor(storage?: ThreadStorage) {
+    this.storage = storage ?? new InMemoryThreadStorage();
+  }
+
+  async createAssistant(params: {
     model: string;
     name?: string;
     instructions?: string;
     tools?: AssistantTool[];
     metadata?: Record<string, string>;
     temperature?: number;
-  }): StoredAssistant {
+  }): Promise<StoredAssistant> {
     const id = `asst_${nanoid()}`;
     const assistant: StoredAssistant = {
       id,
@@ -62,34 +88,44 @@ export class ThreadManager {
       created_at: Math.floor(Date.now() / 1000),
     };
 
-    this.assistants.set(id, assistant);
+    await this.storage.saveAssistant(id, assistant);
+    this.cache.assistants.set(id, assistant);
     return assistant;
   }
 
-  getAssistant(id: string): StoredAssistant | undefined {
-    return this.assistants.get(id);
+  async getAssistant(id: string): Promise<StoredAssistant | undefined> {
+    if (this.cache.assistants.has(id)) {
+      return this.cache.assistants.get(id);
+    }
+    const assistant = await this.storage.loadAssistant(id);
+    if (assistant) {
+      this.cache.assistants.set(id, assistant);
+    }
+    return assistant ?? undefined;
   }
 
-  updateAssistant(
+  async updateAssistant(
     id: string,
     updates: Partial<Omit<StoredAssistant, 'id' | 'created_at'>>
-  ): StoredAssistant | undefined {
-    const assistant = this.assistants.get(id);
+  ): Promise<StoredAssistant | undefined> {
+    const assistant = await this.getAssistant(id);
     if (!assistant) return undefined;
 
     Object.assign(assistant, updates);
+    await this.storage.saveAssistant(id, assistant);
     return assistant;
   }
 
-  deleteAssistant(id: string): boolean {
-    return this.assistants.delete(id);
+  async deleteAssistant(id: string): Promise<boolean> {
+    this.cache.assistants.delete(id);
+    return this.storage.deleteAssistant(id);
   }
 
-  listAssistants(): StoredAssistant[] {
-    return Array.from(this.assistants.values());
+  async listAssistants(): Promise<StoredAssistant[]> {
+    return this.storage.listAssistants();
   }
 
-  createThread(metadata?: Record<string, string>): Thread {
+  async createThread(metadata?: Record<string, string>): Promise<Thread> {
     const id = `thread_${nanoid()}`;
     const thread: Thread = {
       id,
@@ -98,20 +134,35 @@ export class ThreadManager {
       metadata: metadata ?? {},
     };
 
-    this.threads.set(id, { thread, messages: [] });
+    const stored: StoredThread = { thread, messages: [] };
+    await this.storage.saveThread(id, stored);
+    this.cache.threads.set(id, stored);
     return thread;
   }
 
-  getThread(id: string): Thread | undefined {
-    return this.threads.get(id)?.thread;
+  async getThread(id: string): Promise<Thread | undefined> {
+    const stored = await this.getStoredThread(id);
+    return stored?.thread;
   }
 
-  deleteThread(id: string): boolean {
-    return this.threads.delete(id);
+  private async getStoredThread(id: string): Promise<StoredThread | undefined> {
+    if (this.cache.threads.has(id)) {
+      return this.cache.threads.get(id);
+    }
+    const stored = await this.storage.loadThread(id);
+    if (stored) {
+      this.cache.threads.set(id, stored);
+    }
+    return stored ?? undefined;
   }
 
-  addMessage(threadId: string, request: CreateMessageRequest): Message | undefined {
-    const stored = this.threads.get(threadId);
+  async deleteThread(id: string): Promise<boolean> {
+    this.cache.threads.delete(id);
+    return this.storage.deleteThread(id);
+  }
+
+  async addMessage(threadId: string, request: CreateMessageRequest): Promise<Message | undefined> {
+    const stored = await this.getStoredThread(threadId);
     if (!stored) return undefined;
 
     const id = `msg_${nanoid()}`;
@@ -136,15 +187,16 @@ export class ThreadManager {
     };
 
     stored.messages.push(message);
+    await this.storage.saveThread(threadId, stored);
     return message;
   }
 
-  getMessage(threadId: string, messageId: string): Message | undefined {
-    const stored = this.threads.get(threadId);
+  async getMessage(threadId: string, messageId: string): Promise<Message | undefined> {
+    const stored = await this.getStoredThread(threadId);
     return stored?.messages.find((m) => m.id === messageId);
   }
 
-  listMessages(
+  async listMessages(
     threadId: string,
     options?: {
       limit?: number;
@@ -153,8 +205,8 @@ export class ThreadManager {
       before?: string;
       run_id?: string;
     }
-  ): Message[] {
-    const stored = this.threads.get(threadId);
+  ): Promise<Message[]> {
+    const stored = await this.getStoredThread(threadId);
     if (!stored) return [];
 
     let messages = [...stored.messages];
@@ -193,8 +245,10 @@ export class ThreadManager {
   /**
    * Get messages in Cogitator format for LLM calls
    */
-  getMessagesForLLM(threadId: string): { role: 'user' | 'assistant'; content: string }[] {
-    const messages = this.listMessages(threadId, { order: 'asc' });
+  async getMessagesForLLM(
+    threadId: string
+  ): Promise<{ role: 'user' | 'assistant'; content: string }[]> {
+    const messages = await this.listMessages(threadId, { order: 'asc' });
 
     return messages.map((msg) => ({
       role: msg.role,
@@ -205,13 +259,13 @@ export class ThreadManager {
   /**
    * Add an assistant message (from LLM response)
    */
-  addAssistantMessage(
+  async addAssistantMessage(
     threadId: string,
     content: string,
     assistantId: string,
     runId: string
-  ): Message | undefined {
-    const stored = this.threads.get(threadId);
+  ): Promise<Message | undefined> {
+    const stored = await this.getStoredThread(threadId);
     if (!stored) return undefined;
 
     const id = `msg_${nanoid()}`;
@@ -242,30 +296,46 @@ export class ThreadManager {
     };
 
     stored.messages.push(message);
+    await this.storage.saveThread(threadId, stored);
     return message;
   }
 
-  addFile(content: Buffer, filename: string): { id: string; filename: string; created_at: number } {
+  async addFile(
+    content: Buffer,
+    filename: string
+  ): Promise<{ id: string; filename: string; created_at: number }> {
     const id = `file_${nanoid()}`;
     const created_at = Math.floor(Date.now() / 1000);
 
-    this.files.set(id, { id, content, filename, created_at });
+    const file: StoredFile = { id, content, filename, created_at };
+    await this.storage.saveFile(id, file);
+    this.cache.files.set(id, file);
 
     return { id, filename, created_at };
   }
 
-  getFile(
+  async getFile(
     id: string
-  ): { id: string; content: Buffer; filename: string; created_at: number } | undefined {
-    return this.files.get(id);
+  ): Promise<{ id: string; content: Buffer; filename: string; created_at: number } | undefined> {
+    if (this.cache.files.has(id)) {
+      return this.cache.files.get(id);
+    }
+    const file = await this.storage.loadFile(id);
+    if (file) {
+      this.cache.files.set(id, file);
+    }
+    return file ?? undefined;
   }
 
-  deleteFile(id: string): boolean {
-    return this.files.delete(id);
+  async deleteFile(id: string): Promise<boolean> {
+    this.cache.files.delete(id);
+    return this.storage.deleteFile(id);
   }
 
-  listFiles(): { id: string; content: Buffer; filename: string; created_at: number }[] {
-    return Array.from(this.files.values());
+  async listFiles(): Promise<
+    { id: string; content: Buffer; filename: string; created_at: number }[]
+  > {
+    return this.storage.listFiles();
   }
 
   private normalizeContent(content: string | unknown[]): MessageContent[] {

@@ -261,7 +261,7 @@ describe('GoogleBackend', () => {
           model: 'invalid-model',
           messages: [{ role: 'user', content: 'Test' }],
         })
-      ).rejects.toThrow('Gemini API error: 400');
+      ).rejects.toThrow('[google] Bad request');
     });
 
     it('should normalize model aliases', async () => {
@@ -482,7 +482,7 @@ describe('GoogleBackend', () => {
         })) {
           /* consume stream */
         }
-      }).rejects.toThrow('Gemini API error: 401');
+      }).rejects.toThrow('[google] Authentication failed');
     });
   });
 });

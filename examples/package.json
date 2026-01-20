@@ -12,12 +12,20 @@
     "swarm": "tsx swarm-local.ts",
     "workflow": "tsx workflow-local.ts",
     "debate": "tsx debate-swarm.ts",
-    "pipeline": "tsx pipeline-swarm.ts"
+    "pipeline": "tsx pipeline-swarm.ts",
+    "memory": "tsx memory-persistence.ts",
+    "openai-server": "tsx openai-compat-server.ts --server",
+    "openai-client": "tsx openai-compat-server.ts --client",
+    "mcp": "tsx mcp-integration.ts",
+    "guardrails": "tsx constitutional-guardrails.ts"
   },
   "dependencies": {
     "@cogitator-ai/core": "workspace:*",
+    "@cogitator-ai/mcp": "workspace:*",
+    "@cogitator-ai/openai-compat": "workspace:*",
     "@cogitator-ai/swarms": "workspace:*",
     "@cogitator-ai/workflows": "workspace:*",
+    "openai": "^4.73.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {

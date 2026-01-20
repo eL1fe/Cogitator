@@ -16,6 +16,7 @@ pnpm add @cogitator-ai/mcp
 - **Schema Converters** - Convert between Zod and JSON Schema
 - **Resources & Prompts** - Access MCP resources and prompt templates
 - **Transport Flexibility** - Support for stdio, HTTP, and SSE transports
+- **Retry & Recovery** - Automatic retry with exponential backoff and reconnection handling
 
 ---
 
@@ -119,6 +120,75 @@ interface MCPClientConfig {
   timeout?: number;
   clientName?: string;
   clientVersion?: string;
+
+  // Retry configuration
+  retry?: MCPRetryConfig;
+  autoReconnect?: boolean;
+
+  // Reconnection callbacks
+  onReconnecting?: (attempt: number) => void;
+  onReconnected?: () => void;
+  onReconnectFailed?: (error: Error) => void;
+}
+```
+
+### Retry & Recovery
+
+The MCP client includes automatic retry and reconnection handling for resilient connections.
+
+```typescript
+const client = await MCPClient.connect({
+  transport: 'stdio',
+  command: 'npx',
+  args: ['-y', '@anthropic/mcp-server-filesystem', '/path'],
+
+  retry: {
+    maxRetries: 5,
+    initialDelay: 1000,
+    maxDelay: 30000,
+    backoffMultiplier: 2,
+    retryOnConnectionLoss: true,
+  },
+
+  autoReconnect: true,
+  onReconnecting: (attempt) => console.log(`Reconnecting... attempt ${attempt}`),
+  onReconnected: () => console.log('Reconnected successfully'),
+  onReconnectFailed: (error) => console.error('Failed to reconnect:', error),
+});
+```
+
+#### Retry Configuration
+
+```typescript
+interface MCPRetryConfig {
+  maxRetries?: number; // Default: 3
+  initialDelay?: number; // Default: 1000ms
+  maxDelay?: number; // Default: 30000ms
+  backoffMultiplier?: number; // Default: 2
+  retryOnConnectionLoss?: boolean; // Default: true
+}
+```
+
+#### Automatic Retry Behavior
+
+All MCP operations (`callTool`, `listResources`, `readResource`, `listPrompts`, `getPrompt`) automatically retry on:
+
+- Connection errors (ECONNREFUSED, ECONNRESET, etc.)
+- Timeout errors
+- Network failures
+
+When a connection error is detected with `autoReconnect: true`, the client will:
+
+1. Close the existing connection
+2. Create a new transport and client
+3. Reconnect with exponential backoff
+4. Continue the operation on the new connection
+
+#### Manual Reconnection
+
+```typescript
+if (!client.isConnected()) {
+  await client.reconnect();
 }
 ```
 
@@ -137,7 +207,11 @@ const client = await MCPClient.connect(config);
 
 client.isConnected();
 
+client.isReconnecting();
+
 client.getCapabilities();
+
+await client.reconnect();
 
 const definitions = await client.listToolDefinitions();
 
@@ -647,6 +721,7 @@ import type {
 
   // Client
   MCPClientConfig,
+  MCPRetryConfig,
 
   // Server
   MCPServerConfig,

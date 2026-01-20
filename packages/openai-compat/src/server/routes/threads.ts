@@ -15,7 +15,7 @@ import type {
 
 export function registerThreadRoutes(fastify: FastifyInstance, adapter: OpenAIAdapter) {
   fastify.post<{ Body: CreateThreadRequest }>('/v1/threads', async (request, reply) => {
-    const thread = adapter.createThread(request.body?.metadata);
+    const thread = await adapter.createThread(request.body?.metadata);
 
     if (request.body?.messages) {
       for (const msg of request.body.messages) {
@@ -23,7 +23,7 @@ export function registerThreadRoutes(fastify: FastifyInstance, adapter: OpenAIAd
           typeof msg.content === 'string'
             ? msg.content
             : msg.content.map((c) => (c.type === 'text' ? c.text : '')).join('');
-        adapter.addMessage(thread.id, { role: msg.role, content, metadata: msg.metadata });
+        await adapter.addMessage(thread.id, { role: msg.role, content, metadata: msg.metadata });
       }
     }
 
@@ -33,7 +33,7 @@ export function registerThreadRoutes(fastify: FastifyInstance, adapter: OpenAIAd
   fastify.get<{ Params: { thread_id: string } }>(
     '/v1/threads/:thread_id',
     async (request, reply) => {
-      const thread = adapter.getThread(request.params.thread_id);
+      const thread = await adapter.getThread(request.params.thread_id);
 
       if (!thread) {
         return reply.status(404).send({
@@ -52,7 +52,7 @@ export function registerThreadRoutes(fastify: FastifyInstance, adapter: OpenAIAd
   fastify.post<{ Params: { thread_id: string }; Body: { metadata?: Record<string, string> } }>(
     '/v1/threads/:thread_id',
     async (request, reply) => {
-      const thread = adapter.getThread(request.params.thread_id);
+      const thread = await adapter.getThread(request.params.thread_id);
 
       if (!thread) {
         return reply.status(404).send({
@@ -75,7 +75,7 @@ export function registerThreadRoutes(fastify: FastifyInstance, adapter: OpenAIAd
   fastify.delete<{ Params: { thread_id: string } }>(
     '/v1/threads/:thread_id',
     async (request, reply) => {
-      const deleted = adapter.deleteThread(request.params.thread_id);
+      const deleted = await adapter.deleteThread(request.params.thread_id);
 
       if (!deleted) {
         return reply.status(404).send({
@@ -98,7 +98,7 @@ export function registerThreadRoutes(fastify: FastifyInstance, adapter: OpenAIAd
   fastify.post<{ Params: { thread_id: string }; Body: CreateMessageRequest }>(
     '/v1/threads/:thread_id/messages',
     async (request, reply) => {
-      const thread = adapter.getThread(request.params.thread_id);
+      const thread = await adapter.getThread(request.params.thread_id);
 
       if (!thread) {
         return reply.status(404).send({
@@ -114,7 +114,7 @@ export function registerThreadRoutes(fastify: FastifyInstance, adapter: OpenAIAd
         typeof request.body.content === 'string'
           ? request.body.content
           : request.body.content.map((c) => (c.type === 'text' ? c.text : '')).join('');
-      const message = adapter.addMessage(request.params.thread_id, {
+      const message = await adapter.addMessage(request.params.thread_id, {
         role: request.body.role,
         content,
         metadata: request.body.metadata,
@@ -144,7 +144,7 @@ export function registerThreadRoutes(fastify: FastifyInstance, adapter: OpenAIAd
       run_id?: string;
     };
   }>('/v1/threads/:thread_id/messages', async (request, reply) => {
-    const thread = adapter.getThread(request.params.thread_id);
+    const thread = await adapter.getThread(request.params.thread_id);
 
     if (!thread) {
       return reply.status(404).send({
@@ -157,7 +157,7 @@ export function registerThreadRoutes(fastify: FastifyInstance, adapter: OpenAIAd
     }
 
     const { limit = 20, order = 'desc', after, before, run_id } = request.query;
-    const messages = adapter.listMessages(request.params.thread_id, {
+    const messages = await adapter.listMessages(request.params.thread_id, {
       limit: limit + 1,
       order,
       after,
@@ -182,7 +182,7 @@ export function registerThreadRoutes(fastify: FastifyInstance, adapter: OpenAIAd
   fastify.get<{ Params: { thread_id: string; message_id: string } }>(
     '/v1/threads/:thread_id/messages/:message_id',
     async (request, reply) => {
-      const thread = adapter.getThread(request.params.thread_id);
+      const thread = await adapter.getThread(request.params.thread_id);
 
       if (!thread) {
         return reply.status(404).send({
@@ -194,7 +194,7 @@ export function registerThreadRoutes(fastify: FastifyInstance, adapter: OpenAIAd
         });
       }
 
-      const message = adapter.getMessage(request.params.thread_id, request.params.message_id);
+      const message = await adapter.getMessage(request.params.thread_id, request.params.message_id);
 
       if (!message) {
         return reply.status(404).send({

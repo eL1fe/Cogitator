@@ -1,7 +1,3 @@
-/**
- * Tests for OpenAI Adapter
- */
-
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { OpenAIAdapter } from '../client/openai-adapter';
 import { ThreadManager } from '../client/thread-manager';
@@ -19,8 +15,8 @@ describe('OpenAIAdapter', () => {
   });
 
   describe('Assistants', () => {
-    it('should create an assistant', () => {
-      const assistant = adapter.createAssistant({
+    it('should create an assistant', async () => {
+      const assistant = await adapter.createAssistant({
         model: 'gpt-4',
         name: 'Test Assistant',
         instructions: 'You are a helpful assistant.',
@@ -33,30 +29,30 @@ describe('OpenAIAdapter', () => {
       expect(assistant.instructions).toBe('You are a helpful assistant.');
     });
 
-    it('should get an assistant', () => {
-      const created = adapter.createAssistant({
+    it('should get an assistant', async () => {
+      const created = await adapter.createAssistant({
         model: 'gpt-4',
         name: 'Test',
       });
 
-      const retrieved = adapter.getAssistant(created.id);
+      const retrieved = await adapter.getAssistant(created.id);
 
       expect(retrieved).toBeDefined();
       expect(retrieved?.id).toBe(created.id);
     });
 
-    it('should return undefined for non-existent assistant', () => {
-      const result = adapter.getAssistant('asst_nonexistent');
+    it('should return undefined for non-existent assistant', async () => {
+      const result = await adapter.getAssistant('asst_nonexistent');
       expect(result).toBeUndefined();
     });
 
-    it('should update an assistant', () => {
-      const created = adapter.createAssistant({
+    it('should update an assistant', async () => {
+      const created = await adapter.createAssistant({
         model: 'gpt-4',
         name: 'Original',
       });
 
-      const updated = adapter.updateAssistant(created.id, {
+      const updated = await adapter.updateAssistant(created.id, {
         name: 'Updated',
         instructions: 'New instructions',
       });
@@ -65,70 +61,70 @@ describe('OpenAIAdapter', () => {
       expect(updated?.instructions).toBe('New instructions');
     });
 
-    it('should delete an assistant', () => {
-      const created = adapter.createAssistant({
+    it('should delete an assistant', async () => {
+      const created = await adapter.createAssistant({
         model: 'gpt-4',
         name: 'Test',
       });
 
-      const deleted = adapter.deleteAssistant(created.id);
+      const deleted = await adapter.deleteAssistant(created.id);
       expect(deleted).toBe(true);
 
-      const retrieved = adapter.getAssistant(created.id);
+      const retrieved = await adapter.getAssistant(created.id);
       expect(retrieved).toBeUndefined();
     });
 
-    it('should list assistants', () => {
-      adapter.createAssistant({ model: 'gpt-4', name: 'First' });
-      adapter.createAssistant({ model: 'gpt-4', name: 'Second' });
+    it('should list assistants', async () => {
+      await adapter.createAssistant({ model: 'gpt-4', name: 'First' });
+      await adapter.createAssistant({ model: 'gpt-4', name: 'Second' });
 
-      const list = adapter.listAssistants();
+      const list = await adapter.listAssistants();
       expect(list).toHaveLength(2);
     });
   });
 
   describe('Threads', () => {
-    it('should create a thread', () => {
-      const thread = adapter.createThread();
+    it('should create a thread', async () => {
+      const thread = await adapter.createThread();
 
       expect(thread.id).toMatch(/^thread_/);
       expect(thread.object).toBe('thread');
       expect(thread.metadata).toEqual({});
     });
 
-    it('should create a thread with metadata', () => {
-      const thread = adapter.createThread({ key: 'value' });
+    it('should create a thread with metadata', async () => {
+      const thread = await adapter.createThread({ key: 'value' });
 
       expect(thread.metadata).toEqual({ key: 'value' });
     });
 
-    it('should get a thread', () => {
-      const created = adapter.createThread();
-      const retrieved = adapter.getThread(created.id);
+    it('should get a thread', async () => {
+      const created = await adapter.createThread();
+      const retrieved = await adapter.getThread(created.id);
 
       expect(retrieved).toBeDefined();
       expect(retrieved?.id).toBe(created.id);
     });
 
-    it('should delete a thread', () => {
-      const created = adapter.createThread();
-      const deleted = adapter.deleteThread(created.id);
+    it('should delete a thread', async () => {
+      const created = await adapter.createThread();
+      const deleted = await adapter.deleteThread(created.id);
 
       expect(deleted).toBe(true);
-      expect(adapter.getThread(created.id)).toBeUndefined();
+      expect(await adapter.getThread(created.id)).toBeUndefined();
     });
   });
 
   describe('Messages', () => {
     let threadId: string;
 
-    beforeEach(() => {
-      const thread = adapter.createThread();
+    beforeEach(async () => {
+      const thread = await adapter.createThread();
       threadId = thread.id;
     });
 
-    it('should add a message to a thread', () => {
-      const message = adapter.addMessage(threadId, {
+    it('should add a message to a thread', async () => {
+      const message = await adapter.addMessage(threadId, {
         role: 'user',
         content: 'Hello!',
       });
@@ -139,31 +135,31 @@ describe('OpenAIAdapter', () => {
       expect(message?.thread_id).toBe(threadId);
     });
 
-    it('should list messages in a thread', () => {
-      adapter.addMessage(threadId, { role: 'user', content: 'First' });
-      adapter.addMessage(threadId, { role: 'user', content: 'Second' });
+    it('should list messages in a thread', async () => {
+      await adapter.addMessage(threadId, { role: 'user', content: 'First' });
+      await adapter.addMessage(threadId, { role: 'user', content: 'Second' });
 
-      const messages = adapter.listMessages(threadId);
+      const messages = await adapter.listMessages(threadId);
 
       expect(messages).toHaveLength(2);
     });
 
-    it('should list messages in descending order by default', () => {
-      adapter.addMessage(threadId, { role: 'user', content: 'First' });
-      adapter.addMessage(threadId, { role: 'user', content: 'Second' });
+    it('should list messages in descending order by default', async () => {
+      await adapter.addMessage(threadId, { role: 'user', content: 'First' });
+      await adapter.addMessage(threadId, { role: 'user', content: 'Second' });
 
-      const messages = adapter.listMessages(threadId);
+      const messages = await adapter.listMessages(threadId);
 
       expect(messages[0].content[0]).toMatchObject({ type: 'text' });
     });
 
-    it('should get a specific message', () => {
-      const created = adapter.addMessage(threadId, {
+    it('should get a specific message', async () => {
+      const created = await adapter.addMessage(threadId, {
         role: 'user',
         content: 'Test message',
       });
 
-      const retrieved = adapter.getMessage(threadId, created!.id);
+      const retrieved = await adapter.getMessage(threadId, created!.id);
 
       expect(retrieved).toBeDefined();
       expect(retrieved?.id).toBe(created!.id);
@@ -179,58 +175,58 @@ describe('ThreadManager', () => {
   });
 
   describe('Files', () => {
-    it('should add a file', () => {
+    it('should add a file', async () => {
       const content = Buffer.from('test content');
-      const file = manager.addFile(content, 'test.txt');
+      const file = await manager.addFile(content, 'test.txt');
 
       expect(file.id).toMatch(/^file_/);
       expect(file.filename).toBe('test.txt');
     });
 
-    it('should get a file', () => {
+    it('should get a file', async () => {
       const content = Buffer.from('test content');
-      const created = manager.addFile(content, 'test.txt');
+      const created = await manager.addFile(content, 'test.txt');
 
-      const retrieved = manager.getFile(created.id);
+      const retrieved = await manager.getFile(created.id);
 
       expect(retrieved).toBeDefined();
       expect(retrieved?.content.toString()).toBe('test content');
     });
 
-    it('should delete a file', () => {
+    it('should delete a file', async () => {
       const content = Buffer.from('test content');
-      const created = manager.addFile(content, 'test.txt');
+      const created = await manager.addFile(content, 'test.txt');
 
-      const deleted = manager.deleteFile(created.id);
+      const deleted = await manager.deleteFile(created.id);
 
       expect(deleted).toBe(true);
-      expect(manager.getFile(created.id)).toBeUndefined();
+      expect(await manager.getFile(created.id)).toBeUndefined();
     });
 
-    it('should list all files', () => {
-      const file1 = manager.addFile(Buffer.from('content1'), 'file1.txt');
-      const file2 = manager.addFile(Buffer.from('content2'), 'file2.txt');
+    it('should list all files', async () => {
+      const file1 = await manager.addFile(Buffer.from('content1'), 'file1.txt');
+      const file2 = await manager.addFile(Buffer.from('content2'), 'file2.txt');
 
-      const files = manager.listFiles();
+      const files = await manager.listFiles();
 
       expect(files).toHaveLength(2);
       expect(files.map((f) => f.id)).toContain(file1.id);
       expect(files.map((f) => f.id)).toContain(file2.id);
     });
 
-    it('should return empty array when no files', () => {
-      const files = manager.listFiles();
+    it('should return empty array when no files', async () => {
+      const files = await manager.listFiles();
       expect(files).toEqual([]);
     });
   });
 
   describe('getMessagesForLLM', () => {
-    it('should convert messages to LLM format', () => {
-      const thread = manager.createThread();
-      manager.addMessage(thread.id, { role: 'user', content: 'Hello' });
-      manager.addAssistantMessage(thread.id, 'Hi there!', 'asst_1', 'run_1');
+    it('should convert messages to LLM format', async () => {
+      const thread = await manager.createThread();
+      await manager.addMessage(thread.id, { role: 'user', content: 'Hello' });
+      await manager.addAssistantMessage(thread.id, 'Hi there!', 'asst_1', 'run_1');
 
-      const llmMessages = manager.getMessagesForLLM(thread.id);
+      const llmMessages = await manager.getMessagesForLLM(thread.id);
 
       expect(llmMessages).toHaveLength(2);
       expect(llmMessages[0]).toEqual({ role: 'user', content: 'Hello' });

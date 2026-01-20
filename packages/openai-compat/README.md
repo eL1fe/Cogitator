@@ -13,6 +13,8 @@ pnpm add @cogitator-ai/openai-compat
 - **OpenAI Server** - Expose Cogitator as OpenAI-compatible REST API
 - **OpenAI Adapter** - In-process adapter for programmatic access
 - **Thread Manager** - Manage conversations, messages, and assistants
+- **Persistent Storage** - Pluggable backends: In-memory, Redis, PostgreSQL
+- **SSE Streaming** - Real-time token streaming with OpenAI-compatible events
 - **File Operations** - Upload and manage files for assistants
 - **Full Assistants API** - Create, update, delete assistants
 - **Run Management** - Execute runs with tool support
@@ -173,7 +175,7 @@ const adapter = createOpenAIAdapter(cogitator, {
 ### Assistant Management
 
 ```typescript
-const assistant = adapter.createAssistant({
+const assistant = await adapter.createAssistant({
   model: 'openai/gpt-4o',
   name: 'Code Helper',
   instructions: 'You help write code',
@@ -182,32 +184,32 @@ const assistant = adapter.createAssistant({
   metadata: { category: 'development' },
 });
 
-const fetched = adapter.getAssistant(assistant.id);
+const fetched = await adapter.getAssistant(assistant.id);
 
-const updated = adapter.updateAssistant(assistant.id, {
+const updated = await adapter.updateAssistant(assistant.id, {
   name: 'Code Expert',
   temperature: 0.5,
 });
 
-const all = adapter.listAssistants();
+const all = await adapter.listAssistants();
 
-const deleted = adapter.deleteAssistant(assistant.id);
+const deleted = await adapter.deleteAssistant(assistant.id);
 ```
 
 ### Thread Operations
 
 ```typescript
-const thread = adapter.createThread({ project: 'demo' });
+const thread = await adapter.createThread({ project: 'demo' });
 
-const fetched = adapter.getThread(thread.id);
+const fetched = await adapter.getThread(thread.id);
 
-const message = adapter.addMessage(thread.id, {
+const message = await adapter.addMessage(thread.id, {
   role: 'user',
   content: 'Hello, how are you?',
   metadata: { source: 'web' },
 });
 
-const messages = adapter.listMessages(thread.id, {
+const messages = await adapter.listMessages(thread.id, {
   limit: 20,
   order: 'asc',
   after: 'msg_abc123',
@@ -215,9 +217,9 @@ const messages = adapter.listMessages(thread.id, {
   run_id: 'run_123',
 });
 
-const msg = adapter.getMessage(thread.id, 'msg_abc123');
+const msg = await adapter.getMessage(thread.id, 'msg_abc123');
 
-adapter.deleteThread(thread.id);
+await adapter.deleteThread(thread.id);
 ```
 
 ### Run Execution
@@ -284,54 +286,235 @@ interface StoredAssistant {
   created_at: number;
 }
 
-const assistant = manager.createAssistant({
+const assistant = await manager.createAssistant({
   model: 'gpt-4o',
   name: 'Helper',
   instructions: 'Be helpful',
 });
 
-const fetched = manager.getAssistant(assistant.id);
-const updated = manager.updateAssistant(assistant.id, { name: 'Expert' });
-const all = manager.listAssistants();
-manager.deleteAssistant(assistant.id);
+const fetched = await manager.getAssistant(assistant.id);
+const updated = await manager.updateAssistant(assistant.id, { name: 'Expert' });
+const all = await manager.listAssistants();
+await manager.deleteAssistant(assistant.id);
 ```
 
 ### Thread Storage
 
 ```typescript
-const thread = manager.createThread({ key: 'value' });
-const fetched = manager.getThread(thread.id);
-manager.deleteThread(thread.id);
+const thread = await manager.createThread({ key: 'value' });
+const fetched = await manager.getThread(thread.id);
+await manager.deleteThread(thread.id);
 ```
 
 ### Message Operations
 
 ```typescript
-const message = manager.addMessage(thread.id, {
+const message = await manager.addMessage(thread.id, {
   role: 'user',
   content: 'Hello!',
 });
 
-const assistantMsg = manager.addAssistantMessage(thread.id, 'Hi there!', assistant.id, run.id);
+const assistantMsg = await manager.addAssistantMessage(
+  thread.id,
+  'Hi there!',
+  assistant.id,
+  run.id
+);
 
-const messages = manager.listMessages(thread.id, {
+const messages = await manager.listMessages(thread.id, {
   limit: 50,
   order: 'desc',
 });
 
-const llmMessages = manager.getMessagesForLLM(thread.id);
+const llmMessages = await manager.getMessagesForLLM(thread.id);
 ```
 
 ### File Management
 
 ```typescript
-const file = manager.addFile(Buffer.from('file content'), 'document.txt');
+const file = await manager.addFile(Buffer.from('file content'), 'document.txt');
 
-const fetched = manager.getFile(file.id);
+const fetched = await manager.getFile(file.id);
 
-const all = manager.listFiles();
+const all = await manager.listFiles();
 
-manager.deleteFile(file.id);
+await manager.deleteFile(file.id);
+```
+
+---
+
+## Persistent Storage
+
+By default, ThreadManager uses in-memory storage. For production, use Redis or PostgreSQL backends.
+
+### Storage Backends
+
+```typescript
+import {
+  ThreadManager,
+  InMemoryThreadStorage,
+  RedisThreadStorage,
+  PostgresThreadStorage,
+  createThreadStorage,
+} from '@cogitator-ai/openai-compat';
+```
+
+### In-Memory (Default)
+
+```typescript
+const manager = new ThreadManager();
+// or explicitly:
+const manager = new ThreadManager(new InMemoryThreadStorage());
+```
+
+### Redis Storage
+
+Requires `ioredis` peer dependency:
+
+```bash
+pnpm add ioredis
+```
+
+```typescript
+const storage = new RedisThreadStorage({
+  host: 'localhost',
+  port: 6379,
+  prefix: 'cogitator:', // optional, default: 'cogitator:'
+});
+await storage.connect();
+
+const manager = new ThreadManager(storage);
+
+// When done:
+await storage.disconnect();
+```
+
+With connection URL:
+
+```typescript
+const storage = new RedisThreadStorage({
+  url: 'redis://user:pass@localhost:6379/0',
+});
+```
+
+### PostgreSQL Storage
+
+Requires `pg` peer dependency:
+
+```bash
+pnpm add pg
+```
+
+```typescript
+const storage = new PostgresThreadStorage({
+  host: 'localhost',
+  port: 5432,
+  database: 'cogitator',
+  user: 'postgres',
+  password: 'secret',
+  tableName: 'cogitator_storage', // optional
+});
+await storage.connect();
+
+const manager = new ThreadManager(storage);
+
+// When done:
+await storage.disconnect();
+```
+
+With connection string:
+
+```typescript
+const storage = new PostgresThreadStorage({
+  connectionString: 'postgresql://user:pass@localhost:5432/db',
+});
+```
+
+### Factory Function
+
+```typescript
+// In-memory
+const storage = createThreadStorage('memory');
+
+// Redis
+const storage = createThreadStorage('redis', {
+  host: 'localhost',
+  port: 6379,
+});
+
+// PostgreSQL
+const storage = createThreadStorage('postgres', {
+  connectionString: 'postgresql://localhost/db',
+});
+```
+
+### Using with OpenAI Server
+
+```typescript
+import { OpenAIServer, RedisThreadStorage } from '@cogitator-ai/openai-compat';
+import { Cogitator } from '@cogitator-ai/core';
+
+const storage = new RedisThreadStorage({ host: 'localhost' });
+await storage.connect();
+
+const cogitator = new Cogitator({ defaultModel: 'openai/gpt-4o' });
+
+// Create adapter with custom storage
+const adapter = new OpenAIAdapter(cogitator, { tools: [] });
+// Note: To use custom storage, create ThreadManager separately:
+const manager = new ThreadManager(storage);
+
+const server = new OpenAIServer(cogitator, {
+  port: 8080,
+  adapter, // pass custom adapter
+});
+
+await server.start();
+```
+
+### ThreadStorage Interface
+
+All storage backends implement this interface:
+
+```typescript
+interface ThreadStorage {
+  // Threads
+  saveThread(id: string, thread: StoredThread): Promise<void>;
+  loadThread(id: string): Promise<StoredThread | null>;
+  deleteThread(id: string): Promise<boolean>;
+  listThreads(): Promise<StoredThread[]>;
+
+  // Assistants
+  saveAssistant(id: string, assistant: StoredAssistant): Promise<void>;
+  loadAssistant(id: string): Promise<StoredAssistant | null>;
+  deleteAssistant(id: string): Promise<boolean>;
+  listAssistants(): Promise<StoredAssistant[]>;
+
+  // Files
+  saveFile(id: string, file: StoredFile): Promise<void>;
+  loadFile(id: string): Promise<StoredFile | null>;
+  deleteFile(id: string): Promise<boolean>;
+  listFiles(): Promise<StoredFile[]>;
+
+  // Lifecycle (optional)
+  connect?(): Promise<void>;
+  disconnect?(): Promise<void>;
+}
+```
+
+### Custom Storage Implementation
+
+```typescript
+import type { ThreadStorage } from '@cogitator-ai/openai-compat';
+
+class MyCustomStorage implements ThreadStorage {
+  async saveThread(id: string, thread: StoredThread): Promise<void> {
+    // Your implementation
+  }
+  // ... implement all methods
+}
+
+const manager = new ThreadManager(new MyCustomStorage());
 ```
 
 ---
@@ -484,13 +667,54 @@ async function waitForRun(openai: OpenAI, threadId: string, runId: string): Prom
 
 ---
 
-## Stream Events
+## SSE Streaming
 
-The package defines stream event types for future streaming support:
+Real-time streaming support with Server-Sent Events (SSE). Streams tokens as they are generated for immediate feedback.
+
+### Streaming with OpenAI SDK
+
+```typescript
+const run = await openai.beta.threads.runs.create(threadId, {
+  assistant_id: assistant.id,
+  stream: true, // Enable streaming
+});
+
+// Handle streaming events
+for await (const event of run) {
+  if (event.event === 'thread.message.delta') {
+    const delta = event.data.delta;
+    if (delta.content) {
+      for (const content of delta.content) {
+        if (content.type === 'text' && content.text?.value) {
+          process.stdout.write(content.text.value);
+        }
+      }
+    }
+  }
+}
+```
+
+### Create Thread and Run with Streaming
+
+```typescript
+const run = await openai.beta.threads.createAndRun({
+  assistant_id: assistant.id,
+  thread: {
+    messages: [{ role: 'user', content: 'Hello!' }],
+  },
+  stream: true,
+});
+
+// Process stream
+for await (const event of run) {
+  console.log(event.event, event.data);
+}
+```
+
+### Stream Events
 
 ```typescript
 type StreamEvent =
-  | { event: 'thread.created'; data: Thread }
   | { event: 'thread.run.created'; data: Run }
   | { event: 'thread.run.queued'; data: Run }
   | { event: 'thread.run.in_progress'; data: Run }
@@ -499,9 +723,68 @@ type StreamEvent =
   | { event: 'thread.run.failed'; data: Run }
   | { event: 'thread.run.cancelled'; data: Run }
   | { event: 'thread.message.created'; data: Message }
+  | { event: 'thread.message.in_progress'; data: Message }
   | { event: 'thread.message.delta'; data: MessageDelta }
   | { event: 'thread.message.completed'; data: Message }
   | { event: 'done'; data: '[DONE]' };
+```
+
+### Message Delta Format
+
+```typescript
+interface MessageDelta {
+  id: string;
+  object: 'thread.message.delta';
+  delta: {
+    content?: {
+      index: number;
+      type: 'text';
+      text?: { value?: string };
+    }[];
+  };
+}
+```
+
+### Raw SSE Endpoint
+
+For non-SDK usage, the SSE stream is available at:
+
+```
+POST /v1/threads/{thread_id}/runs
+Content-Type: application/json
+
+{
+  "assistant_id": "asst_xxx",
+  "stream": true
+}
+```
+
+Response format (Server-Sent Events):
+
+```
+event: thread.run.created
+data: {"id":"run_xxx","status":"queued",...}
+
+event: thread.run.in_progress
+data: {"id":"run_xxx","status":"in_progress",...}
+
+event: thread.message.created
+data: {"id":"msg_xxx","status":"in_progress",...}
+
+event: thread.message.delta
+data: {"id":"msg_xxx","delta":{"content":[{"index":0,"type":"text","text":{"value":"Hello"}}]}}
+
+event: thread.message.delta
+data: {"id":"msg_xxx","delta":{"content":[{"index":1,"type":"text","text":{"value":" world"}}]}}
+
+event: thread.message.completed
+data: {"id":"msg_xxx","status":"completed",...}
+
+event: thread.run.completed
+data: {"id":"run_xxx","status":"completed",...}
+
+event: done
+data: [DONE]
 ```
 
 ---
@@ -577,6 +860,26 @@ import type { FileObject, FilePurpose, UploadFileRequest } from '@cogitator-ai/o
 
 ```typescript
 import type { StreamEvent, MessageDelta, RunStepDelta } from '@cogitator-ai/openai-compat';
+```
+
+### Storage Types
+
+```typescript
+import type {
+  ThreadStorage,
+  StoredThread,
+  StoredAssistant,
+  StoredFile,
+  RedisThreadStorageConfig,
+  PostgresThreadStorageConfig,
+} from '@cogitator-ai/openai-compat';
+
+import {
+  InMemoryThreadStorage,
+  RedisThreadStorage,
+  PostgresThreadStorage,
+  createThreadStorage,
+} from '@cogitator-ai/openai-compat';
 ```
 
 ---

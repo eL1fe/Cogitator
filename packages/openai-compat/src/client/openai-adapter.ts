@@ -7,20 +7,48 @@
 
 import { type Cogitator, Agent } from '@cogitator-ai/core';
 import type { Tool } from '@cogitator-ai/types';
+import { EventEmitter } from 'events';
 import { ThreadManager, type StoredAssistant } from './thread-manager';
 import { nanoid } from 'nanoid';
 import type {
   Assistant,
   AssistantTool,
   Run,
+  RunStep,
+  Message,
+  MessageDelta,
   CreateRunRequest,
   SubmitToolOutputsRequest,
 } from '../types/openai-types';
+
+export type StreamEventType =
+  | 'thread.run.created'
+  | 'thread.run.queued'
+  | 'thread.run.in_progress'
+  | 'thread.run.completed'
+  | 'thread.run.failed'
+  | 'thread.run.cancelled'
+  | 'thread.run.step.created'
+  | 'thread.run.step.in_progress'
+  | 'thread.run.step.completed'
+  | 'thread.message.created'
+  | 'thread.message.in_progress'
+  | 'thread.message.delta'
+  | 'thread.message.completed'
+  | 'done'
+  | 'error';
+
+export interface StreamEmitterEvents {
+  event: [type: StreamEventType, data: Run | RunStep | Message | MessageDelta | string];
+  error: [error: Error];
+  end: [];
+}
 
 interface RunState {
   run: Run;
   toolOutputs?: Map<string, string>;
   abortController: AbortController;
+  streamEmitter?: EventEmitter<StreamEmitterEvents>;
 }
 
 /**
@@ -66,24 +94,24 @@ export class OpenAIAdapter {
     return this.threadManager;
   }
 
-  createAssistant(params: {
+  async createAssistant(params: {
     model: string;
     name?: string;
     instructions?: string;
     tools?: AssistantTool[];
     metadata?: Record<string, string>;
     temperature?: number;
-  }): Assistant {
-    const stored = this.threadManager.createAssistant(params);
+  }): Promise<Assistant> {
+    const stored = await this.threadManager.createAssistant(params);
     return this.toAssistant(stored);
   }
 
-  getAssistant(id: string): Assistant | undefined {
-    const stored = this.threadManager.getAssistant(id);
+  async getAssistant(id: string): Promise<Assistant | undefined> {
+    const stored = await this.threadManager.getAssistant(id);
     return stored ? this.toAssistant(stored) : undefined;
   }
 
-  updateAssistant(
+  async updateAssistant(
     id: string,
     updates: Partial<{
       model: string;
@@ -93,17 +121,18 @@ export class OpenAIAdapter {
       metadata: Record<string, string>;
       temperature: number;
     }>
-  ): Assistant | undefined {
-    const stored = this.threadManager.updateAssistant(id, updates);
+  ): Promise<Assistant | undefined> {
+    const stored = await this.threadManager.updateAssistant(id, updates);
     return stored ? this.toAssistant(stored) : undefined;
   }
 
-  deleteAssistant(id: string): boolean {
+  async deleteAssistant(id: string): Promise<boolean> {
     return this.threadManager.deleteAssistant(id);
   }
 
-  listAssistants(): Assistant[] {
-    return this.threadManager.listAssistants().map((s) => this.toAssistant(s));
+  async listAssistants(): Promise<Assistant[]> {
+    const assistants = await this.threadManager.listAssistants();
+    return assistants.map((s) => this.toAssistant(s));
   }
 
   private toAssistant(stored: StoredAssistant): Assistant {
@@ -121,30 +150,30 @@ export class OpenAIAdapter {
     };
   }
 
-  createThread(metadata?: Record<string, string>) {
+  async createThread(metadata?: Record<string, string>) {
     return this.threadManager.createThread(metadata);
   }
 
-  getThread(id: string) {
+  async getThread(id: string) {
     return this.threadManager.getThread(id);
   }
 
-  deleteThread(id: string) {
+  async deleteThread(id: string) {
     return this.threadManager.deleteThread(id);
   }
 
-  addMessage(
+  async addMessage(
     threadId: string,
     params: { role: 'user' | 'assistant'; content: string; metadata?: Record<string, string> }
   ) {
     return this.threadManager.addMessage(threadId, params);
   }
 
-  getMessage(threadId: string, messageId: string) {
+  async getMessage(threadId: string, messageId: string) {
     return this.threadManager.getMessage(threadId, messageId);
   }
 
-  listMessages(
+  async listMessages(
     threadId: string,
     options?: {
       limit?: number;
@@ -161,12 +190,12 @@ export class OpenAIAdapter {
    * Create and execute a run
    */
   async createRun(threadId: string, request: CreateRunRequest): Promise<Run> {
-    const assistant = this.threadManager.getAssistant(request.assistant_id);
+    const assistant = await this.threadManager.getAssistant(request.assistant_id);
     if (!assistant) {
       throw new Error(`Assistant ${request.assistant_id} not found`);
     }
 
-    const thread = this.threadManager.getThread(threadId);
+    const thread = await this.threadManager.getThread(threadId);
     if (!thread) {
       throw new Error(`Thread ${threadId} not found`);
     }
@@ -205,15 +234,19 @@ export class OpenAIAdapter {
     };
 
     const abortController = new AbortController();
-    this.runs.set(runId, { run, abortController });
+    const streamEmitter = request.stream ? new EventEmitter<StreamEmitterEvents>() : undefined;
+    this.runs.set(runId, { run, abortController, streamEmitter });
 
     if (request.additional_messages) {
       for (const msg of request.additional_messages) {
-        this.threadManager.addMessage(threadId, msg);
+        await this.threadManager.addMessage(threadId, msg);
       }
     }
 
-    this.executeRun(runId, threadId, assistant, request).catch((error) => {
+    streamEmitter?.emit('event', 'thread.run.created', run);
+    streamEmitter?.emit('event', 'thread.run.queued', run);
+
+    this.executeRun(runId, threadId, assistant, request, !!request.stream).catch((error) => {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.warn(`[OpenAIAdapter] Run ${runId} failed:`, errorMessage);
 
@@ -225,6 +258,8 @@ export class OpenAIAdapter {
           code: 'server_error',
           message: errorMessage,
         };
+        state.streamEmitter?.emit('event', 'thread.run.failed', state.run);
+        state.streamEmitter?.emit('end');
       }
     });
 
@@ -286,20 +321,31 @@ export class OpenAIAdapter {
     return state.run;
   }
 
+  /**
+   * Get the stream emitter for a streaming run
+   */
+  getStreamEmitter(runId: string): EventEmitter<StreamEmitterEvents> | undefined {
+    return this.runs.get(runId)?.streamEmitter;
+  }
+
   private async executeRun(
     runId: string,
     threadId: string,
     assistant: StoredAssistant,
-    request: CreateRunRequest
+    request: CreateRunRequest,
+    streaming = false
   ): Promise<void> {
     const state = this.runs.get(runId);
     if (!state) return;
 
+    const emitter = state.streamEmitter;
+
     state.run.status = 'in_progress';
     state.run.started_at = Math.floor(Date.now() / 1000);
+    emitter?.emit('event', 'thread.run.in_progress', state.run);
 
     try {
-      const messages = this.threadManager.getMessagesForLLM(threadId);
+      const messages = await this.threadManager.getMessagesForLLM(threadId);
 
       const agent = new Agent({
         name: assistant.name ?? 'assistant',
@@ -314,17 +360,72 @@ export class OpenAIAdapter {
         throw new Error('No user message found');
       }
 
+      const messageId = `msg_${nanoid()}`;
+      let accumulatedContent = '';
+      let deltaIndex = 0;
+
+      if (streaming && emitter) {
+        const inProgressMessage: Message = {
+          id: messageId,
+          object: 'thread.message',
+          created_at: Math.floor(Date.now() / 1000),
+          thread_id: threadId,
+          status: 'in_progress',
+          completed_at: null,
+          incomplete_at: null,
+          role: 'assistant',
+          content: [],
+          assistant_id: assistant.id,
+          run_id: runId,
+          attachments: [],
+          metadata: {},
+        };
+        emitter.emit('event', 'thread.message.created', inProgressMessage);
+        emitter.emit('event', 'thread.message.in_progress', inProgressMessage);
+      }
+
       const result = await this.cogitator.run(agent, {
         input: lastUserMessage.content,
         threadId,
+        stream: streaming,
+        onToken: streaming
+          ? (token: string) => {
+              accumulatedContent += token;
+              if (emitter) {
+                const delta: MessageDelta = {
+                  id: messageId,
+                  object: 'thread.message.delta',
+                  delta: {
+                    content: [
+                      {
+                        index: deltaIndex++,
+                        type: 'text',
+                        text: { value: token },
+                      },
+                    ],
+                  },
+                };
+                emitter.emit('event', 'thread.message.delta', delta);
+              }
+            }
+          : undefined,
       });
 
       if (state.abortController.signal.aborted) {
         return;
       }
 
-      if (result.output) {
-        this.threadManager.addAssistantMessage(threadId, result.output, assistant.id, runId);
+      const finalContent = result.output || accumulatedContent;
+      if (finalContent) {
+        const message = await this.threadManager.addAssistantMessage(
+          threadId,
+          finalContent,
+          assistant.id,
+          runId
+        );
+        if (streaming && emitter && message) {
+          emitter.emit('event', 'thread.message.completed', message);
+        }
       }
 
       state.run.status = 'completed';
@@ -336,6 +437,10 @@ export class OpenAIAdapter {
             total_tokens: result.usage.totalTokens,
           }
         : null;
+
+      emitter?.emit('event', 'thread.run.completed', state.run);
+      emitter?.emit('event', 'done', '[DONE]');
+      emitter?.emit('end');
     } catch (error) {
       if (state.abortController.signal.aborted) {
         return;
@@ -347,6 +452,10 @@ export class OpenAIAdapter {
         code: 'server_error',
         message: error instanceof Error ? error.message : String(error),
       };
+
+      emitter?.emit('event', 'thread.run.failed', state.run);
+      emitter?.emit('error', error instanceof Error ? error : new Error(String(error)));
+      emitter?.emit('end');
     }
   }
 }

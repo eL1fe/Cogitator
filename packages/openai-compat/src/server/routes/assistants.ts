@@ -15,14 +15,14 @@ import type {
 
 export function registerAssistantRoutes(fastify: FastifyInstance, adapter: OpenAIAdapter) {
   fastify.post<{ Body: CreateAssistantRequest }>('/v1/assistants', async (request, reply) => {
-    const assistant = adapter.createAssistant(request.body);
+    const assistant = await adapter.createAssistant(request.body);
     return reply.status(201).send(assistant);
   });
 
   fastify.get<{
     Querystring: { limit?: number; order?: 'asc' | 'desc'; after?: string; before?: string };
   }>('/v1/assistants', async (request, reply) => {
-    const assistants = adapter.listAssistants();
+    const assistants = await adapter.listAssistants();
 
     let data = assistants;
     const { limit = 20, order = 'desc', after, before } = request.query;
@@ -64,7 +64,7 @@ export function registerAssistantRoutes(fastify: FastifyInstance, adapter: OpenA
   fastify.get<{ Params: { assistant_id: string } }>(
     '/v1/assistants/:assistant_id',
     async (request, reply) => {
-      const assistant = adapter.getAssistant(request.params.assistant_id);
+      const assistant = await adapter.getAssistant(request.params.assistant_id);
 
       if (!assistant) {
         return reply.status(404).send({
@@ -83,7 +83,7 @@ export function registerAssistantRoutes(fastify: FastifyInstance, adapter: OpenA
   fastify.post<{ Params: { assistant_id: string }; Body: UpdateAssistantRequest }>(
     '/v1/assistants/:assistant_id',
     async (request, reply) => {
-      const assistant = adapter.updateAssistant(request.params.assistant_id, request.body);
+      const assistant = await adapter.updateAssistant(request.params.assistant_id, request.body);
 
       if (!assistant) {
         return reply.status(404).send({
@@ -102,7 +102,7 @@ export function registerAssistantRoutes(fastify: FastifyInstance, adapter: OpenA
   fastify.delete<{ Params: { assistant_id: string } }>(
     '/v1/assistants/:assistant_id',
     async (request, reply) => {
-      const deleted = adapter.deleteAssistant(request.params.assistant_id);
+      const deleted = await adapter.deleteAssistant(request.params.assistant_id);
 
       if (!deleted) {
         return reply.status(404).send({

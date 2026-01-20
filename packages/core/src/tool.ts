@@ -1,13 +1,47 @@
-/**
- * Tool factory and implementation
- */
-
 import type { Tool, ToolConfig, ToolSchema } from '@cogitator-ai/types';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { ZodType } from 'zod';
 
 /**
- * Create a type-safe tool
+ * Create a type-safe tool for agent use.
+ *
+ * Tools enable agents to interact with external systems, APIs, databases,
+ * or perform computations. Parameters are validated using Zod schemas.
+ *
+ * @typeParam TParams - Type of parameters the tool accepts
+ * @typeParam TResult - Type of result the tool returns
+ * @param config - Tool configuration
+ * @returns A Tool instance ready for agent use
+ *
+ * @example
+ * ```ts
+ * import { tool } from '@cogitator-ai/core';
+ * import { z } from 'zod';
+ *
+ * const weatherTool = tool({
+ *   name: 'get_weather',
+ *   description: 'Get current weather for a city',
+ *   parameters: z.object({
+ *     city: z.string().describe('City name'),
+ *     units: z.enum(['celsius', 'fahrenheit']).default('celsius'),
+ *   }),
+ *   execute: async ({ city, units }) => {
+ *     const response = await fetch(`https://api.weather.com/${city}`);
+ *     return response.json();
+ *   },
+ * });
+ * ```
+ *
+ * @example Sandboxed tool execution
+ * ```ts
+ * const shellTool = tool({
+ *   name: 'run_command',
+ *   description: 'Execute a shell command safely',
+ *   parameters: z.object({ command: z.string() }),
+ *   execute: async ({ command }) => ({ command }),
+ *   sandbox: { type: 'docker', image: 'alpine:latest' },
+ * });
+ * ```
  */
 export function tool<TParams, TResult>(
   config: ToolConfig<TParams, TResult>
@@ -30,7 +64,15 @@ export function tool<TParams, TResult>(
 }
 
 /**
- * Convert a tool to JSON Schema format for LLM
+ * Convert a tool to JSON Schema format for LLM function calling.
+ *
+ * Transforms Zod schema to OpenAPI 3.0 compatible JSON Schema
+ * that can be sent to LLM providers for function calling.
+ *
+ * @typeParam TParams - Type of tool parameters
+ * @typeParam TResult - Type of tool result
+ * @param t - Tool to convert
+ * @returns JSON Schema representation of the tool
  */
 export function toolToSchema<TParams, TResult>(t: Tool<TParams, TResult>): ToolSchema {
   const jsonSchema = zodToJsonSchema(t.parameters as ZodType, {

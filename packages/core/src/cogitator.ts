@@ -1,334 +1,153 @@
-/**
- * Cogitator - Main runtime class
- */
-
 import { nanoid } from 'nanoid';
 import type {
   CogitatorConfig,
   RunOptions,
   RunResult,
   Message,
-  MessageContent,
   ToolCall,
-  ToolResult,
   LLMBackend,
   LLMProvider,
   Span,
-  ToolContext,
-  MemoryAdapter,
-  Tool,
   Reflection,
   ReflectionAction,
   AgentContext,
-  InsightStore,
   Constitution,
   CostSummary,
 } from '@cogitator-ai/types';
-import {
-  InMemoryAdapter,
-  RedisAdapter,
-  PostgresAdapter,
-  ContextBuilder,
-  countMessageTokens,
-  countMessagesTokens,
-  type ContextBuilderDeps,
-} from '@cogitator-ai/memory';
 import { getPrice } from '@cogitator-ai/models';
 import { type Agent } from './agent';
 import { ToolRegistry } from './registry';
 import { createLLMBackend, parseModel } from './llm/index';
 import { getLogger } from './logger';
-import { ReflectionEngine, InMemoryInsightStore } from './reflection/index';
-import { ConstitutionalAI } from './constitutional/index';
-import { CostAwareRouter } from './cost-routing/index';
+import {
+  type InitializerState,
+  initializeMemory,
+  initializeSandbox,
+  initializeReflection,
+  initializeGuardrails,
+  initializeCostRouting,
+  cleanupState,
+} from './cogitator/initializers';
+import {
+  buildInitialMessages,
+  saveEntry,
+  enrichMessagesWithInsights,
+  addContextToMessages,
+} from './cogitator/message-builder';
+import { createSpan, getTextContent } from './cogitator/span-factory';
+import { executeTool, createToolMessage } from './cogitator/tool-executor';
+import { streamChat } from './cogitator/streaming';
 
-type SandboxManager = {
-  initialize(): Promise<void>;
-  execute(
-    request: { command: string[]; cwd?: string; env?: Record<string, string>; timeout?: number },
-    config: {
-      type: string;
-      image?: string;
-      resources?: unknown;
-      network?: unknown;
-      timeout?: number;
-    }
-  ): Promise<{
-    success: boolean;
-    data?: {
-      stdout: string;
-      stderr: string;
-      exitCode: number;
-      timedOut: boolean;
-      duration: number;
-    };
-    error?: string;
-  }>;
-  isDockerAvailable(): Promise<boolean>;
-  shutdown(): Promise<void>;
-};
-
+/**
+ * Main runtime for executing AI agents.
+ *
+ * Cogitator orchestrates agent execution with support for:
+ * - Multiple LLM providers (OpenAI, Anthropic, Ollama, Google, Azure, etc.)
+ * - Memory persistence (Redis, PostgreSQL, in-memory)
+ * - Sandboxed tool execution (Docker, WASM)
+ * - Reflection and learning from past runs
+ * - Constitutional AI guardrails
+ * - Cost-aware model routing
+ *
+ * @example Basic usage
+ * ```ts
+ * import { Cogitator, Agent } from '@cogitator-ai/core';
+ *
+ * const cog = new Cogitator({
+ *   llm: { defaultProvider: 'anthropic' },
+ * });
+ *
+ * const agent = new Agent({
+ *   name: 'assistant',
+ *   model: 'anthropic/claude-sonnet-4-20250514',
+ *   instructions: 'You are a helpful assistant.',
+ * });
+ *
+ * const result = await cog.run(agent, { input: 'Hello!' });
+ * console.log(result.output);
+ *
+ * await cog.close();
+ * ```
+ *
+ * @example With memory and streaming
+ * ```ts
+ * const cog = new Cogitator({
+ *   memory: {
+ *     adapter: 'redis',
+ *     redis: { url: 'redis://localhost:6379' },
+ *   },
+ * });
+ *
+ * const result = await cog.run(agent, {
+ *   input: 'Remember my name is Alice',
+ *   threadId: 'conversation-123',
+ *   stream: true,
+ *   onToken: (token) => process.stdout.write(token),
+ * });
+ * ```
+ */
 export class Cogitator {
   private config: CogitatorConfig;
   private backends = new Map<LLMProvider, LLMBackend>();
+  /** Global tool registry shared across all runs */
   public readonly tools: ToolRegistry = new ToolRegistry();
 
-  private memoryAdapter?: MemoryAdapter;
-  private contextBuilder?: ContextBuilder;
-  private memoryInitialized = false;
+  private state: InitializerState = {
+    memoryInitialized: false,
+    sandboxInitialized: false,
+    reflectionInitialized: false,
+    guardrailsInitialized: false,
+    costRoutingInitialized: false,
+  };
 
-  private sandboxManager?: SandboxManager;
-  private sandboxInitialized = false;
-
-  private reflectionEngine?: ReflectionEngine;
-  private insightStore?: InsightStore;
-  private reflectionInitialized = false;
-
-  private constitutionalAI?: ConstitutionalAI;
-  private guardrailsInitialized = false;
-
-  private costRouter?: CostAwareRouter;
-  private costRoutingInitialized = false;
-
+  /**
+   * Create a new Cogitator runtime.
+   *
+   * @param config - Runtime configuration
+   * @param config.llm - LLM provider settings (API keys, base URLs)
+   * @param config.memory - Memory adapter configuration
+   * @param config.sandbox - Sandbox execution settings
+   * @param config.reflection - Reflection engine settings
+   * @param config.guardrails - Constitutional AI settings
+   * @param config.costRouting - Cost-aware routing settings
+   */
   constructor(config: CogitatorConfig = {}) {
     this.config = config;
   }
 
   /**
-   * Initialize memory adapter and context builder (lazy, on first run)
-   */
-  private async initializeMemory(): Promise<void> {
-    if (this.memoryInitialized || !this.config.memory?.adapter) return;
-
-    const provider = this.config.memory.adapter;
-    let adapter: MemoryAdapter;
-
-    if (provider === 'memory') {
-      adapter = new InMemoryAdapter({
-        provider: 'memory',
-        ...this.config.memory.inMemory,
-      });
-    } else if (provider === 'redis') {
-      const url = this.config.memory.redis?.url;
-      if (!url) {
-        getLogger().warn('Redis adapter requires url in config');
-        return;
-      }
-      adapter = new RedisAdapter({
-        provider: 'redis',
-        url,
-        ...this.config.memory.redis,
-      });
-    } else if (provider === 'postgres') {
-      const connectionString = this.config.memory.postgres?.connectionString;
-      if (!connectionString) {
-        getLogger().warn('Postgres adapter requires connectionString in config');
-        return;
-      }
-      adapter = new PostgresAdapter({
-        provider: 'postgres',
-        connectionString,
-        ...this.config.memory.postgres,
-      });
-    } else {
-      getLogger().warn(`Unknown memory provider: ${provider}`);
-      return;
-    }
-
-    const result = await adapter.connect();
-    if (!result.success) {
-      getLogger().warn('Memory adapter connection failed', { error: result.error });
-      return;
-    }
-
-    this.memoryAdapter = adapter;
-
-    if (this.config.memory.contextBuilder) {
-      const deps: ContextBuilderDeps = {
-        memoryAdapter: this.memoryAdapter,
-      };
-      const contextConfig = {
-        maxTokens: this.config.memory.contextBuilder.maxTokens ?? 4000,
-        strategy: this.config.memory.contextBuilder.strategy ?? 'recent',
-        ...this.config.memory.contextBuilder,
-      } as const;
-      this.contextBuilder = new ContextBuilder(contextConfig, deps);
-    }
-
-    this.memoryInitialized = true;
-  }
-
-  /**
-   * Initialize sandbox manager (lazy, on first sandboxed tool execution)
-   */
-  private async initializeSandbox(): Promise<void> {
-    if (this.sandboxInitialized) return;
-
-    try {
-      const { SandboxManager } = await import('@cogitator-ai/sandbox');
-      this.sandboxManager = new SandboxManager(this.config.sandbox) as SandboxManager;
-      await this.sandboxManager.initialize();
-      this.sandboxInitialized = true;
-    } catch {
-      this.sandboxInitialized = true;
-    }
-  }
-
-  /**
-   * Initialize reflection engine (lazy, on first run with reflection enabled)
-   */
-  private async initializeReflection(agent: Agent): Promise<void> {
-    if (this.reflectionInitialized || !this.config.reflection?.enabled) return;
-
-    const backend = this.getBackend(this.config.reflection.reflectionModel ?? agent.model);
-
-    this.insightStore = new InMemoryInsightStore();
-    this.reflectionEngine = new ReflectionEngine({
-      llm: backend,
-      insightStore: this.insightStore,
-      config: this.config.reflection,
-    });
-
-    this.reflectionInitialized = true;
-  }
-
-  /**
-   * Initialize constitutional AI guardrails (lazy, on first run with guardrails enabled)
-   */
-  private initializeGuardrails(agent: Agent): void {
-    if (this.guardrailsInitialized || !this.config.guardrails?.enabled) return;
-
-    const backend = this.getBackend(this.config.guardrails.model ?? agent.model);
-
-    this.constitutionalAI = new ConstitutionalAI({
-      llm: backend,
-      constitution: this.config.guardrails.constitution,
-      config: this.config.guardrails,
-    });
-
-    this.guardrailsInitialized = true;
-  }
-
-  /**
-   * Initialize cost-aware routing (lazy, on first run with cost routing enabled)
-   */
-  private initializeCostRouting(): void {
-    if (this.costRoutingInitialized || !this.config.costRouting?.enabled) return;
-
-    this.costRouter = new CostAwareRouter({ config: this.config.costRouting });
-    this.costRoutingInitialized = true;
-  }
-
-  /**
-   * Build initial messages for a run, loading history if memory is enabled
-   */
-  private async buildInitialMessages(
-    agent: Agent,
-    options: RunOptions,
-    threadId: string
-  ): Promise<Message[]> {
-    if (!this.memoryAdapter || options.useMemory === false) {
-      return [
-        { role: 'system', content: agent.instructions },
-        { role: 'user', content: options.input },
-      ];
-    }
-
-    const threadResult = await this.memoryAdapter.getThread(threadId);
-    if (!threadResult.success || !threadResult.data) {
-      await this.memoryAdapter.createThread(agent.id, { agentId: agent.id }, threadId);
-    }
-
-    if (this.contextBuilder && options.loadHistory !== false) {
-      const ctx = await this.contextBuilder.build({
-        threadId,
-        agentId: agent.id,
-        systemPrompt: agent.instructions,
-      });
-      return [...ctx.messages, { role: 'user', content: options.input }];
-    }
-
-    if (options.loadHistory !== false) {
-      const entries = await this.memoryAdapter.getEntries({ threadId, limit: 20 });
-      const messages: Message[] = [{ role: 'system', content: agent.instructions }];
-      if (entries.success) {
-        messages.push(...entries.data.map((e) => e.message));
-      }
-      messages.push({ role: 'user', content: options.input });
-      return messages;
-    }
-
-    return [
-      { role: 'system', content: agent.instructions },
-      { role: 'user', content: options.input },
-    ];
-  }
-
-  /**
-   * Save a message entry to memory (non-blocking, won't crash on failure)
-   */
-  private async saveEntry(
-    threadId: string,
-    agentId: string,
-    message: Message,
-    toolCalls?: ToolCall[],
-    toolResults?: ToolResult[],
-    onError?: (error: Error, operation: 'save' | 'load') => void
-  ): Promise<void> {
-    if (!this.memoryAdapter) return;
-
-    try {
-      const threadResult = await this.memoryAdapter.getThread(threadId);
-      if (!threadResult.success || !threadResult.data) {
-        await this.memoryAdapter.createThread(agentId, { agentId }, threadId);
-      }
-
-      await this.memoryAdapter.addEntry({
-        threadId,
-        message,
-        toolCalls,
-        toolResults,
-        tokenCount: countMessageTokens(message),
-      });
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      getLogger().warn('Failed to save memory entry', { error: error.message });
-      onError?.(error, 'save');
-    }
-  }
-
-  /**
-   * Create a span with proper IDs and emit callback
-   */
-  private createSpan(
-    name: string,
-    traceId: string,
-    parentId: string | undefined,
-    startTime: number,
-    endTime: number,
-    attributes: Record<string, unknown>,
-    status: 'ok' | 'error' | 'unset' = 'ok',
-    kind: Span['kind'] = 'internal',
-    onSpan?: (span: Span) => void
-  ): Span {
-    const span: Span = {
-      id: `span_${nanoid(12)}`,
-      traceId,
-      parentId,
-      name,
-      kind,
-      status,
-      startTime,
-      endTime,
-      duration: endTime - startTime,
-      attributes,
-    };
-    onSpan?.(span);
-    return span;
-  }
-
-  /**
-   * Run an agent with the given input
+   * Run an agent with the given input.
+   *
+   * Executes the agent's task, handling LLM calls, tool execution,
+   * memory persistence, and observability callbacks.
+   *
+   * @param agent - Agent to execute
+   * @param options - Run configuration
+   * @param options.input - User input/prompt for the agent
+   * @param options.threadId - Thread ID for memory persistence
+   * @param options.context - Additional context to include in system prompt
+   * @param options.stream - Enable streaming responses
+   * @param options.onToken - Callback for each streamed token
+   * @param options.onToolCall - Callback when a tool is called
+   * @param options.onToolResult - Callback when a tool returns a result
+   * @param options.onSpan - Callback for observability spans
+   * @param options.timeout - Override agent timeout
+   * @returns Run result with output, usage stats, and trace
+   *
+   * @example
+   * ```ts
+   * const result = await cog.run(agent, {
+   *   input: 'Search for TypeScript tutorials',
+   *   threadId: 'session-123',
+   *   stream: true,
+   *   onToken: (token) => process.stdout.write(token),
+   *   onToolCall: (call) => console.log('Tool:', call.name),
+   * });
+   *
+   * console.log('Output:', result.output);
+   * console.log('Tokens:', result.usage.totalTokens);
+   * console.log('Cost:', result.usage.cost);
+   * ```
    */
   async run(agent: Agent, options: RunOptions): Promise<RunResult> {
     const runId = `run_${nanoid(12)}`;
@@ -352,21 +171,7 @@ export class Cogitator {
     const rootSpanId = `span_${nanoid(12)}`;
 
     try {
-      if (this.config.memory?.adapter && !this.memoryInitialized) {
-        await this.initializeMemory();
-      }
-
-      if (this.config.reflection?.enabled && !this.reflectionInitialized) {
-        await this.initializeReflection(agent);
-      }
-
-      if (this.config.guardrails?.enabled && !this.guardrailsInitialized) {
-        this.initializeGuardrails(agent);
-      }
-
-      if (this.config.costRouting?.enabled && !this.costRoutingInitialized) {
-        this.initializeCostRouting();
-      }
+      await this.initializeAll(agent);
 
       const registry = new ToolRegistry();
       if (agent.tools && agent.tools.length > 0) {
@@ -375,41 +180,48 @@ export class Cogitator {
 
       let effectiveModel = agent.model;
 
-      if (this.costRouter && this.config.costRouting?.autoSelectModel) {
-        const recommendation = await this.costRouter.recommendModel(options.input);
+      if (this.state.costRouter && this.config.costRouting?.autoSelectModel) {
+        const recommendation = await this.state.costRouter.recommendModel(options.input);
         effectiveModel = `${recommendation.provider}/${recommendation.modelId}`;
 
-        const budgetCheck = this.costRouter.checkBudget(recommendation.estimatedCost);
+        const budgetCheck = this.state.costRouter.checkBudget(recommendation.estimatedCost);
         if (!budgetCheck.allowed) {
           throw new Error(`Budget exceeded: ${budgetCheck.reason}`);
         }
       }
 
       const backend = this.getBackend(effectiveModel, agent.config.provider);
-
       const model = agent.config.provider ? effectiveModel : parseModel(effectiveModel).model;
 
-      const messages = await this.buildInitialMessages(agent, options, threadId);
+      const messages = await buildInitialMessages(
+        agent,
+        options,
+        threadId,
+        this.state.memoryAdapter,
+        this.state.contextBuilder
+      );
 
-      if (this.constitutionalAI && this.config.guardrails?.filterInput) {
-        const inputResult = await this.constitutionalAI.filterInput(options.input);
+      if (this.state.constitutionalAI && this.config.guardrails?.filterInput) {
+        const inputResult = await this.state.constitutionalAI.filterInput(options.input);
         if (!inputResult.allowed) {
           throw new Error(`Input blocked: ${inputResult.blockedReason ?? 'Policy violation'}`);
         }
       }
 
-      if (options.context && messages.length > 0 && messages[0].role === 'system') {
-        const contextStr = Object.entries(options.context)
-          .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
-          .join('\n');
-        messages[0].content += `\n\nContext:\n${contextStr}`;
+      if (options.context) {
+        addContextToMessages(messages, options.context);
       }
 
-      if (this.memoryAdapter && options.saveHistory !== false && options.useMemory !== false) {
-        await this.saveEntry(
+      if (
+        this.state.memoryAdapter &&
+        options.saveHistory !== false &&
+        options.useMemory !== false
+      ) {
+        await saveEntry(
           threadId,
           agent.id,
           { role: 'user', content: options.input },
+          this.state.memoryAdapter,
           undefined,
           undefined,
           options.onMemoryError
@@ -435,11 +247,8 @@ export class Cogitator {
         availableTools: registry.getNames(),
       };
 
-      if (this.reflectionEngine && this.config.reflection?.enabled) {
-        const insights = await this.reflectionEngine.getRelevantInsights(agentContext);
-        if (insights.length > 0 && messages.length > 0 && messages[0].role === 'system') {
-          messages[0].content += `\n\nPast learnings that may help:\n${insights.map((i) => `- ${i.content}`).join('\n')}`;
-        }
+      if (this.state.reflectionEngine && this.config.reflection?.enabled) {
+        await enrichMessagesWithInsights(messages, this.state.reflectionEngine, agentContext);
       }
 
       while (iterations < maxIterations) {
@@ -455,14 +264,7 @@ export class Cogitator {
 
         let response;
         if (options.stream && options.onToken) {
-          response = await this.streamChat(
-            backend,
-            model,
-            messages,
-            registry,
-            agent,
-            options.onToken
-          );
+          response = await streamChat(backend, model, messages, registry, agent, options.onToken);
         } else {
           response = await backend.chat({
             model,
@@ -475,7 +277,7 @@ export class Cogitator {
           });
         }
 
-        const llmSpan = this.createSpan(
+        const llmSpan = createSpan(
           'llm.chat',
           traceId,
           rootSpanId,
@@ -499,8 +301,11 @@ export class Cogitator {
 
         let outputContent = response.content;
 
-        if (this.constitutionalAI && this.config.guardrails?.filterOutput) {
-          const outputResult = await this.constitutionalAI.filterOutput(outputContent, messages);
+        if (this.state.constitutionalAI && this.config.guardrails?.filterOutput) {
+          const outputResult = await this.state.constitutionalAI.filterOutput(
+            outputContent,
+            messages
+          );
           if (!outputResult.allowed) {
             if (outputResult.suggestedRevision) {
               outputContent = outputResult.suggestedRevision;
@@ -518,11 +323,16 @@ export class Cogitator {
         };
         messages.push(assistantMessage);
 
-        if (this.memoryAdapter && options.saveHistory !== false && options.useMemory !== false) {
-          await this.saveEntry(
+        if (
+          this.state.memoryAdapter &&
+          options.saveHistory !== false &&
+          options.useMemory !== false
+        ) {
+          await saveEntry(
             threadId,
             agent.id,
             assistantMessage,
+            this.state.memoryAdapter,
             response.toolCalls,
             undefined,
             options.onMemoryError
@@ -539,11 +349,15 @@ export class Cogitator {
 
           const executeToolCall = async (toolCall: ToolCall) => {
             const toolSpanStart = Date.now();
-            const result = await this.executeTool(
+            const result = await executeTool(
               registry,
               toolCall,
               runId,
               agent.id,
+              this.state.sandboxManager,
+              this.state.constitutionalAI,
+              !!this.config.guardrails?.filterToolCalls,
+              () => initializeSandbox(this.config, this.state),
               abortController.signal
             );
             const toolSpanEnd = Date.now();
@@ -561,7 +375,7 @@ export class Cogitator {
               })();
 
           for (const { toolCall, result, toolSpanStart, toolSpanEnd } of toolResults) {
-            const toolSpan = this.createSpan(
+            const toolSpan = createSpan(
               `tool.${toolCall.name}`,
               traceId,
               rootSpanId,
@@ -582,23 +396,19 @@ export class Cogitator {
 
             options.onToolResult?.(result);
 
-            const toolMessage: Message = {
-              role: 'tool',
-              content: JSON.stringify(result.result),
-              toolCallId: toolCall.id,
-              name: toolCall.name,
-            };
+            const toolMessage = createToolMessage(toolCall, result);
             messages.push(toolMessage);
 
             if (
-              this.memoryAdapter &&
+              this.state.memoryAdapter &&
               options.saveHistory !== false &&
               options.useMemory !== false
             ) {
-              await this.saveEntry(
+              await saveEntry(
                 threadId,
                 agent.id,
                 toolMessage,
+                this.state.memoryAdapter,
                 undefined,
                 [result],
                 options.onMemoryError
@@ -616,12 +426,12 @@ export class Cogitator {
             allActions.push(action);
 
             if (
-              this.reflectionEngine &&
+              this.state.reflectionEngine &&
               this.config.reflection?.enabled &&
               this.config.reflection.reflectAfterToolCall
             ) {
               try {
-                const reflectionResult = await this.reflectionEngine.reflectOnToolCall(
+                const reflectionResult = await this.state.reflectionEngine.reflectOnToolCall(
                   action,
                   agentContext
                 );
@@ -650,17 +460,15 @@ export class Cogitator {
 
       const endTime = Date.now();
       const lastAssistantMessage = messages.filter((m) => m.role === 'assistant').pop();
-      const finalOutput = lastAssistantMessage
-        ? this.getTextContent(lastAssistantMessage.content)
-        : '';
+      const finalOutput = lastAssistantMessage ? getTextContent(lastAssistantMessage.content) : '';
 
       if (
-        this.reflectionEngine &&
+        this.state.reflectionEngine &&
         this.config.reflection?.enabled &&
         this.config.reflection.reflectAtEnd
       ) {
         try {
-          const runReflection = await this.reflectionEngine.reflectOnRun(
+          const runReflection = await this.state.reflectionEngine.reflectOnRun(
             agentContext,
             allActions,
             finalOutput,
@@ -675,7 +483,7 @@ export class Cogitator {
         }
       }
 
-      const rootSpan = this.createSpan(
+      const rootSpan = createSpan(
         'agent.run',
         traceId,
         undefined,
@@ -700,8 +508,8 @@ export class Cogitator {
 
       const runCost = this.calculateCost(effectiveModel, totalInputTokens, totalOutputTokens);
 
-      if (this.costRouter) {
-        this.costRouter.recordCost({
+      if (this.state.costRouter) {
+        this.state.costRouter.recordCost({
           runId,
           agentId: agent.id,
           threadId,
@@ -732,8 +540,8 @@ export class Cogitator {
           spans,
         },
         reflections: allReflections.length > 0 ? allReflections : undefined,
-        reflectionSummary: this.reflectionEngine
-          ? await this.reflectionEngine.getSummary(agent.id)
+        reflectionSummary: this.state.reflectionEngine
+          ? await this.state.reflectionEngine.getSummary(agent.id)
           : undefined,
       };
 
@@ -743,7 +551,7 @@ export class Cogitator {
     } catch (error) {
       const endTime = Date.now();
 
-      const errorSpan = this.createSpan(
+      const errorSpan = createSpan(
         'agent.run',
         traceId,
         undefined,
@@ -772,240 +580,24 @@ export class Cogitator {
     }
   }
 
-  /**
-   * Stream chat with token callback
-   */
-  private async streamChat(
-    backend: LLMBackend,
-    model: string,
-    messages: Message[],
-    registry: ToolRegistry,
-    agent: Agent,
-    onToken: (token: string) => void
-  ) {
-    let content = '';
-    let toolCalls: ToolCall[] | undefined;
-    let finishReason: 'stop' | 'tool_calls' | 'length' | 'error' = 'stop';
-    let inputTokens = 0;
-    let outputTokens = 0;
-    let hasUsageFromStream = false;
-
-    const stream = backend.chatStream({
-      model,
-      messages,
-      tools: registry.getSchemas(),
-      temperature: agent.config.temperature,
-      topP: agent.config.topP,
-      maxTokens: agent.config.maxTokens,
-      stop: agent.config.stopSequences,
-    });
-
-    for await (const chunk of stream) {
-      if (chunk.delta.content) {
-        content += chunk.delta.content;
-        onToken(chunk.delta.content);
-      }
-      if (chunk.delta.toolCalls) {
-        toolCalls = chunk.delta.toolCalls as ToolCall[];
-      }
-      if (chunk.finishReason) {
-        finishReason = chunk.finishReason;
-      }
-      if (chunk.usage) {
-        inputTokens = chunk.usage.inputTokens;
-        outputTokens = chunk.usage.outputTokens;
-        hasUsageFromStream = true;
-      }
+  private async initializeAll(agent: Agent): Promise<void> {
+    if (this.config.memory?.adapter && !this.state.memoryInitialized) {
+      await initializeMemory(this.config, this.state);
     }
 
-    if (!hasUsageFromStream) {
-      inputTokens = countMessagesTokens(messages);
-      outputTokens = Math.ceil(content.length / 4);
+    if (this.config.reflection?.enabled && !this.state.reflectionInitialized) {
+      await initializeReflection(this.config, this.state, agent, (model) => this.getBackend(model));
     }
 
-    return {
-      id: `stream_${nanoid(8)}`,
-      content,
-      toolCalls,
-      finishReason,
-      usage: {
-        inputTokens,
-        outputTokens,
-        totalTokens: inputTokens + outputTokens,
-      },
-    };
-  }
-
-  /**
-   * Execute a tool
-   */
-  private async executeTool(
-    registry: ToolRegistry,
-    toolCall: ToolCall,
-    runId: string,
-    agentId: string,
-    signal?: AbortSignal
-  ): Promise<ToolResult> {
-    const tool = registry.get(toolCall.name);
-
-    if (!tool) {
-      return {
-        callId: toolCall.id,
-        name: toolCall.name,
-        result: null,
-        error: `Tool not found: ${toolCall.name}`,
-      };
+    if (this.config.guardrails?.enabled && !this.state.guardrailsInitialized) {
+      initializeGuardrails(this.config, this.state, agent, (model) => this.getBackend(model));
     }
 
-    const parseResult = tool.parameters.safeParse(toolCall.arguments);
-    if (!parseResult.success) {
-      return {
-        callId: toolCall.id,
-        name: toolCall.name,
-        result: null,
-        error: `Invalid arguments: ${parseResult.error.message}`,
-      };
-    }
-
-    if (this.constitutionalAI && this.config.guardrails?.filterToolCalls) {
-      const context: ToolContext = {
-        agentId,
-        runId,
-        signal: signal ?? new AbortController().signal,
-      };
-      const guardResult = await this.constitutionalAI.guardTool(tool, toolCall.arguments, context);
-      if (!guardResult.approved) {
-        return {
-          callId: toolCall.id,
-          name: toolCall.name,
-          result: null,
-          error: `Tool blocked: ${guardResult.reason ?? 'Policy violation'}`,
-        };
-      }
-    }
-
-    if (tool.sandbox?.type === 'docker' || tool.sandbox?.type === 'wasm') {
-      return this.executeInSandbox(tool, toolCall, runId, agentId);
-    }
-
-    const context: ToolContext = {
-      agentId,
-      runId,
-      signal: signal ?? new AbortController().signal,
-    };
-
-    try {
-      const result = await tool.execute(parseResult.data, context);
-      return {
-        callId: toolCall.id,
-        name: toolCall.name,
-        result,
-      };
-    } catch (error) {
-      return {
-        callId: toolCall.id,
-        name: toolCall.name,
-        result: null,
-        error: error instanceof Error ? error.message : String(error),
-      };
+    if (this.config.costRouting?.enabled && !this.state.costRoutingInitialized) {
+      initializeCostRouting(this.config, this.state);
     }
   }
 
-  /**
-   * Execute a tool in sandbox (Docker or WASM)
-   */
-  private async executeInSandbox(
-    tool: Tool,
-    toolCall: ToolCall,
-    runId: string,
-    agentId: string
-  ): Promise<ToolResult> {
-    await this.initializeSandbox();
-
-    if (!this.sandboxManager) {
-      getLogger().warn('Sandbox unavailable, executing natively', { tool: tool.name });
-      const context: ToolContext = {
-        agentId,
-        runId,
-        signal: new AbortController().signal,
-      };
-      try {
-        const result = await tool.execute(toolCall.arguments, context);
-        return { callId: toolCall.id, name: toolCall.name, result };
-      } catch (error) {
-        return {
-          callId: toolCall.id,
-          name: toolCall.name,
-          result: null,
-          error: error instanceof Error ? error.message : String(error),
-        };
-      }
-    }
-
-    const args = toolCall.arguments;
-    const sandboxConfig = tool.sandbox!;
-
-    const isWasm = sandboxConfig.type === 'wasm';
-    const request = isWasm
-      ? {
-          command: [],
-          stdin: JSON.stringify(args),
-          timeout: tool.timeout,
-        }
-      : {
-          command: ['sh', '-c', String(args.command ?? '')],
-          cwd: args.cwd as string | undefined,
-          env: args.env as Record<string, string> | undefined,
-          timeout: tool.timeout,
-        };
-
-    const result = await this.sandboxManager.execute(request, sandboxConfig);
-
-    if (!result.success) {
-      return {
-        callId: toolCall.id,
-        name: toolCall.name,
-        result: null,
-        error: result.error,
-      };
-    }
-
-    if (isWasm) {
-      try {
-        const parsed = JSON.parse(result.data!.stdout);
-        return {
-          callId: toolCall.id,
-          name: toolCall.name,
-          result: parsed,
-        };
-      } catch {
-        return {
-          callId: toolCall.id,
-          name: toolCall.name,
-          result: result.data!.stdout,
-        };
-      }
-    }
-
-    return {
-      callId: toolCall.id,
-      name: toolCall.name,
-      result: {
-        stdout: result.data!.stdout,
-        stderr: result.data!.stderr,
-        exitCode: result.data!.exitCode,
-        timedOut: result.data!.timedOut,
-        duration: result.data!.duration,
-        command: args.command,
-      },
-    };
-  }
-
-  /**
-   * Get or create an LLM backend
-   * @param modelString - Model string (e.g., "x-ai/grok-4.1-fast")
-   * @param explicitProvider - Explicit provider override (e.g., 'openai' for OpenRouter)
-   */
   private getBackend(modelString: string, explicitProvider?: string): LLMBackend {
     const { provider: parsedProvider } = parseModel(modelString);
 
@@ -1023,9 +615,6 @@ export class Cogitator {
     return backend;
   }
 
-  /**
-   * Calculate cost based on model and tokens using dynamic model registry
-   */
   private calculateCost(model: string, inputTokens: number, outputTokens: number): number {
     const { model: modelName } = parseModel(model);
     const price = getPrice(modelName);
@@ -1038,81 +627,91 @@ export class Cogitator {
   }
 
   /**
-   * Get accumulated insights for an agent
+   * Get accumulated insights from reflection for an agent.
+   *
+   * Insights are learnings derived from past runs that can help
+   * improve future agent performance.
+   *
+   * @param agentId - ID of the agent to get insights for
+   * @returns Array of insights, empty if reflection is not enabled
    */
   async getInsights(agentId: string) {
-    if (!this.insightStore) return [];
-    return this.insightStore.getAll(agentId);
+    if (!this.state.insightStore) return [];
+    return this.state.insightStore.getAll(agentId);
   }
 
   /**
-   * Get reflection summary for an agent
+   * Get reflection summary for an agent.
+   *
+   * Summary includes statistics about total runs, successful tool calls,
+   * common patterns, and accumulated learnings.
+   *
+   * @param agentId - ID of the agent to get summary for
+   * @returns Reflection summary, null if reflection is not enabled
    */
   async getReflectionSummary(agentId: string) {
-    if (!this.reflectionEngine) return null;
-    return this.reflectionEngine.getSummary(agentId);
+    if (!this.state.reflectionEngine) return null;
+    return this.state.reflectionEngine.getSummary(agentId);
   }
 
   /**
-   * Get the constitutional AI guardrails instance
+   * Get the constitutional AI guardrails instance.
+   *
+   * @returns ConstitutionalAI instance, undefined if guardrails not enabled
    */
-  getGuardrails(): ConstitutionalAI | undefined {
-    return this.constitutionalAI;
+  getGuardrails() {
+    return this.state.constitutionalAI;
   }
 
   /**
-   * Set the constitution for guardrails
+   * Set or update the constitution for guardrails.
+   *
+   * The constitution defines principles and rules that the agent
+   * must follow, filtering both input and output.
+   *
+   * @param constitution - New constitution to apply
    */
   setConstitution(constitution: Constitution): void {
-    this.constitutionalAI?.setConstitution(constitution);
+    this.state.constitutionalAI?.setConstitution(constitution);
   }
 
   /**
-   * Get cost-aware routing summary
+   * Get cost tracking summary across all runs.
+   *
+   * @returns Cost summary with total spent, runs count, and per-model breakdown
    */
   getCostSummary(): CostSummary | undefined {
-    return this.costRouter?.getCostSummary();
+    return this.state.costRouter?.getCostSummary();
   }
 
   /**
-   * Get the cost-aware router instance
+   * Get the cost-aware router instance for advanced cost management.
+   *
+   * @returns CostAwareRouter instance, undefined if cost routing not enabled
    */
-  getCostRouter(): CostAwareRouter | undefined {
-    return this.costRouter;
-  }
-
-  private getTextContent(content: MessageContent): string {
-    if (typeof content === 'string') {
-      return content;
-    }
-    return content
-      .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
-      .map((part) => part.text)
-      .join(' ');
+  getCostRouter() {
+    return this.state.costRouter;
   }
 
   /**
-   * Close all connections
+   * Close all connections and release resources.
+   *
+   * Should be called when done using the Cogitator instance to properly
+   * disconnect from memory adapters, shut down sandbox containers, and
+   * clean up internal state.
+   *
+   * @example
+   * ```ts
+   * const cog = new Cogitator({ ... });
+   * try {
+   *   await cog.run(agent, { input: 'Hello' });
+   * } finally {
+   *   await cog.close();
+   * }
+   * ```
    */
   async close(): Promise<void> {
-    if (this.memoryAdapter) {
-      await this.memoryAdapter.disconnect();
-      this.memoryAdapter = undefined;
-      this.contextBuilder = undefined;
-      this.memoryInitialized = false;
-    }
-    if (this.sandboxManager) {
-      await this.sandboxManager.shutdown();
-      this.sandboxManager = undefined;
-      this.sandboxInitialized = false;
-    }
-    this.reflectionEngine = undefined;
-    this.insightStore = undefined;
-    this.reflectionInitialized = false;
-    this.constitutionalAI = undefined;
-    this.guardrailsInitialized = false;
-    this.costRouter = undefined;
-    this.costRoutingInitialized = false;
+    await cleanupState(this.state);
     this.backends.clear();
   }
 }

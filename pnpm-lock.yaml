@@ -60,12 +60,21 @@ importers:
       '@cogitator-ai/core':
         specifier: workspace:*
         version: link:../packages/core
+      '@cogitator-ai/mcp':
+        specifier: workspace:*
+        version: link:../packages/mcp
+      '@cogitator-ai/openai-compat':
+        specifier: workspace:*
+        version: link:../packages/openai-compat
       '@cogitator-ai/swarms':
         specifier: workspace:*
         version: link:../packages/swarms
       '@cogitator-ai/workflows':
         specifier: workspace:*
         version: link:../packages/workflows
+      openai:
+        specifier: ^4.73.1
+        version: 4.104.0(zod@3.25.76)
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -568,6 +577,9 @@ importers:
       zod:
         specifier: ^3.22.0
         version: 3.25.76
+      zod-to-json-schema:
+        specifier: ^3.22.0
+        version: 3.25.1(zod@3.25.76)
     devDependencies:
       '@extism/js-pdk':
         specifier: ^1.0.0

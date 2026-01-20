@@ -1135,6 +1135,23 @@ cogitator/
 └── deploy/             # Deployment configs
 ```
 
+### Examples
+
+Run any example with `npx tsx examples/<name>.ts`:
+
+| Example                        | Description                              |
+| ------------------------------ | ---------------------------------------- |
+| `basic-agent.ts`               | Simple agent with tools                  |
+| `memory-persistence.ts`        | Redis/PostgreSQL memory persistence      |
+| `openai-compat-server.ts`      | OpenAI-compatible REST API server        |
+| `mcp-integration.ts`           | MCP server integration                   |
+| `constitutional-guardrails.ts` | Safety guardrails with Constitutional AI |
+| `research-agent.ts`            | Web research agent                       |
+| `code-assistant.ts`            | Code assistant with file tools           |
+| `dev-team-swarm.ts`            | Hierarchical dev team swarm              |
+| `debate-swarm.ts`              | Debate between multiple agents           |
+| `workflow-code-review.ts`      | Code review workflow with DAG            |
+
 ---
 
 ## Star History

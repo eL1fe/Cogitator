@@ -51,7 +51,7 @@ export function registerFileRoutes(fastify: FastifyInstance, adapter: OpenAIAdap
       });
     }
 
-    const file = threadManager.addFile(fileContent, filename);
+    const file = await threadManager.addFile(fileContent, filename);
 
     const response: FileObject = {
       id: file.id,
@@ -67,7 +67,7 @@ export function registerFileRoutes(fastify: FastifyInstance, adapter: OpenAIAdap
   });
 
   fastify.get<{ Querystring: { purpose?: FilePurpose } }>('/v1/files', async (_request, reply) => {
-    const files = threadManager.listFiles();
+    const files = await threadManager.listFiles();
 
     const data: FileObject[] = files.map((file) => ({
       id: file.id,
@@ -89,7 +89,7 @@ export function registerFileRoutes(fastify: FastifyInstance, adapter: OpenAIAdap
   });
 
   fastify.get<{ Params: { file_id: string } }>('/v1/files/:file_id', async (request, reply) => {
-    const file = threadManager.getFile(request.params.file_id);
+    const file = await threadManager.getFile(request.params.file_id);
 
     if (!file) {
       return reply.status(404).send({
@@ -117,7 +117,7 @@ export function registerFileRoutes(fastify: FastifyInstance, adapter: OpenAIAdap
   fastify.get<{ Params: { file_id: string } }>(
     '/v1/files/:file_id/content',
     async (request, reply) => {
-      const file = threadManager.getFile(request.params.file_id);
+      const file = await threadManager.getFile(request.params.file_id);
 
       if (!file) {
         return reply.status(404).send({
@@ -136,7 +136,7 @@ export function registerFileRoutes(fastify: FastifyInstance, adapter: OpenAIAdap
   );
 
   fastify.delete<{ Params: { file_id: string } }>('/v1/files/:file_id', async (request, reply) => {
-    const deleted = threadManager.deleteFile(request.params.file_id);
+    const deleted = await threadManager.deleteFile(request.params.file_id);
 
     if (!deleted) {
       return reply.status(404).send({

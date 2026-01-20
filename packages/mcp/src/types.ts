@@ -6,6 +6,23 @@ import type { Tool } from '@cogitator-ai/types';
 
 export type MCPTransportType = 'stdio' | 'http' | 'sse';
 
+export interface MCPRetryConfig {
+  /** Maximum number of retry attempts (default: 3) */
+  maxRetries?: number;
+
+  /** Initial delay in ms before first retry (default: 1000) */
+  initialDelay?: number;
+
+  /** Maximum delay in ms between retries (default: 30000) */
+  maxDelay?: number;
+
+  /** Backoff multiplier (default: 2) */
+  backoffMultiplier?: number;
+
+  /** Whether to retry on connection loss (default: true) */
+  retryOnConnectionLoss?: boolean;
+}
+
 export interface MCPClientConfig {
   /** Transport type */
   transport: MCPTransportType;
@@ -30,6 +47,21 @@ export interface MCPClientConfig {
 
   /** Client version */
   clientVersion?: string;
+
+  /** Retry configuration for failed operations */
+  retry?: MCPRetryConfig;
+
+  /** Auto-reconnect on connection loss (default: true) */
+  autoReconnect?: boolean;
+
+  /** Callback when reconnection attempt starts */
+  onReconnecting?: (attempt: number) => void;
+
+  /** Callback when reconnected successfully */
+  onReconnected?: () => void;
+
+  /** Callback when reconnection fails permanently */
+  onReconnectFailed?: (error: Error) => void;
 }
 
 export interface MCPResource {

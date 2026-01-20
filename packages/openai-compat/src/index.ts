@@ -9,7 +9,22 @@
 export { OpenAIServer, createOpenAIServer } from './server/api-server';
 
 export { OpenAIAdapter, createOpenAIAdapter } from './client/openai-adapter';
+export type { StreamEventType, StreamEmitterEvents } from './client/openai-adapter';
 export { ThreadManager } from './client/thread-manager';
+export type { StoredThread, StoredAssistant } from './client/thread-manager';
+
+export {
+  InMemoryThreadStorage,
+  RedisThreadStorage,
+  PostgresThreadStorage,
+  createThreadStorage,
+} from './client/storage';
+export type {
+  ThreadStorage,
+  StoredFile,
+  RedisThreadStorageConfig,
+  PostgresThreadStorageConfig,
+} from './client/storage';
 
 export type {
   OpenAIError,

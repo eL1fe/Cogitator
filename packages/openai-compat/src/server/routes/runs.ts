@@ -12,7 +12,7 @@ export function registerRunRoutes(fastify: FastifyInstance, adapter: OpenAIAdapt
   fastify.post<{ Params: { thread_id: string }; Body: CreateRunRequest }>(
     '/v1/threads/:thread_id/runs',
     async (request, reply) => {
-      const thread = adapter.getThread(request.params.thread_id);
+      const thread = await adapter.getThread(request.params.thread_id);
 
       if (!thread) {
         return reply.status(404).send({
@@ -49,11 +49,11 @@ export function registerRunRoutes(fastify: FastifyInstance, adapter: OpenAIAdapt
       thread?: { messages?: { role: 'user' | 'assistant'; content: string }[] };
     };
   }>('/v1/threads/runs', async (request, reply) => {
-    const thread = adapter.createThread();
+    const thread = await adapter.createThread();
 
     if (request.body.thread?.messages) {
       for (const msg of request.body.thread.messages) {
-        adapter.addMessage(thread.id, msg);
+        await adapter.addMessage(thread.id, msg);
       }
     }
 
@@ -153,53 +153,57 @@ export function registerRunRoutes(fastify: FastifyInstance, adapter: OpenAIAdapt
 }
 
 /**
- * Handle streaming run response
+ * Handle streaming run response using EventEmitter for real-time token delivery
  */
-async function handleStreamingRun(
+function handleStreamingRun(
   reply: {
-    raw: { write: (data: string) => void; end: () => void };
+    raw: {
+      write: (data: string) => void;
+      end: () => void;
+      on: (event: string, handler: () => void) => void;
+    };
     header: (key: string, value: string) => void;
   },
   adapter: OpenAIAdapter,
-  threadId: string,
+  _threadId: string,
   runId: string
 ) {
   reply.header('Content-Type', 'text/event-stream');
   reply.header('Cache-Control', 'no-cache');
   reply.header('Connection', 'keep-alive');
+  reply.header('X-Accel-Buffering', 'no');
 
   const sendEvent = (event: string, data: unknown) => {
+    const dataStr = event === 'done' ? data : JSON.stringify(data);
     reply.raw.write(`event: ${event}\n`);
-    reply.raw.write(`data: ${JSON.stringify(data)}\n\n`);
+    reply.raw.write(`data: ${dataStr}\n\n`);
   };
 
-  let lastStatus = '';
-  const maxIterations = 300;
-  let iterations = 0;
-
-  while (iterations < maxIterations) {
-    const run = adapter.getRun(threadId, runId);
-    if (!run) break;
-
-    if (run.status !== lastStatus) {
-      lastStatus = run.status;
-      sendEvent(`thread.run.${run.status}`, run);
-    }
-
-    if (['completed', 'failed', 'cancelled', 'expired', 'incomplete'].includes(run.status)) {
-      if (run.status === 'completed') {
-        const messages = adapter.listMessages(threadId, { run_id: runId, limit: 1 });
-        if (messages.length > 0) {
-          sendEvent('thread.message.completed', messages[0]);
-        }
-      }
-      break;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    iterations++;
+  const emitter = adapter.getStreamEmitter(runId);
+  if (!emitter) {
+    sendEvent('error', {
+      error: { message: 'No stream available for this run', type: 'server_error' },
+    });
+    sendEvent('done', '[DONE]');
+    reply.raw.end();
+    return;
   }
 
-  sendEvent('done', '[DONE]');
-  reply.raw.end();
+  const eventHandler = (type: string, data: unknown) => {
+    sendEvent(type, data);
+  };
+
+  const endHandler = () => {
+    emitter.off('event', eventHandler);
+    emitter.off('end', endHandler);
+    reply.raw.end();
+  };
+
+  emitter.on('event', eventHandler);
+  emitter.on('end', endHandler);
+
+  reply.raw.on('close', () => {
+    emitter.off('event', eventHandler);
+    emitter.off('end', endHandler);
+  });
 }
