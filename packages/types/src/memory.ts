@@ -63,7 +63,7 @@ export interface Embedding {
 
 export type MemoryResult<T> = { success: true; data: T } | { success: false; error: string };
 
-export type MemoryProvider = 'memory' | 'redis' | 'postgres';
+export type MemoryProvider = 'memory' | 'redis' | 'postgres' | 'sqlite' | 'mongodb' | 'qdrant';
 
 export interface MemoryAdapterConfig {
   provider: MemoryProvider;
@@ -100,6 +100,36 @@ export interface PostgresAdapterConfig extends MemoryAdapterConfig {
   connectionString: string;
   schema?: string;
   poolSize?: number;
+}
+
+export interface SQLiteAdapterConfig extends MemoryAdapterConfig {
+  provider: 'sqlite';
+  /** Path to SQLite database file. Use ':memory:' for in-memory database */
+  path: string;
+  /** Enable WAL mode for better concurrency (default: true) */
+  walMode?: boolean;
+}
+
+export interface MongoDBAdapterConfig extends MemoryAdapterConfig {
+  provider: 'mongodb';
+  /** MongoDB connection URI */
+  uri: string;
+  /** Database name (default: 'cogitator') */
+  database?: string;
+  /** Collection prefix (default: 'memory_') */
+  collectionPrefix?: string;
+}
+
+export interface QdrantAdapterConfig extends MemoryAdapterConfig {
+  provider: 'qdrant';
+  /** Qdrant server URL (default: 'http://localhost:6333') */
+  url?: string;
+  /** API key for Qdrant Cloud */
+  apiKey?: string;
+  /** Collection name (default: 'cogitator') */
+  collection?: string;
+  /** Vector dimensions (must match embedding model) */
+  dimensions: number;
 }
 
 export interface MemoryQueryOptions {
@@ -242,6 +272,9 @@ export interface MemoryConfig {
   inMemory?: Omit<InMemoryAdapterConfig, 'provider'>;
   redis?: Omit<RedisAdapterConfig, 'provider'>;
   postgres?: Omit<PostgresAdapterConfig, 'provider'>;
+  sqlite?: Omit<SQLiteAdapterConfig, 'provider'>;
+  mongodb?: Omit<MongoDBAdapterConfig, 'provider'>;
+  qdrant?: Omit<QdrantAdapterConfig, 'provider'>;
   embedding?: EmbeddingServiceConfig;
   contextBuilder?: Partial<ContextBuilderConfig>;
 }

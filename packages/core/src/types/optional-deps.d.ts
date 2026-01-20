@@ -51,3 +51,64 @@ declare module 'better-sqlite3' {
   const Database: DatabaseConstructor;
   export default Database;
 }
+
+declare module 'langfuse' {
+  interface TraceOptions {
+    id?: string;
+    name: string;
+    input?: unknown;
+    metadata?: Record<string, unknown>;
+    userId?: string;
+    sessionId?: string;
+    tags?: string[];
+  }
+
+  interface SpanOptions {
+    name: string;
+    input?: unknown;
+    metadata?: Record<string, unknown>;
+  }
+
+  interface GenerationOptions {
+    name: string;
+    model: string;
+    input?: unknown;
+    metadata?: Record<string, unknown>;
+    modelParameters?: Record<string, unknown>;
+  }
+
+  interface LangfuseGeneration {
+    id: string;
+    end(options?: {
+      output?: unknown;
+      usage?: { input?: number; output?: number; total?: number };
+    }): void;
+  }
+
+  interface LangfuseSpan {
+    id: string;
+    span(options: SpanOptions): LangfuseSpan;
+    generation(options: GenerationOptions): LangfuseGeneration;
+    end(options?: { output?: unknown }): void;
+  }
+
+  interface LangfuseTrace {
+    id: string;
+    span(options: SpanOptions): LangfuseSpan;
+    generation(options: GenerationOptions): LangfuseGeneration;
+    update(options: { output?: unknown; metadata?: Record<string, unknown> }): void;
+  }
+
+  export class Langfuse {
+    constructor(options: {
+      publicKey: string;
+      secretKey: string;
+      baseUrl?: string;
+      flushAt?: number;
+      flushInterval?: number;
+    });
+    trace(options: TraceOptions): LangfuseTrace;
+    flush(): Promise<void>;
+    shutdown(): Promise<void>;
+  }
+}

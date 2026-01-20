@@ -7,6 +7,8 @@ import type {
   InMemoryAdapterConfig,
   RedisAdapterConfig,
   PostgresAdapterConfig,
+  SQLiteAdapterConfig,
+  MongoDBAdapterConfig,
 } from '@cogitator-ai/types';
 import { InMemoryAdapter } from './memory';
 
@@ -16,7 +18,9 @@ export { InMemoryAdapter } from './memory';
 export type MemoryAdapterConfigUnion =
   | InMemoryAdapterConfig
   | RedisAdapterConfig
-  | PostgresAdapterConfig;
+  | PostgresAdapterConfig
+  | SQLiteAdapterConfig
+  | MongoDBAdapterConfig;
 
 export async function createMemoryAdapter(
   config: MemoryAdapterConfigUnion
@@ -33,6 +37,16 @@ export async function createMemoryAdapter(
     case 'postgres': {
       const { PostgresAdapter } = await import('./postgres');
       return new PostgresAdapter(config);
+    }
+
+    case 'sqlite': {
+      const { SQLiteAdapter } = await import('./sqlite');
+      return new SQLiteAdapter(config);
+    }
+
+    case 'mongodb': {
+      const { MongoDBAdapter } = await import('./mongodb');
+      return new MongoDBAdapter(config);
     }
 
     default: {

@@ -303,3 +303,11 @@ export type {
   CausalContext,
 } from '@cogitator-ai/types';
 export { DEFAULT_CAUSAL_CONFIG } from '@cogitator-ai/types';
+
+export {
+  LangfuseExporter,
+  createLangfuseExporter,
+  OTLPExporter,
+  createOTLPExporter,
+} from './observability/index';
+export type { LangfuseConfig, OTLPExporterConfig } from './observability/index';
