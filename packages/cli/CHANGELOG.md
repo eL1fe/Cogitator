@@ -1,5 +1,13 @@
 # @cogitator-ai/cli
 
+## 0.2.7
+
+### Patch Changes
+
+- Updated dependencies [faed1e7]
+  - @cogitator-ai/core@0.8.0
+  - @cogitator-ai/config@0.2.6
+
 ## 0.2.6
 
 ### Patch Changes
