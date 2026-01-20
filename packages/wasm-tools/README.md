@@ -19,24 +19,31 @@ pnpm add @cogitator-ai/wasm-tools
 
 ### Pre-built Tools
 
-Use the built-in calculator and JSON processor tools:
+Use the built-in WASM tools:
 
 ```typescript
-import { createCalcTool, createJsonTool } from '@cogitator-ai/wasm-tools';
+import {
+  createCalcTool,
+  createJsonTool,
+  createHashTool,
+  createBase64Tool,
+} from '@cogitator-ai/wasm-tools';
 import { Cogitator, Agent } from '@cogitator-ai/core';
 
 const calc = createCalcTool();
 const json = createJsonTool();
+const hash = createHashTool();
+const base64 = createBase64Tool();
 
 const agent = new Agent({
-  name: 'math-assistant',
+  name: 'utility-assistant',
   model: 'gpt-4o',
-  tools: [calc, json],
+  tools: [calc, json, hash, base64],
 });
 
 const cog = new Cogitator({ llm: { defaultProvider: 'openai' } });
 const result = await cog.run(agent, {
-  input: 'Calculate 2 + 2 * 3',
+  input: 'Calculate the SHA-256 hash of "hello world"',
 });
 ```
 
@@ -110,6 +117,29 @@ const json = createJsonTool({ timeout: 10000 });
 // Example: { json: '{"a": {"b": 1}}', query: '$.a.b' } → 1
 ```
 
+### createHashTool(options?)
+
+Create a cryptographic hash tool supporting multiple algorithms.
+
+```typescript
+const hash = createHashTool({ timeout: 10000 });
+
+// Supports: sha256, sha1, md5
+// Example: { text: "hello", algorithm: "sha256" } → "2cf24dba5fb0a30e..."
+```
+
+### createBase64Tool(options?)
+
+Create a Base64 encoding/decoding tool with URL-safe variant support.
+
+```typescript
+const base64 = createBase64Tool({ timeout: 10000 });
+
+// Example: { text: "hello", operation: "encode" } → "aGVsbG8="
+// Example: { text: "aGVsbG8=", operation: "decode" } → "hello"
+// URL-safe: { text: "hello", operation: "encode", urlSafe: true }
+```
+
 ### getWasmPath(name)
 
 Get the path to a pre-built WASM module.
@@ -125,12 +155,16 @@ const jsonPath = getWasmPath('json'); // Path to json.wasm
 
 For direct sandbox usage:
 
-| Export           | Description                               |
-| ---------------- | ----------------------------------------- |
-| `calcToolConfig` | Sandbox config for calculator WASM module |
-| `calcToolSchema` | Zod schema for calculator input           |
-| `jsonToolConfig` | Sandbox config for JSON processor         |
-| `jsonToolSchema` | Zod schema for JSON processor input       |
+| Export             | Description                               |
+| ------------------ | ----------------------------------------- |
+| `calcToolConfig`   | Sandbox config for calculator WASM module |
+| `calcToolSchema`   | Zod schema for calculator input           |
+| `jsonToolConfig`   | Sandbox config for JSON processor         |
+| `jsonToolSchema`   | Zod schema for JSON processor input       |
+| `hashToolConfig`   | Sandbox config for hash WASM module       |
+| `hashToolSchema`   | Zod schema for hash input                 |
+| `base64ToolConfig` | Sandbox config for base64 WASM module     |
+| `base64ToolSchema` | Zod schema for base64 input               |
 
 ## Building Custom WASM Modules
 

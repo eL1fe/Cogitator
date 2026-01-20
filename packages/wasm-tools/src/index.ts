@@ -146,6 +146,17 @@ export const jsonToolSchema = z.object({
   query: z.string().optional().describe('Optional JSONPath query'),
 });
 
+export const hashToolSchema = z.object({
+  text: z.string().describe('Text to hash'),
+  algorithm: z.enum(['sha256', 'sha1', 'md5']).describe('Hash algorithm to use'),
+});
+
+export const base64ToolSchema = z.object({
+  text: z.string().describe('Text to encode or decode'),
+  operation: z.enum(['encode', 'decode']).describe('Whether to encode or decode'),
+  urlSafe: z.boolean().optional().describe('Use URL-safe Base64 variant'),
+});
+
 /**
  * Create a calculator WASM tool.
  *
@@ -208,6 +219,66 @@ export function createJsonTool(options?: { timeout?: number }): Tool<JsonToolInp
   });
 }
 
+/**
+ * Create a hash WASM tool.
+ *
+ * Computes cryptographic hashes safely in a WASM sandbox.
+ * Supports SHA-256, SHA-1, and MD5 algorithms.
+ *
+ * @param options - Optional configuration overrides
+ * @returns A Tool for hashing text
+ *
+ * @example
+ * ```ts
+ * const hashTool = createHashTool();
+ * const agent = new Agent({ tools: [hashTool] });
+ *
+ * // Agent can now use: hash_text({ text: "hello", algorithm: "sha256" })
+ * ```
+ */
+export function createHashTool(options?: { timeout?: number }): Tool<HashToolInput, unknown> {
+  return defineWasmTool({
+    name: 'hash_text',
+    description: 'Compute cryptographic hash of text. Supports SHA-256, SHA-1, and MD5 algorithms.',
+    wasmModule: getWasmPath('hash'),
+    wasmFunction: 'hash',
+    parameters: hashToolSchema,
+    category: 'utility',
+    tags: ['hash', 'crypto', 'sha256', 'md5'],
+    timeout: options?.timeout ?? 5000,
+  });
+}
+
+/**
+ * Create a Base64 encoding/decoding WASM tool.
+ *
+ * Encodes and decodes Base64 safely in a WASM sandbox.
+ * Supports both standard and URL-safe Base64 variants.
+ *
+ * @param options - Optional configuration overrides
+ * @returns A Tool for Base64 operations
+ *
+ * @example
+ * ```ts
+ * const b64Tool = createBase64Tool();
+ * const agent = new Agent({ tools: [b64Tool] });
+ *
+ * // Agent can now use: base64({ text: "hello", operation: "encode" })
+ * ```
+ */
+export function createBase64Tool(options?: { timeout?: number }): Tool<Base64ToolInput, unknown> {
+  return defineWasmTool({
+    name: 'base64',
+    description: 'Encode or decode Base64 text. Supports standard and URL-safe variants.',
+    wasmModule: getWasmPath('base64'),
+    wasmFunction: 'base64',
+    parameters: base64ToolSchema,
+    category: 'utility',
+    tags: ['base64', 'encoding', 'decoding'],
+    timeout: options?.timeout ?? 5000,
+  });
+}
+
 export const calcToolConfig: SandboxConfig = {
   type: 'wasm',
   wasmModule: getWasmPath('calc'),
@@ -222,5 +293,21 @@ export const jsonToolConfig: SandboxConfig = {
   timeout: 5000,
 };
 
+export const hashToolConfig: SandboxConfig = {
+  type: 'wasm',
+  wasmModule: getWasmPath('hash'),
+  wasmFunction: 'hash',
+  timeout: 5000,
+};
+
+export const base64ToolConfig: SandboxConfig = {
+  type: 'wasm',
+  wasmModule: getWasmPath('base64'),
+  wasmFunction: 'base64',
+  timeout: 5000,
+};
+
 export type CalcToolInput = z.infer<typeof calcToolSchema>;
 export type JsonToolInput = z.infer<typeof jsonToolSchema>;
+export type HashToolInput = z.infer<typeof hashToolSchema>;
+export type Base64ToolInput = z.infer<typeof base64ToolSchema>;
