@@ -1,6 +1,6 @@
 {
   "name": "@cogitator-ai/models",
-  "version": "6.0.1",
+  "version": "7.0.0",
   "description": "Dynamic model registry with pricing for Cogitator",
   "type": "module",
   "main": "./dist/index.js",

@@ -1,5 +1,30 @@
 # @cogitator-ai/core
 
+## 0.9.0
+
+### Minor Changes
+
+- Phase 5: Memory adapters and observability integrations
+
+  Memory Adapters:
+  - SQLite adapter with WAL mode for zero-config local development
+  - MongoDB adapter for flexible document storage
+  - Qdrant vector adapter for semantic similarity search
+
+  Observability:
+  - Langfuse exporter for LLM-native observability
+  - OpenTelemetry OTLP exporter for universal tracing
+
+  All adapters use dynamic imports - install only what you need.
+
+### Patch Changes
+
+- Updated dependencies
+  - @cogitator-ai/types@0.9.0
+  - @cogitator-ai/memory@0.5.0
+  - @cogitator-ai/models@7.0.0
+  - @cogitator-ai/sandbox@0.2.7
+
 ## 0.8.0
 
 ### Minor Changes
