@@ -61,3 +61,37 @@ export const DEFAULT_COST_ROUTING_CONFIG: CostRoutingConfig = {
   minCapabilityMatch: 0.3,
   trackCosts: true,
 };
+
+export interface TokenEstimate {
+  min: number;
+  max: number;
+  expected: number;
+}
+
+export interface CostBreakdown {
+  inputTokens: TokenEstimate;
+  outputTokens: TokenEstimate;
+  model: string;
+  provider: string;
+  pricePerMInputTokens: number;
+  pricePerMOutputTokens: number;
+  iterationCount: number;
+  toolCallCount: number;
+}
+
+export interface CostEstimate {
+  minCost: number;
+  maxCost: number;
+  expectedCost: number;
+  confidence: number;
+  breakdown: CostBreakdown;
+  warnings: string[];
+}
+
+export interface EstimateOptions {
+  assumeToolCalls?: number;
+  assumeIterations?: number;
+  includeSystemPrompt?: boolean;
+  includeMemory?: boolean;
+  memoryTokenEstimate?: number;
+}

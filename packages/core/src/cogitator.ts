@@ -13,6 +13,8 @@ import type {
   AgentContext,
   Constitution,
   CostSummary,
+  CostEstimate,
+  EstimateOptions,
 } from '@cogitator-ai/types';
 import { getPrice } from '@cogitator-ai/models';
 import { type Agent } from './agent';
@@ -39,6 +41,7 @@ import {
 import { createSpan, getTextContent } from './cogitator/span-factory';
 import { executeTool, createToolMessage } from './cogitator/tool-executor';
 import { streamChat } from './cogitator/streaming';
+import { CostEstimator } from './cost-routing/cost-estimator';
 
 /**
  * Main runtime for executing AI agents.
@@ -102,6 +105,8 @@ export class Cogitator {
     costRoutingInitialized: false,
     securityInitialized: false,
   };
+
+  private costEstimator?: CostEstimator;
 
   /**
    * Create a new Cogitator runtime.
@@ -710,6 +715,48 @@ export class Cogitator {
    */
   getCostRouter() {
     return this.state.costRouter;
+  }
+
+  /**
+   * Estimate the cost of running an agent before execution.
+   *
+   * Returns min/max/expected cost estimates based on:
+   * - Model pricing (from registry)
+   * - Task complexity analysis
+   * - Tool usage patterns
+   * - Estimated iterations
+   *
+   * @param params - Estimation parameters
+   * @param params.agent - Agent to estimate cost for
+   * @param params.input - User input/prompt
+   * @param params.options - Optional estimation overrides
+   * @returns Cost estimate with breakdown and confidence score
+   *
+   * @example
+   * ```ts
+   * const estimate = await cog.estimateCost({
+   *   agent,
+   *   input: 'Analyze this document and summarize key points',
+   *   options: { assumeIterations: 3, assumeToolCalls: 5 }
+   * });
+   *
+   * console.log(`Expected cost: $${estimate.expectedCost.toFixed(4)}`);
+   * console.log(`Confidence: ${(estimate.confidence * 100).toFixed(0)}%`);
+   *
+   * if (estimate.expectedCost > 0.10) {
+   *   console.log('Warning: This may be an expensive operation');
+   * }
+   * ```
+   */
+  async estimateCost(params: {
+    agent: Agent;
+    input: string;
+    options?: EstimateOptions;
+  }): Promise<CostEstimate> {
+    if (!this.costEstimator) {
+      this.costEstimator = new CostEstimator();
+    }
+    return this.costEstimator.estimate(params);
   }
 
   /**

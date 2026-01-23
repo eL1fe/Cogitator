@@ -1104,6 +1104,68 @@ console.log(`By model:`, summary.byModel);
 - Prefers local models (Ollama) when quality is sufficient
 - Falls back to cloud models for advanced reasoning
 
+### 💵 Cost Prediction
+
+Estimate the cost of running an agent **before** execution — perfect for expensive tasks:
+
+```typescript
+const cog = new Cogitator();
+
+const agent = new Agent({
+  name: 'analyst',
+  model: 'openai/gpt-4o',
+  instructions: 'You analyze data thoroughly.',
+  tools: [webSearch, calculator],
+});
+
+// Get cost estimate before running
+const estimate = await cog.estimateCost({
+  agent,
+  input: 'Analyze this complex dataset and provide insights',
+  options: {
+    assumeToolCalls: 5, // Expected tool calls
+    assumeIterations: 3, // Expected LLM rounds
+  },
+});
+
+console.log(`Expected cost: $${estimate.expectedCost.toFixed(4)}`);
+console.log(`Range: $${estimate.minCost.toFixed(4)} - $${estimate.maxCost.toFixed(4)}`);
+console.log(`Confidence: ${(estimate.confidence * 100).toFixed(0)}%`);
+
+// {
+//   minCost: 0.008,
+//   maxCost: 0.025,
+//   expectedCost: 0.015,
+//   confidence: 0.7,
+//   breakdown: {
+//     inputTokens: { min: 800, max: 2400, expected: 1500 },
+//     outputTokens: { min: 450, max: 3600, expected: 1800 },
+//     model: 'gpt-4o',
+//     provider: 'openai',
+//     pricePerMInputTokens: 2.5,
+//     pricePerMOutputTokens: 10,
+//     iterationCount: 3,
+//     toolCallCount: 5
+//   },
+//   warnings: ['Tool calls are unpredictable, actual cost may vary significantly']
+// }
+
+// Local models are free
+const localAgent = new Agent({ model: 'ollama/llama3.2', name: 'local' });
+const localEstimate = await cog.estimateCost({ agent: localAgent, input: 'Hello' });
+console.log(localEstimate.expectedCost); // 0
+console.log(localEstimate.warnings); // ['Local model (Ollama) - no API cost']
+```
+
+**Features:**
+
+- **Token Estimation** — Heuristic-based (~4 chars = 1 token) for input and output
+- **Model Pricing** — Uses model registry for accurate per-token pricing
+- **Complexity Analysis** — TaskAnalyzer determines simple/moderate/complex
+- **Confidence Scores** — Lower confidence for complex tasks with many tool calls
+- **Local Model Detection** — Automatically returns $0 for Ollama models
+- **Warnings** — Alerts for unpredictable costs, missing pricing data
+
 ### 🗄️ Tool Caching
 
 Cache tool results to avoid redundant API calls with exact or semantic matching:
