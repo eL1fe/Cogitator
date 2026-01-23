@@ -1,5 +1,16 @@
 # @cogitator-ai/wasm-tools
 
+## 0.4.0
+
+### Minor Changes
+
+- Add WasmToolManager for WASM tool hot-reload support
+  - WasmToolManager class with watch() and load() methods
+  - FileWatcher with debouncing for file system events
+  - WasmLoader for Extism plugin lifecycle management
+  - Automatic tool updates when WASM files change
+  - Full test coverage (28 tests)
+
 ## 0.3.7
 
 ### Patch Changes
