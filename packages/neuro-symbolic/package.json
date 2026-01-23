@@ -25,6 +25,10 @@
     "./knowledge-graph": {
       "types": "./dist/knowledge-graph/index.d.ts",
       "import": "./dist/knowledge-graph/index.js"
+    },
+    "./tools": {
+      "types": "./dist/tools/index.d.ts",
+      "import": "./dist/tools/index.js"
     }
   },
   "files": [

@@ -1,5 +1,20 @@
 export { NeuroSymbolic, createNeuroSymbolic, type NeuroSymbolicOptions } from './orchestrator';
 
+export {
+  createNeuroSymbolicTools,
+  createLogicTools,
+  createConstraintTools,
+  createPlanningTools,
+  createGraphTools,
+  type NeuroSymbolicTools,
+  type NeuroSymbolicToolsOptions,
+} from './tools';
+
+export {
+  MemoryGraphAdapter,
+  createMemoryGraphAdapter,
+} from './knowledge-graph/adapters/memory-adapter';
+
 export * from './logic';
 
 export {

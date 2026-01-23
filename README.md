@@ -802,6 +802,76 @@ console.log(plan.robustness.vulnerabilities);
 - **LLM-Powered Discovery** — Extract causal relationships from text, traces, and observations
 - **Hypothesis Generation & Validation** — Generate and test causal hypotheses from execution data
 
+### 🧮 Neuro-Symbolic Agent Tools
+
+Give your agents formal reasoning capabilities — Prolog-style logic, constraint solving, and knowledge graphs:
+
+```typescript
+import { Cogitator, Agent } from '@cogitator-ai/core';
+import { createNeuroSymbolicTools, createMemoryGraphAdapter } from '@cogitator-ai/neuro-symbolic';
+
+// Create tools with optional knowledge graph
+const graphAdapter = createMemoryGraphAdapter();
+const nsTools = createNeuroSymbolicTools({ graphAdapter });
+
+// Add facts to the logic knowledge base
+await nsTools.loadProgram.execute(
+  {
+    program: `
+    parent(tom, mary).
+    parent(mary, ann).
+    grandparent(X, Z) :- parent(X, Y), parent(Y, Z).
+  `,
+  },
+  context
+);
+
+// Query the knowledge base
+const result = await nsTools.queryLogic.execute({ query: 'grandparent(X, ann)' }, context);
+console.log(result.solutions); // [{ X: 'tom' }]
+
+// Use tools with an agent
+const reasoningAgent = new Agent({
+  name: 'reasoning-agent',
+  model: 'gpt-4o',
+  instructions: `You have access to formal reasoning tools:
+- queryLogic: Execute Prolog-style queries
+- assertFact: Add facts to the knowledge base
+- solveConstraints: Solve SAT/SMT constraint problems
+- validatePlan: Verify action sequences
+- findPath: Find paths in knowledge graphs`,
+  tools: [
+    nsTools.queryLogic,
+    nsTools.assertFact,
+    nsTools.solveConstraints,
+    nsTools.validatePlan,
+    nsTools.findPath,
+    nsTools.queryGraph,
+  ],
+});
+
+const cog = new Cogitator();
+const answer = await cog.run(reasoningAgent, {
+  input: 'Who is the grandparent of Ann? Verify using logic.',
+});
+```
+
+**Available Tools:**
+
+| Tool               | Description                                         |
+| ------------------ | --------------------------------------------------- |
+| `queryLogic`       | Execute Prolog-style queries with variable bindings |
+| `assertFact`       | Add facts/rules to the knowledge base               |
+| `loadProgram`      | Load complete Prolog programs                       |
+| `solveConstraints` | Solve SAT/SMT problems with Z3 or simple solver     |
+| `validatePlan`     | Verify action sequences against preconditions       |
+| `repairPlan`       | Suggest fixes for invalid plans                     |
+| `registerAction`   | Define action schemas for planning                  |
+| `findPath`         | Find shortest paths in knowledge graphs             |
+| `queryGraph`       | Pattern match against graph nodes/edges             |
+| `addGraphNode`     | Add entities to the knowledge graph                 |
+| `addGraphEdge`     | Add relationships between entities                  |
+
 ### 📈 Agent Learning (DSPy-Style)
 
 Agents automatically improve through execution trace analysis and instruction optimization:

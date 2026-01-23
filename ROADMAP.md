@@ -7,44 +7,7 @@
 - 🟡 **Medium** — Quality of life improvements
 - 🟢 **Nice to Have** — Polish and extras
 
-### 4. Real-time Streaming for Workflows
-
-**Package:** `packages/workflows`
-
-**What:** Server-Sent Events for live DAG execution progress.
-
-**API Design:**
-
-```typescript
-// packages/workflows/src/executor-stream.ts
-const stream = workflow.executeStream(input);
-
-for await (const event of stream) {
-  switch (event.type) {
-    case 'workflow_started':
-      console.log(`Started: ${event.workflowId}`);
-      break;
-    case 'node_started':
-      console.log(`Node ${event.nodeName} started`);
-      break;
-    case 'node_progress':
-      console.log(`Progress: ${event.progress}%`);
-      break;
-    case 'node_completed':
-      console.log(`Node ${event.nodeName} completed`, event.output);
-      break;
-    case 'workflow_completed':
-      console.log(`Done!`, event.result);
-      break;
-  }
-}
-```
-
-**Why:** Enables live progress visualization, better UX for long-running workflows.
-
----
-
-### 5. Neuro-Symbolic Agent Tools
+### ~~5. Neuro-Symbolic Agent Tools~~ ✅
 
 **Package:** `packages/neuro-symbolic` + `packages/core`
 
@@ -53,12 +16,13 @@ for await (const event of stream) {
 **API Design:**
 
 ```typescript
-import { createNeuroSymbolicTools } from '@cogitator-ai/neuro-symbolic';
+import { createNeuroSymbolicTools, createMemoryGraphAdapter } from '@cogitator-ai/neuro-symbolic';
+
+const graphAdapter = createMemoryGraphAdapter();
 
 const nsTools = createNeuroSymbolicTools({
-  logicKB: knowledgeBase,
-  graphAdapter: postgresGraph,
-  z3Available: true,
+  graphAdapter,
+  config: { logic: { maxSolutions: 20 } },
 });
 
 const agent = new Agent({
@@ -66,14 +30,22 @@ const agent = new Agent({
   tools: [
     nsTools.queryLogic, // Prolog-style queries
     nsTools.assertFact, // Add facts to KB
-    nsTools.solveConstraints, // Z3 constraint solving
-    nsTools.findPath, // Graph pathfinding
+    nsTools.loadProgram, // Load Prolog programs
+    nsTools.solveConstraints, // SAT/SMT constraint solving
     nsTools.validatePlan, // Plan verification
+    nsTools.repairPlan, // Plan repair suggestions
+    nsTools.registerAction, // Register action schemas
+    nsTools.findPath, // Graph pathfinding
+    nsTools.queryGraph, // Graph pattern matching
+    nsTools.addGraphNode, // Add entities to graph
+    nsTools.addGraphEdge, // Add relationships
   ],
 });
 ```
 
 **Why:** Combines LLM reasoning with formal logic for more reliable answers.
+
+**Status:** Implemented in packages/neuro-symbolic/src/tools/
 
 ---
 
@@ -450,8 +422,10 @@ const executor = new WorkflowExecutor({
 // packages/neuro-symbolic/src/knowledge-graph/adapters/
 ├── postgres-graph-adapter.ts  // Using pg + ltree extension
 ├── neo4j-graph-adapter.ts     // Native graph DB
-├── memory-graph-adapter.ts    // For testing
+├── memory-graph-adapter.ts    // For testing ✅ DONE
 ```
+
+**Status:** MemoryGraphAdapter implemented with full GraphAdapter interface support (nodes, edges, pathfinding, traversal, querying).
 
 **Why:** Neuro-symbolic graph features don't work without adapter.
 
@@ -470,7 +444,7 @@ const executor = new WorkflowExecutor({
 4. ~~Agent-as-Tool composition~~ ✅
 5. Semantic memory consolidation (#2)
 6. ~~Hybrid search (#3)~~ ✅
-7. Neuro-symbolic tools integration (#5)
+7. ~~Neuro-symbolic tools integration (#5)~~ ✅
 
 ### Phase 3: DX & Polish
 
