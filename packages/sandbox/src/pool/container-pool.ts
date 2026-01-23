@@ -65,8 +65,16 @@ export class ContainerPool {
     return container;
   }
 
-  async release(container: DockerContainer): Promise<void> {
+  async release(container: DockerContainer, options?: { corrupted?: boolean }): Promise<void> {
     const pooled = this.containers.find((c) => c.container.id === container.id);
+
+    if (options?.corrupted) {
+      if (pooled) {
+        this.containers = this.containers.filter((c) => c.container.id !== container.id);
+      }
+      await this.destroyContainer(container);
+      return;
+    }
 
     if (pooled) {
       pooled.inUse = false;

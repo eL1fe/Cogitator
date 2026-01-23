@@ -13,7 +13,7 @@ import type {
 import { BaseSandboxExecutor } from './base';
 import { ContainerPool } from '../pool/container-pool';
 import { parseMemory } from '../utils/parse-resources';
-import type { Docker, DockerExec } from '../docker-types';
+import type { Docker, DockerExec, DockerStream } from '../docker-types';
 
 export interface DockerExecutorOptions {
   docker?: SandboxDockerConfig;
@@ -95,6 +95,8 @@ export class DockerSandboxExecutor extends BaseSandboxExecutor {
     const timeout = request.timeout ?? config.timeout ?? DEFAULT_TIMEOUT;
     const image = config.image ?? DEFAULT_IMAGE;
 
+    let containerCorrupted = true;
+
     try {
       const container = await this.pool.acquire(image, {
         memory: config.resources?.memory ? parseMemory(config.resources.memory) : undefined,
@@ -117,6 +119,7 @@ export class DockerSandboxExecutor extends BaseSandboxExecutor {
         });
 
         const result = await this.runWithTimeout(exec, request.stdin, timeout);
+        containerCorrupted = result.containerCorrupted;
 
         return this.success({
           stdout: result.stdout,
@@ -126,7 +129,7 @@ export class DockerSandboxExecutor extends BaseSandboxExecutor {
           duration: Date.now() - startTime,
         });
       } finally {
-        await this.pool.release(container);
+        await this.pool.release(container, { corrupted: containerCorrupted });
       }
     } catch (error) {
       return this.failure(
@@ -144,70 +147,85 @@ export class DockerSandboxExecutor extends BaseSandboxExecutor {
     stderr: string;
     exitCode: number;
     timedOut: boolean;
+    containerCorrupted: boolean;
   }> {
-    return new Promise((resolve, reject) => {
-      let timedOut = false;
-      const timer = setTimeout(() => {
-        timedOut = true;
-      }, timeoutMs);
+    let stdout = '';
+    let stderr = '';
+    let stream: DockerStream | null = null;
 
-      void (async () => {
-        try {
-          const stream = await exec.start({
-            hijack: true,
-            stdin: !!stdin,
-          });
+    const executionPromise = (async () => {
+      stream = await exec.start({
+        hijack: true,
+        stdin: !!stdin,
+      });
 
-          let stdout = '';
-          let stderr = '';
+      stream.on('data', (chunk: Buffer) => {
+        let offset = 0;
+        while (offset < chunk.length) {
+          if (offset + 8 > chunk.length) break;
 
-          stream.on('data', (chunk: Buffer) => {
-            let offset = 0;
-            while (offset < chunk.length) {
-              if (offset + 8 > chunk.length) break;
+          const type = chunk[offset];
+          const size =
+            (chunk[offset + 4] << 24) |
+            (chunk[offset + 5] << 16) |
+            (chunk[offset + 6] << 8) |
+            chunk[offset + 7];
 
-              const type = chunk[offset];
-              const size =
-                (chunk[offset + 4] << 24) |
-                (chunk[offset + 5] << 16) |
-                (chunk[offset + 6] << 8) |
-                chunk[offset + 7];
+          if (offset + 8 + size > chunk.length) break;
 
-              if (offset + 8 + size > chunk.length) break;
+          const data = chunk.slice(offset + 8, offset + 8 + size).toString('utf-8');
 
-              const data = chunk.slice(offset + 8, offset + 8 + size).toString('utf-8');
-
-              if (type === 1) {
-                stdout += data;
-              } else if (type === 2) {
-                stderr += data;
-              }
-
-              offset += 8 + size;
-            }
-          });
-
-          if (stdin) {
-            stream.write(stdin);
-            stream.end();
+          if (type === 1) {
+            stdout += data;
+          } else if (type === 2) {
+            stderr += data;
           }
 
-          await new Promise<void>((res) => stream.on('end', res));
-          clearTimeout(timer);
-
-          const inspection = await exec.inspect();
-
-          resolve({
-            stdout: stdout.slice(0, MAX_OUTPUT_SIZE),
-            stderr: stderr.slice(0, MAX_OUTPUT_SIZE),
-            exitCode: inspection.ExitCode ?? 1,
-            timedOut,
-          });
-        } catch (error) {
-          clearTimeout(timer);
-          reject(error instanceof Error ? error : new Error(String(error)));
+          offset += 8 + size;
         }
-      })();
+      });
+
+      if (stdin) {
+        stream.write(stdin);
+        stream.end();
+      }
+
+      await new Promise<void>((res) => stream!.on('end', res));
+      const inspection = await exec.inspect();
+      return inspection.ExitCode ?? 1;
+    })();
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        if (stream) stream.end();
+        reject(new Error('TIMEOUT'));
+      }, timeoutMs);
     });
+
+    try {
+      const exitCode = await Promise.race([executionPromise, timeoutPromise]);
+      if (timer) clearTimeout(timer);
+      return {
+        stdout: stdout.slice(0, MAX_OUTPUT_SIZE),
+        stderr: stderr.slice(0, MAX_OUTPUT_SIZE),
+        exitCode,
+        timedOut: false,
+        containerCorrupted: false,
+      };
+    } catch (error) {
+      if (error instanceof Error && error.message === 'TIMEOUT') {
+        return {
+          stdout: stdout.slice(0, MAX_OUTPUT_SIZE),
+          stderr: stderr.slice(0, MAX_OUTPUT_SIZE),
+          exitCode: 124,
+          timedOut: true,
+          containerCorrupted: true,
+        };
+      }
+      if (timer) clearTimeout(timer);
+      throw error;
+    }
   }
 }
