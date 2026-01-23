@@ -1,5 +1,11 @@
 # @cogitator-ai/config
 
+## 0.3.4
+
+### Patch Changes
+
+- docs: sync package READMEs with main documentation
+
 ## 0.3.3
 
 ### Patch Changes

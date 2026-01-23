@@ -1,5 +1,11 @@
 # @cogitator-ai/memory
 
+## 0.6.2
+
+### Patch Changes
+
+- docs: sync package READMEs with main documentation
+
 ## 0.6.1
 
 ### Patch Changes
