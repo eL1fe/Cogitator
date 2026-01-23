@@ -162,6 +162,45 @@ Cogitator is a modular monorepo. Install only what you need:
 
 ---
 
+### Agent-as-Tool Composition
+
+Use one agent as a tool for another — simple hierarchical delegation without swarm overhead:
+
+```typescript
+import { Cogitator, Agent, agentAsTool } from '@cogitator-ai/core';
+
+const cog = new Cogitator();
+
+// Specialist agent for research
+const researcher = new Agent({
+  name: 'researcher',
+  model: 'gpt-4o',
+  instructions: 'You are a research specialist. Find accurate information.',
+  tools: [webSearch],
+});
+
+// Main agent that can delegate to researcher
+const writer = new Agent({
+  name: 'writer',
+  model: 'claude-3-5-sonnet',
+  instructions: 'Write articles. Use the research tool when you need facts.',
+  tools: [
+    agentAsTool(cog, researcher, {
+      name: 'research',
+      description: 'Delegate research tasks to a specialist',
+      timeout: 60000,
+      includeUsage: true, // Track sub-agent token usage
+    }),
+  ],
+});
+
+const result = await cog.run(writer, {
+  input: 'Write an article about the latest AI developments',
+});
+
+// Writer automatically delegates research to the specialist agent
+```
+
 ### Multi-Agent Swarm
 
 ```typescript
