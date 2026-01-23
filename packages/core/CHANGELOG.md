@@ -1,5 +1,32 @@
 # @cogitator-ai/core
 
+## 0.15.0
+
+### Minor Changes
+
+- 6b09d54: feat(core): implement Agent serialization and deserialization
+
+  Add serialize() and Agent.deserialize() methods for agent persistence:
+  - AgentSnapshot format with version field for backward compatibility
+  - Tool names stored instead of full tool objects (functions are not serializable)
+  - Tool resolution via ToolRegistry or direct array on deserialize
+  - Config overrides support during restoration
+  - Agent.validateSnapshot() for runtime type checking
+  - AgentDeserializationError for clear error messages
+
+  This enables:
+  - Pause/resume agents across process restarts
+  - Sharing agent configurations as JSON
+  - Storing agents in databases
+
+### Patch Changes
+
+- Updated dependencies [6b09d54]
+  - @cogitator-ai/types@0.16.0
+  - @cogitator-ai/memory@0.6.6
+  - @cogitator-ai/models@14.0.0
+  - @cogitator-ai/sandbox@0.2.16
+
 ## 0.14.0
 
 ### Minor Changes
