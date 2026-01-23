@@ -9,49 +9,9 @@
 
 ---
 
-## 🔴 Critical Fixes
-
-_No critical fixes remaining._
-
----
-
 ## 🟠 High Impact Features
 
-### 2. Agent-as-Tool Composition
-
-**Package:** `packages/core`
-
-**What:** Allow using an agent as a tool for another agent, enabling hierarchical delegation without swarm overhead.
-
-**API Design:**
-
-```typescript
-import { Agent, agentAsTool } from '@cogitator-ai/core';
-
-const researcher = new Agent({
-  name: 'researcher',
-  tools: [webSearch, webScrape],
-});
-
-const writer = new Agent({
-  name: 'writer',
-  tools: [
-    agentAsTool(researcher, {
-      name: 'research',
-      description: 'Delegate research tasks to a specialized agent',
-      timeout: 60000,
-    }),
-  ],
-});
-```
-
-**Implementation location:** New file `packages/core/src/agent-tool.ts`
-
-**Why:** This is how Claude Code works with subagents. Lightweight alternative to full swarm coordination.
-
----
-
-### 3. Semantic Memory Consolidation
+### 2. Semantic Memory Consolidation
 
 **Package:** `packages/memory`
 
@@ -88,7 +48,7 @@ const facts = await memory.getFacts({
 
 ---
 
-### 4. Hybrid Search (BM25 + Vector)
+### 3. Hybrid Search (BM25 + Vector)
 
 **Package:** `packages/memory`
 
@@ -140,7 +100,7 @@ export async function hybridSearch(
 
 ---
 
-### 5. Real-time Streaming for Workflows
+### 4. Real-time Streaming for Workflows
 
 **Package:** `packages/workflows`
 
@@ -177,7 +137,7 @@ for await (const event of stream) {
 
 ---
 
-### 6. Neuro-Symbolic Agent Tools
+### 5. Neuro-Symbolic Agent Tools
 
 **Package:** `packages/neuro-symbolic` + `packages/core`
 
@@ -212,7 +172,7 @@ const agent = new Agent({
 
 ## 🟡 Medium Priority
 
-### 7. Tool Caching Layer
+### 6. Tool Caching Layer
 
 **Package:** `packages/core`
 
@@ -246,7 +206,7 @@ const cachedWebSearch = withCache(webSearch, {
 
 ---
 
-### 8. Prompt Injection Detection
+### 7. Prompt Injection Detection
 
 **Package:** `packages/core/src/constitutional`
 
@@ -268,7 +228,7 @@ const filter = new InputFilter({
 
 ---
 
-### 9. Cost Prediction Before Run
+### 8. Cost Prediction Before Run
 
 **Package:** `packages/core/src/cost-routing`
 
@@ -306,7 +266,7 @@ const estimate = await cogitator.estimateCost({
 
 ---
 
-### 10. Agent Persistence/Serialization
+### 9. Agent Persistence/Serialization
 
 **Package:** `packages/core`
 
@@ -334,7 +294,7 @@ const restored = Agent.deserialize(snapshot, { toolRegistry });
 
 ---
 
-### 11. MCP Resource Publishing
+### 10. MCP Resource Publishing
 
 **Package:** `packages/mcp/src/server`
 
@@ -374,7 +334,7 @@ server.registerPrompt({
 
 ---
 
-### 12. WASM Tool Hot-Reload
+### 11. WASM Tool Hot-Reload
 
 **Package:** `packages/wasm-tools`
 
@@ -402,7 +362,7 @@ const tools = manager.getTools();
 
 ---
 
-### 13. Distributed Swarm Execution
+### 12. Distributed Swarm Execution
 
 **Package:** `packages/swarms` + `packages/worker`
 
@@ -435,7 +395,7 @@ const result = await swarm.run({
 
 ## 🟢 Nice to Have
 
-### 14. Agent Marketplace / Discovery
+### 13. Agent Marketplace / Discovery
 
 **Package:** New `packages/marketplace`
 
@@ -473,7 +433,7 @@ await marketplace.publish(myAgent, {
 
 ---
 
-### 15. Multi-Modal Tool Support
+### 14. Multi-Modal Tool Support
 
 **Package:** `packages/core/src/tools`
 
@@ -528,7 +488,7 @@ const audioTranscriber = tool({
 
 ---
 
-### 16. More WASM Pre-built Tools
+### 15. More WASM Pre-built Tools
 
 **Package:** `packages/wasm-tools`
 
@@ -551,7 +511,7 @@ const audioTranscriber = tool({
 
 ---
 
-### 17. Workflow Checkpoint Granularity
+### 16. Workflow Checkpoint Granularity
 
 **Package:** `packages/workflows`
 
@@ -571,7 +531,7 @@ const executor = new WorkflowExecutor({
 
 ---
 
-### 18. Knowledge Graph Adapter Implementation
+### 17. Knowledge Graph Adapter Implementation
 
 **Package:** `packages/neuro-symbolic`
 
@@ -600,25 +560,25 @@ const executor = new WorkflowExecutor({
 
 ### Phase 2: Core Features
 
-4. Agent-as-Tool composition
-5. Semantic memory consolidation
-6. Hybrid search
-7. Neuro-symbolic tools integration
+4. ~~Agent-as-Tool composition~~ ✅
+5. Semantic memory consolidation (#2)
+6. Hybrid search (#3)
+7. Neuro-symbolic tools integration (#5)
 
 ### Phase 3: DX & Polish
 
-8. Real-time workflow streaming
-9. Tool caching
-10. Cost prediction
-11. Agent serialization
+8. Real-time workflow streaming (#4)
+9. Tool caching (#6)
+10. Cost prediction (#8)
+11. Agent serialization (#9)
 
 ### Phase 4: Ecosystem
 
-12. MCP resource publishing
-13. WASM hot-reload
-14. Distributed swarms
-15. Marketplace
-16. Multi-modal tools
+12. MCP resource publishing (#10)
+13. WASM hot-reload (#11)
+14. Distributed swarms (#12)
+15. Marketplace (#13)
+16. Multi-modal tools (#14)
 
 ---
 

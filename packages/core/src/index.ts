@@ -7,6 +7,8 @@
 export { Cogitator } from './cogitator';
 export { Agent } from './agent';
 export { tool, toolToSchema } from './tool';
+export { agentAsTool } from './agent-tool';
+export type { AgentAsToolOptions, AgentToolResult } from './agent-tool';
 export { ToolRegistry } from './registry';
 
 export { calculator, datetime, builtinTools } from './tools/index';
