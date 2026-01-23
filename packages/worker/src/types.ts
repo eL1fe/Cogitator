@@ -77,7 +77,26 @@ export interface SwarmJobPayload {
   metadata?: Record<string, unknown>;
 }
 
-export type JobPayload = AgentJobPayload | WorkflowJobPayload | SwarmJobPayload;
+export interface SwarmAgentJobPayload {
+  type: 'swarm-agent';
+  jobId: string;
+  swarmId: string;
+  agentName: string;
+  agentConfig: SerializedAgent;
+  input: string;
+  context?: Record<string, unknown>;
+  stateKeys: {
+    blackboard: string;
+    messages: string;
+    results: string;
+  };
+}
+
+export type JobPayload =
+  | AgentJobPayload
+  | WorkflowJobPayload
+  | SwarmJobPayload
+  | SwarmAgentJobPayload;
 
 export interface AgentJobResult {
   type: 'agent';
@@ -111,7 +130,18 @@ export interface SwarmJobResult {
   }[];
 }
 
-export type JobResult = AgentJobResult | WorkflowJobResult | SwarmJobResult;
+export interface SwarmAgentJobResult {
+  type: 'swarm-agent';
+  swarmId: string;
+  agentName: string;
+  output: string;
+  structured?: unknown;
+  toolCalls: { name: string; input: unknown; output: unknown }[];
+  tokenUsage: { prompt: number; completion: number; total: number };
+  error?: string;
+}
+
+export type JobResult = AgentJobResult | WorkflowJobResult | SwarmJobResult | SwarmAgentJobResult;
 
 export interface QueueConfig {
   /** Queue name (default: 'cogitator-jobs') */

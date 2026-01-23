@@ -7,14 +7,14 @@ import type {
   StrategyResult,
   HierarchicalConfig,
   RunResult,
+  SwarmCoordinatorInterface,
 } from '@cogitator-ai/types';
-import { BaseStrategy } from './base';
-import type { SwarmCoordinator } from '../coordinator';
+import { BaseStrategy } from './base.js';
 
 export class HierarchicalStrategy extends BaseStrategy {
   private config: HierarchicalConfig;
 
-  constructor(coordinator: SwarmCoordinator, config?: HierarchicalConfig) {
+  constructor(coordinator: SwarmCoordinatorInterface, config?: HierarchicalConfig) {
     super(coordinator);
     this.config = {
       maxDelegationDepth: 3,

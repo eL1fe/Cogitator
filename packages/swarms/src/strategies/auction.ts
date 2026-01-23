@@ -8,9 +8,9 @@ import type {
   AuctionConfig,
   RunResult,
   SwarmAgent,
+  SwarmCoordinatorInterface,
 } from '@cogitator-ai/types';
-import { BaseStrategy } from './base';
-import type { SwarmCoordinator } from '../coordinator';
+import { BaseStrategy } from './base.js';
 
 interface Bid {
   agentName: string;
@@ -22,7 +22,7 @@ interface Bid {
 export class AuctionStrategy extends BaseStrategy {
   private config: AuctionConfig;
 
-  constructor(coordinator: SwarmCoordinator, config: AuctionConfig) {
+  constructor(coordinator: SwarmCoordinatorInterface, config: AuctionConfig) {
     super(coordinator);
     this.config = {
       minBid: 0,

@@ -8,16 +8,16 @@ import type {
   RoundRobinConfig,
   RunResult,
   SwarmAgent,
+  SwarmCoordinatorInterface,
 } from '@cogitator-ai/types';
-import { BaseStrategy } from './base';
-import type { SwarmCoordinator } from '../coordinator';
+import { BaseStrategy } from './base.js';
 
 export class RoundRobinStrategy extends BaseStrategy {
   private config: RoundRobinConfig;
   private currentIndex = 0;
   private stickyAssignments = new Map<string, string>();
 
-  constructor(coordinator: SwarmCoordinator, config?: RoundRobinConfig) {
+  constructor(coordinator: SwarmCoordinatorInterface, config?: RoundRobinConfig) {
     super(coordinator);
     this.config = {
       sticky: false,

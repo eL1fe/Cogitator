@@ -7,9 +7,10 @@
 
 import { Worker, type Job } from 'bullmq';
 import type { WorkerConfig, JobPayload, JobResult, QueueMetrics } from './types';
-import { processAgentJob } from './processors/agent';
-import { processWorkflowJob } from './processors/workflow';
-import { processSwarmJob } from './processors/swarm';
+import { processAgentJob } from './processors/agent.js';
+import { processWorkflowJob } from './processors/workflow.js';
+import { processSwarmJob } from './processors/swarm.js';
+import { processSwarmAgentJob } from './processors/swarm-agent.js';
 
 const DEFAULT_QUEUE_NAME = 'cogitator-jobs';
 
@@ -98,6 +99,8 @@ export class WorkerPool {
         return processWorkflowJob(job.data);
       case 'swarm':
         return processSwarmJob(job.data);
+      case 'swarm-agent':
+        return processSwarmAgentJob(job.data);
       default: {
         const _exhaustive: never = job.data;
         throw new Error(`Unknown job type: ${(_exhaustive as JobPayload).type}`);

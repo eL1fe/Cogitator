@@ -336,6 +336,33 @@ export interface SwarmErrorConfig {
   partialResults?: boolean;
 }
 
+export interface DistributedSwarmConfig {
+  enabled: boolean;
+  /** Queue name for agent jobs (default: 'swarm-agent-jobs') */
+  queue?: string;
+  /** Worker concurrency per pool (default: 4) */
+  workerConcurrency?: number;
+  /** Job timeout in ms (default: 300000) */
+  timeout?: number;
+  /** Redis connection config */
+  redis?: {
+    host?: string;
+    port?: number;
+    password?: string;
+    keyPrefix?: string;
+    db?: number;
+  };
+  /** Retry configuration for failed jobs */
+  retry?: {
+    maxRetries?: number;
+    backoff?: 'constant' | 'linear' | 'exponential';
+    initialDelay?: number;
+    maxDelay?: number;
+  };
+  /** Cleanup completed job data after ms (default: 3600000 = 1 hour) */
+  cleanupAfter?: number;
+}
+
 export interface SwarmConfig {
   name: string;
   strategy: SwarmStrategy;
@@ -366,6 +393,9 @@ export interface SwarmConfig {
 
   resources?: SwarmResourceConfig;
   errorHandling?: SwarmErrorConfig;
+
+  /** Distributed execution configuration */
+  distributed?: DistributedSwarmConfig;
 
   observability?: {
     /** Enable tracing */

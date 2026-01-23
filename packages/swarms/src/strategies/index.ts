@@ -13,9 +13,9 @@ import type {
   PipelineConfig,
   DebateConfig,
   NegotiationConfig,
+  SwarmCoordinatorInterface,
 } from '@cogitator-ai/types';
 import { DEFAULT_NEGOTIATION_CONFIG } from '@cogitator-ai/types';
-import type { SwarmCoordinator } from '../coordinator';
 
 export { BaseStrategy } from './base';
 export { HierarchicalStrategy } from './hierarchical';
@@ -37,7 +37,10 @@ import { NegotiationStrategy } from './negotiation-strategy';
 /**
  * Create a strategy instance based on configuration
  */
-export function createStrategy(coordinator: SwarmCoordinator, config: SwarmConfig): IStrategy {
+export function createStrategy(
+  coordinator: SwarmCoordinatorInterface,
+  config: SwarmConfig
+): IStrategy {
   const strategy = config.strategy;
 
   switch (strategy) {

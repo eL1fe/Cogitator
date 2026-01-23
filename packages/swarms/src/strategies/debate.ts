@@ -8,14 +8,14 @@ import type {
   DebateConfig,
   RunResult,
   SwarmMessage,
+  SwarmCoordinatorInterface,
 } from '@cogitator-ai/types';
-import { BaseStrategy } from './base';
-import type { SwarmCoordinator } from '../coordinator';
+import { BaseStrategy } from './base.js';
 
 export class DebateStrategy extends BaseStrategy {
   private config: DebateConfig;
 
-  constructor(coordinator: SwarmCoordinator, config: DebateConfig) {
+  constructor(coordinator: SwarmCoordinatorInterface, config: DebateConfig) {
     super(coordinator);
     this.config = {
       format: 'structured',

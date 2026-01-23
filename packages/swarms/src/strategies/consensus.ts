@@ -9,9 +9,9 @@ import type {
   RunResult,
   SwarmMessage,
   SwarmAgent,
+  SwarmCoordinatorInterface,
 } from '@cogitator-ai/types';
-import { BaseStrategy } from './base';
-import type { SwarmCoordinator } from '../coordinator';
+import { BaseStrategy } from './base.js';
 
 interface Vote {
   agentName: string;
@@ -31,7 +31,7 @@ interface VoteCount {
 export class ConsensusStrategy extends BaseStrategy {
   private config: ConsensusConfig;
 
-  constructor(coordinator: SwarmCoordinator, config: ConsensusConfig) {
+  constructor(coordinator: SwarmCoordinatorInterface, config: ConsensusConfig) {
     super(coordinator);
     this.config = config;
   }

@@ -27,6 +27,7 @@
     "@cogitator-ai/types": "workspace:*",
     "@cogitator-ai/workflows": "workspace:*",
     "@types/node": "^25.0.0",
+    "ioredis": "^5.9.2",
     "nanoid": "^5.0.4",
     "zod": "^3.22.0"
   },

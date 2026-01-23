@@ -11,13 +11,13 @@ import type {
   ArbitrationResult,
   MediationSuggestion,
   SwarmAgent,
+  SwarmCoordinatorInterface,
 } from '@cogitator-ai/types';
 import { DEFAULT_NEGOTIATION_CONFIG } from '@cogitator-ai/types';
-import { BaseStrategy } from './base';
-import type { SwarmCoordinator } from '../coordinator';
-import { TurnManager } from './negotiation/turn-manager';
-import { ConvergenceCalculator } from './negotiation/convergence';
-import { ApprovalIntegration } from './negotiation/approval';
+import { BaseStrategy } from './base.js';
+import { TurnManager } from './negotiation/turn-manager.js';
+import { ConvergenceCalculator } from './negotiation/convergence.js';
+import { ApprovalIntegration } from './negotiation/approval.js';
 
 export class NegotiationStrategy extends BaseStrategy {
   private config: NegotiationConfig;
@@ -26,7 +26,7 @@ export class NegotiationStrategy extends BaseStrategy {
   private convergenceCalculator!: ConvergenceCalculator;
   private approvalIntegration?: ApprovalIntegration;
 
-  constructor(coordinator: SwarmCoordinator, config: Partial<NegotiationConfig> = {}) {
+  constructor(coordinator: SwarmCoordinatorInterface, config: Partial<NegotiationConfig> = {}) {
     super(coordinator);
     this.config = { ...DEFAULT_NEGOTIATION_CONFIG, ...config };
   }

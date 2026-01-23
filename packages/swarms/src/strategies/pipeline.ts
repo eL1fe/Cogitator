@@ -9,14 +9,14 @@ import type {
   PipelineStage,
   PipelineContext,
   RunResult,
+  SwarmCoordinatorInterface,
 } from '@cogitator-ai/types';
-import { BaseStrategy } from './base';
-import type { SwarmCoordinator } from '../coordinator';
+import { BaseStrategy } from './base.js';
 
 export class PipelineStrategy extends BaseStrategy {
   private config: PipelineConfig;
 
-  constructor(coordinator: SwarmCoordinator, config: PipelineConfig) {
+  constructor(coordinator: SwarmCoordinatorInterface, config: PipelineConfig) {
     super(coordinator);
     this.config = config;
 

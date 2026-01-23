@@ -17,6 +17,7 @@ import type {
   AgentJobPayload,
   WorkflowJobPayload,
   SwarmJobPayload,
+  SwarmAgentJobPayload,
   SerializedAgent,
   SerializedWorkflow,
   SerializedSwarm,
@@ -146,6 +147,51 @@ export class JobQueue {
       priority: options?.priority,
       delay: options?.delay,
     }) as Promise<Job<SwarmJobPayload>>;
+  }
+
+  /**
+   * Add a distributed swarm agent job to the queue
+   * Used by DistributedSwarmCoordinator for per-agent job dispatch
+   */
+  async addSwarmAgentJob(
+    swarmId: string,
+    agentName: string,
+    agentConfig: SerializedAgent,
+    input: string,
+    options?: {
+      context?: Record<string, unknown>;
+      stateKeys?: {
+        blackboard: string;
+        messages: string;
+        results: string;
+      };
+      priority?: number;
+      delay?: number;
+      timeout?: number;
+    }
+  ): Promise<Job<SwarmAgentJobPayload>> {
+    const jobId = nanoid();
+
+    const payload: SwarmAgentJobPayload = {
+      type: 'swarm-agent',
+      jobId,
+      swarmId,
+      agentName,
+      agentConfig,
+      input,
+      context: options?.context,
+      stateKeys: options?.stateKeys ?? {
+        blackboard: `swarm:${swarmId}:blackboard`,
+        messages: `swarm:${swarmId}:messages`,
+        results: `swarm:${swarmId}:results`,
+      },
+    };
+
+    return this.queue.add('swarm-agent', payload, {
+      jobId,
+      priority: options?.priority,
+      delay: options?.delay,
+    }) as Promise<Job<SwarmAgentJobPayload>>;
   }
 
   /**

@@ -655,6 +655,185 @@ swarm.once('swarm:complete', (event) => {
 
 ---
 
+## Distributed Execution
+
+Run swarm agents across multiple workers using Redis-backed communication and BullMQ job queues. Each agent executes as a separate job, enabling horizontal scaling and parallel processing.
+
+### Basic Distributed Swarm
+
+```typescript
+import { Cogitator, Agent } from '@cogitator-ai/core';
+import { SwarmBuilder } from '@cogitator-ai/swarms';
+
+const cogitator = new Cogitator({ defaultModel: 'gpt-4o' });
+
+const swarm = new SwarmBuilder('distributed-team')
+  .strategy('hierarchical')
+  .supervisor(new Agent({ name: 'lead', instructions: 'Coordinate the team' }))
+  .workers([
+    new Agent({ name: 'analyst-1', instructions: 'Analyze data' }),
+    new Agent({ name: 'analyst-2', instructions: 'Analyze data' }),
+    new Agent({ name: 'analyst-3', instructions: 'Analyze data' }),
+  ])
+  .distributed({
+    enabled: true,
+    queue: 'swarm-agent-jobs',
+    timeout: 300000,
+    redis: {
+      host: 'localhost',
+      port: 6379,
+    },
+  })
+  .build(cogitator);
+
+const result = await swarm.run({
+  input: 'Analyze Q4 sales data across all regions',
+});
+
+// Cleanup Redis connections when done
+await swarm.close();
+```
+
+### Distributed Configuration Options
+
+```typescript
+interface DistributedSwarmConfig {
+  enabled: boolean;
+  queue?: string; // Job queue name (default: 'swarm-agent-jobs')
+  workerConcurrency?: number; // Workers per process (default: 4)
+  timeout?: number; // Job timeout in ms (default: 300000)
+  redis?: {
+    host?: string; // Redis host (default: 'localhost')
+    port?: number; // Redis port (default: 6379)
+    password?: string; // Redis password
+    keyPrefix?: string; // Key prefix (default: 'swarm')
+    db?: number; // Redis database (default: 0)
+  };
+  retry?: {
+    maxRetries?: number; // Max retry attempts
+    backoff?: 'constant' | 'linear' | 'exponential';
+    initialDelay?: number; // Initial delay in ms
+    maxDelay?: number; // Max delay in ms
+  };
+  cleanupAfter?: number; // Cleanup keys after ms
+}
+```
+
+### Redis-Backed Communication
+
+Distributed swarms use Redis for shared state synchronization:
+
+```typescript
+import { RedisMessageBus, RedisBlackboard, RedisSwarmEventEmitter } from '@cogitator-ai/swarms';
+import Redis from 'ioredis';
+
+const redis = new Redis({ host: 'localhost', port: 6379 });
+
+// Message bus for agent-to-agent communication
+const messageBus = new RedisMessageBus(
+  { enabled: true, protocol: 'direct' },
+  { redis, swarmId: 'my-swarm', keyPrefix: 'swarm' }
+);
+await messageBus.initialize();
+
+// Shared blackboard for state
+const blackboard = new RedisBlackboard(
+  { enabled: true, sections: { results: [] }, trackHistory: true },
+  { redis, swarmId: 'my-swarm', keyPrefix: 'swarm' }
+);
+await blackboard.initialize();
+
+// Event emitter for cross-worker events
+const events = new RedisSwarmEventEmitter({
+  redis,
+  swarmId: 'my-swarm',
+  keyPrefix: 'swarm',
+});
+await events.initialize();
+```
+
+### Setting Up Workers
+
+Workers process distributed swarm jobs. Use with `@cogitator-ai/worker`:
+
+```typescript
+import { WorkerPool } from '@cogitator-ai/worker';
+
+const pool = new WorkerPool({
+  concurrency: 4,
+  redis: {
+    host: 'localhost',
+    port: 6379,
+  },
+  queues: ['swarm-agent-jobs'],
+});
+
+await pool.start();
+
+// Workers automatically process swarm-agent jobs
+// Each job runs a single agent and publishes results back to Redis
+```
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Swarm.run()                          │
+│  distributed: true → DistributedSwarmCoordinator            │
+│  distributed: false → SwarmCoordinator (in-memory)          │
+└─────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│  DistributedCoordinator │     │  Redis (Shared State)       │
+│  - dispatches agent jobs│────▶│  - swarm:{id}:blackboard    │
+│  - subscribes to results│     │  - swarm:{id}:messages      │
+│  - coordinates strategy │     │  - swarm:{id}:results       │
+└─────────────────────────┘     └─────────────────────────────┘
+              │                               ▲
+              │ job queue                     │
+              ▼                               │
+┌─────────────────────────┐                   │
+│  BullMQ Queue           │                   │
+│  swarm-agent-jobs       │                   │
+└─────────────────────────┘                   │
+              │                               │
+    ┌─────────┼─────────┐                     │
+    ▼         ▼         ▼                     │
+┌───────┐ ┌───────┐ ┌───────┐                │
+│Worker1│ │Worker2│ │Worker3│ ───────────────┘
+│ Agent │ │ Agent │ │ Agent │  publish results
+└───────┘ └───────┘ └───────┘
+```
+
+### Local vs Distributed
+
+The same swarm works in both modes with identical API:
+
+```typescript
+// Local execution (in-process)
+const localSwarm = new SwarmBuilder('local-team')
+  .strategy('consensus')
+  .agents([agent1, agent2, agent3])
+  .consensus({ threshold: 0.6, maxRounds: 3, resolution: 'majority', onNoConsensus: 'fail' })
+  .build(cogitator);
+
+// Distributed execution (across workers)
+const distributedSwarm = new SwarmBuilder('distributed-team')
+  .strategy('consensus')
+  .agents([agent1, agent2, agent3])
+  .consensus({ threshold: 0.6, maxRounds: 3, resolution: 'majority', onNoConsensus: 'fail' })
+  .distributed({ enabled: true, redis: { host: 'redis.example.com' } })
+  .build(cogitator);
+
+// Same API for both
+const localResult = await localSwarm.run({ input: 'Task...' });
+const distributedResult = await distributedSwarm.run({ input: 'Task...' });
+```
+
+---
+
 ## Swarm Control
 
 ### Pause and Resume
@@ -781,6 +960,19 @@ import type {
   SwarmEventType,
   SwarmEvent,
   SwarmEventHandler,
+} from '@cogitator-ai/swarms';
+```
+
+### Distributed Types
+
+```typescript
+import type { DistributedSwarmConfig } from '@cogitator-ai/types';
+
+import {
+  RedisMessageBus,
+  RedisBlackboard,
+  RedisSwarmEventEmitter,
+  DistributedSwarmCoordinator,
 } from '@cogitator-ai/swarms';
 ```
 
