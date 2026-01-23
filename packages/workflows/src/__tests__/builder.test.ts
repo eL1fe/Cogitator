@@ -105,6 +105,84 @@ describe('WorkflowBuilder', () => {
     });
   });
 
+  describe('parallel support', () => {
+    it('creates parallel edges for fan-out', () => {
+      const workflow = new WorkflowBuilder<TestState>('parallel')
+        .initialState({ value: 0 })
+        .addNode('start', async () => ({}))
+        .addParallel('fanout', ['a', 'b', 'c'], { after: ['start'] })
+        .addNode('a', async () => ({ output: 'a' }))
+        .addNode('b', async () => ({ output: 'b' }))
+        .addNode('c', async () => ({ output: 'c' }))
+        .build();
+
+      expect(workflow.nodes.size).toBe(5);
+      const parallelEdge = workflow.edges.find((e) => e.type === 'parallel');
+      expect(parallelEdge).toBeDefined();
+      if (parallelEdge?.type === 'parallel') {
+        expect(parallelEdge.from).toBe('fanout');
+        expect(parallelEdge.to).toContain('a');
+        expect(parallelEdge.to).toContain('b');
+        expect(parallelEdge.to).toContain('c');
+        expect(parallelEdge.to.length).toBe(3);
+      }
+    });
+
+    it('creates sequential edge to parallel node', () => {
+      const workflow = new WorkflowBuilder<TestState>('parallel-seq')
+        .initialState({ value: 0 })
+        .addNode('start', async () => ({}))
+        .addParallel('fanout', ['a', 'b'], { after: ['start'] })
+        .addNode('a', async () => ({}))
+        .addNode('b', async () => ({}))
+        .build();
+
+      const seqEdge = workflow.edges.find(
+        (e) => e.type === 'sequential' && e.from === 'start' && e.to === 'fanout'
+      );
+      expect(seqEdge).toBeDefined();
+    });
+
+    it('handles fan-in after parallel execution', () => {
+      const workflow = new WorkflowBuilder<TestState>('fan-in')
+        .initialState({ value: 0 })
+        .addNode('start', async () => ({}))
+        .addParallel('fanout', ['a', 'b'], { after: ['start'] })
+        .addNode('a', async () => ({ output: 'a' }))
+        .addNode('b', async () => ({ output: 'b' }))
+        .addNode('merge', async () => ({ output: 'merged' }), {
+          after: ['a', 'b'],
+        })
+        .build();
+
+      expect(workflow.nodes.size).toBe(5);
+      const mergeEdges = workflow.edges.filter((e) => e.type === 'sequential' && e.to === 'merge');
+      expect(mergeEdges.length).toBe(2);
+    });
+
+    it('validates parallel edge targets exist', () => {
+      const builder = new WorkflowBuilder<TestState>('invalid-parallel')
+        .initialState({ value: 0 })
+        .addNode('start', async () => ({}))
+        .addParallel('fanout', ['nonexistent'], { after: ['start'] });
+
+      expect(() => builder.build()).toThrow("references unknown node 'nonexistent'");
+    });
+
+    it('supports parallel without after option', () => {
+      const workflow = new WorkflowBuilder<TestState>('parallel-root')
+        .initialState({ value: 0 })
+        .addParallel('fanout', ['a', 'b'])
+        .addNode('a', async () => ({}))
+        .addNode('b', async () => ({}))
+        .build();
+
+      expect(workflow.entryPoint).toBe('a');
+      const parallelEdge = workflow.edges.find((e) => e.type === 'parallel');
+      expect(parallelEdge).toBeDefined();
+    });
+  });
+
   describe('validation', () => {
     it('throws error for empty workflow', () => {
       const builder = new WorkflowBuilder('empty').initialState({});

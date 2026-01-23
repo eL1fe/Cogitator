@@ -293,6 +293,7 @@ export type {
   AddNodeOptions,
   AddConditionalOptions,
   AddLoopOptions,
+  AddParallelOptions,
   TracingConfig,
   MetricsConfig,
   SpanExporter,

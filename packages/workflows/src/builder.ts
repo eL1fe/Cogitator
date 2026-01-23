@@ -11,6 +11,7 @@ import type {
   AddNodeOptions,
   AddConditionalOptions,
   AddLoopOptions,
+  AddParallelOptions,
   NodeConfig,
 } from '@cogitator-ai/types';
 
@@ -35,12 +36,19 @@ interface InternalLoop<S> {
   after: string[];
 }
 
+interface InternalParallel {
+  name: string;
+  targets: string[];
+  after: string[];
+}
+
 export class WorkflowBuilder<S extends WorkflowState = WorkflowState> {
   private name: string;
   private state: S;
   private nodes: InternalNode<S>[] = [];
   private conditionals: InternalConditional<S>[] = [];
   private loops: InternalLoop<S>[] = [];
+  private parallels: InternalParallel[] = [];
   private entryPointName: string | null = null;
 
   constructor(name: string) {
@@ -107,6 +115,15 @@ export class WorkflowBuilder<S extends WorkflowState = WorkflowState> {
     return this;
   }
 
+  addParallel(name: string, targets: string[], options?: AddParallelOptions): this {
+    this.parallels.push({
+      name,
+      targets,
+      after: options?.after ?? [],
+    });
+    return this;
+  }
+
   /**
    * Build and validate the workflow
    */
@@ -137,14 +154,23 @@ export class WorkflowBuilder<S extends WorkflowState = WorkflowState> {
       });
     }
 
+    for (const parallel of this.parallels) {
+      nodesMap.set(parallel.name, {
+        name: parallel.name,
+        fn: async (ctx) => ({ output: ctx.state }),
+        config: undefined,
+      });
+    }
+
     const edges: Edge[] = [];
 
     const conditionalNames = new Set(this.conditionals.map((c) => c.name));
     const loopNames = new Set(this.loops.map((l) => l.name));
+    const parallelNames = new Set(this.parallels.map((p) => p.name));
 
     for (const node of this.nodes) {
       for (const dep of node.after) {
-        if (conditionalNames.has(dep) || loopNames.has(dep)) {
+        if (conditionalNames.has(dep) || loopNames.has(dep) || parallelNames.has(dep)) {
           continue;
         }
         edges.push({
@@ -199,6 +225,22 @@ export class WorkflowBuilder<S extends WorkflowState = WorkflowState> {
       });
     }
 
+    for (const parallel of this.parallels) {
+      for (const dep of parallel.after) {
+        edges.push({
+          type: 'sequential',
+          from: dep,
+          to: parallel.name,
+        });
+      }
+
+      edges.push({
+        type: 'parallel',
+        from: parallel.name,
+        to: parallel.targets,
+      });
+    }
+
     let entryPoint = this.entryPointName;
 
     if (!entryPoint) {
@@ -211,6 +253,14 @@ export class WorkflowBuilder<S extends WorkflowState = WorkflowState> {
       for (const cond of this.conditionals) {
         for (const dep of cond.after) {
           allDeps.add(dep);
+        }
+      }
+      for (const parallel of this.parallels) {
+        for (const dep of parallel.after) {
+          allDeps.add(dep);
+        }
+        for (const target of parallel.targets) {
+          allDeps.add(target);
         }
       }
 

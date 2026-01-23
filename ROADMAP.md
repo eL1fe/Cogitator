@@ -11,24 +11,7 @@
 
 ## 🔴 Critical Fixes
 
-### 1. Workflow Parallel Edge Implementation
-
-**Package:** `packages/workflows/src/executor.ts`
-
-**Problem:** `ParallelEdge` type is defined in types but executor ignores it.
-
-**Current code only handles:**
-
-```typescript
-if (edge.type === 'sequential') { ... }
-if (edge.type === 'conditional') { ... }
-if (edge.type === 'loop') { ... }
-// parallel is MISSING
-```
-
-**Required:** Add handler for `edge.type === 'parallel'` that spawns all targets simultaneously.
-
-**Impact:** Advertised feature doesn't work.
+_No critical fixes remaining._
 
 ---
 
@@ -613,7 +596,7 @@ const executor = new WorkflowExecutor({
 
 1. ~~Docker timeout fix~~ ✅
 2. ~~Swarm strategy tests~~ ✅
-3. Workflow parallel edge fix
+3. ~~Workflow parallel edge fix~~ ✅
 
 ### Phase 2: Core Features
 

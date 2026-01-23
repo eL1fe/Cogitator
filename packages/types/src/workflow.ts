@@ -139,6 +139,10 @@ export interface AddLoopOptions {
   after?: string[];
 }
 
+export interface AddParallelOptions {
+  after?: string[];
+}
+
 export type ApprovalType = 'approve-reject' | 'multi-choice' | 'free-form' | 'numeric-rating';
 
 export interface ApprovalChoice {
