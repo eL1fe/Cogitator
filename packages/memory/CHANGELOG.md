@@ -1,5 +1,26 @@
 # @cogitator-ai/memory
 
+## 0.6.0
+
+### Minor Changes
+
+- feat(memory): implement hybrid search with BM25 + vector fusion
+
+  Add comprehensive hybrid search capability combining keyword search (BM25) with semantic vector search using Reciprocal Rank Fusion (RRF):
+  - BM25Index class with inverted index for fast keyword search
+  - Tokenizer with stopword filtering and text normalization
+  - RRF algorithm for combining ranked results from different sources
+  - HybridSearch class with three search strategies: vector, keyword, hybrid
+  - PostgreSQL adapter extended with tsvector/tsquery full-text search
+  - InMemoryEmbeddingAdapter for testing without database dependency
+  - New types: SearchStrategy, SearchOptions, SearchResult, HybridSearchConfig
+
+### Patch Changes
+
+- Updated dependencies
+  - @cogitator-ai/types@0.11.0
+  - @cogitator-ai/redis@0.2.10
+
 ## 0.5.2
 
 ### Patch Changes

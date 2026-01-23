@@ -1,5 +1,15 @@
 # @cogitator-ai/core
 
+## 0.11.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @cogitator-ai/types@0.11.0
+  - @cogitator-ai/memory@0.6.0
+  - @cogitator-ai/models@9.0.0
+  - @cogitator-ai/sandbox@0.2.11
+
 ## 0.11.2
 
 ### Patch Changes
