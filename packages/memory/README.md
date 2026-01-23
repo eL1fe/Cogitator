@@ -20,7 +20,9 @@ pnpm add pg       # For PostgreSQL adapter
 - **Context Builder** - Build token-aware conversation context
 - **Embedding Services** - OpenAI and Ollama embedding integration
 - **Semantic Search** - Vector similarity search with pgvector
+- **Hybrid Search** - BM25 + Vector with Reciprocal Rank Fusion
 - **Facts Storage** - Store and retrieve agent knowledge
+- **Knowledge Graph** - Entity-relationship memory with multi-hop traversal
 - **Zod Schemas** - Type-safe configuration validation
 
 ---
@@ -353,6 +355,110 @@ const embeddings = createEmbeddingService({
 
 const vector = await embeddings.embed('Hello, world!');
 ```
+
+---
+
+## Hybrid Search
+
+Combine keyword search (BM25) with semantic search (vector embeddings) using Reciprocal Rank Fusion for best-of-both-worlds retrieval.
+
+### Configuration
+
+```typescript
+import {
+  HybridSearch,
+  InMemoryEmbeddingAdapter,
+  OpenAIEmbeddingService,
+} from '@cogitator-ai/memory';
+
+const embeddingService = new OpenAIEmbeddingService({
+  apiKey: process.env.OPENAI_API_KEY!,
+});
+
+const embeddingAdapter = new InMemoryEmbeddingAdapter();
+
+const search = new HybridSearch({
+  embeddingAdapter,
+  embeddingService,
+  keywordAdapter: embeddingAdapter, // PostgresAdapter also implements KeywordSearchAdapter
+  defaultWeights: { bm25: 0.4, vector: 0.6 },
+});
+```
+
+### Search Strategies
+
+```typescript
+// Pure vector search (semantic similarity)
+const vectorResults = await search.search({
+  query: 'machine learning algorithms',
+  strategy: 'vector',
+  limit: 10,
+});
+
+// Pure keyword search (BM25)
+const keywordResults = await search.search({
+  query: 'machine learning algorithms',
+  strategy: 'keyword',
+  limit: 10,
+});
+
+// Hybrid search (combines both with RRF)
+const hybridResults = await search.search({
+  query: 'machine learning algorithms',
+  strategy: 'hybrid',
+  weights: { bm25: 0.4, vector: 0.6 },
+  limit: 10,
+});
+
+// Results include both scores
+hybridResults.data.forEach((result) => {
+  console.log(`${result.content} — score: ${result.score}`);
+  console.log(`  vector: ${result.vectorScore}, keyword: ${result.keywordScore}`);
+});
+```
+
+### Document Indexing
+
+For keyword search, documents must be indexed:
+
+```typescript
+// Add documents to BM25 index
+search.indexDocument('doc-1', 'Machine learning is a subset of AI...');
+search.indexDocument('doc-2', 'Deep learning uses neural networks...');
+
+// Remove from index
+search.removeDocument('doc-1');
+
+// Clear entire index
+search.clearIndex();
+
+// Check index size
+console.log('Indexed documents:', search.indexSize);
+```
+
+### Why Hybrid Search?
+
+| Search Type        | Strengths                                            | Weaknesses                      |
+| ------------------ | ---------------------------------------------------- | ------------------------------- |
+| **Vector**         | Finds semantically similar content, handles synonyms | Misses exact keyword matches    |
+| **Keyword (BM25)** | Exact term matching, fast                            | Misses synonyms and paraphrases |
+| **Hybrid**         | Best of both worlds                                  | Slightly more computation       |
+
+**Example:** Query "ML algorithms"
+
+- Vector search finds "machine learning methods" (semantic match)
+- Keyword search finds "ML algorithms comparison" (exact match)
+- Hybrid returns both, ranked by combined relevance
+
+### Reciprocal Rank Fusion (RRF)
+
+Hybrid search uses RRF to combine rankings from both search methods:
+
+```
+RRF_score(d) = Σ 1 / (k + rank_i(d))
+```
+
+Where `k` is a constant (default 60) and `rank_i(d)` is the rank of document `d` in result set `i`. This produces stable rankings even when individual scores are on different scales.
 
 ---
 

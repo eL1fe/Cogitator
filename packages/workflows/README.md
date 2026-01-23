@@ -14,6 +14,7 @@ pnpm add @cogitator-ai/workflows
 ## Features
 
 - **DAG Builder** — Type-safe workflow construction with nodes, conditionals, loops
+- **Real-time Streaming** — Stream execution events via async generators
 - **Checkpoints** — Save and resume workflow state
 - **Pre-built Nodes** — Agent, tool, and function nodes
 - **Timer System** — Delays, cron schedules, wait-until patterns
@@ -49,6 +50,7 @@ const result = await executor.execute(workflow, { input: 'Analyze this data...' 
 ## Table of Contents
 
 - [Core Concepts](#core-concepts)
+- [Real-time Streaming](#real-time-streaming)
 - [Pre-built Nodes](#pre-built-nodes)
 - [Conditional Branching](#conditional-branching)
 - [Loops](#loops)
@@ -101,6 +103,89 @@ const result = await executor.execute(workflow, {
 console.log(result.output);
 console.log(result.state);
 console.log(result.events);
+```
+
+---
+
+## Real-time Streaming
+
+Stream workflow execution events in real-time using async generators:
+
+```typescript
+import { WorkflowExecutor } from '@cogitator-ai/workflows';
+
+const executor = new WorkflowExecutor(cogitator);
+
+for await (const event of executor.stream(workflow)) {
+  switch (event.type) {
+    case 'workflow_started':
+      console.log('Workflow started:', event.workflowId);
+      break;
+
+    case 'node_started':
+      console.log(`Node ${event.nodeId} started`);
+      break;
+
+    case 'node_progress':
+      console.log(`Node ${event.nodeId}: ${event.progress}%`);
+      break;
+
+    case 'node_completed':
+      console.log(`Node ${event.nodeId} completed:`, event.result);
+      break;
+
+    case 'node_error':
+      console.error(`Node ${event.nodeId} failed:`, event.error);
+      break;
+
+    case 'workflow_completed':
+      console.log('Workflow completed:', event.result);
+      break;
+  }
+}
+```
+
+### Event Types
+
+| Event                | Description                | Properties                     |
+| -------------------- | -------------------------- | ------------------------------ |
+| `workflow_started`   | Workflow execution begins  | `workflowId`, `timestamp`      |
+| `node_started`       | Node execution begins      | `nodeId`, `timestamp`          |
+| `node_progress`      | Progress update from node  | `nodeId`, `progress` (0-100)   |
+| `node_completed`     | Node finished successfully | `nodeId`, `result`, `duration` |
+| `node_error`         | Node execution failed      | `nodeId`, `error`              |
+| `workflow_completed` | Workflow finished          | `result`, `duration`           |
+
+### Reporting Progress from Nodes
+
+Use `ctx.reportProgress()` inside nodes to emit progress events:
+
+```typescript
+const workflow = new WorkflowBuilder('processing')
+  .addNode('process', async (ctx) => {
+    const items = ctx.state.items;
+
+    for (let i = 0; i < items.length; i++) {
+      await processItem(items[i]);
+      ctx.reportProgress?.(Math.round(((i + 1) / items.length) * 100));
+    }
+
+    return { output: 'Done' };
+  })
+  .build();
+```
+
+### Progress Callback
+
+For non-streaming execution, use the `onNodeProgress` callback:
+
+```typescript
+const result = await executor.execute(workflow, {
+  input: 'Start',
+  onNodeProgress: (nodeId, progress) => {
+    console.log(`${nodeId}: ${progress}%`);
+  },
+});
 ```
 
 ---
