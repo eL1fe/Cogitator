@@ -1,5 +1,11 @@
 # @cogitator-ai/cli
 
+## 0.2.11
+
+### Patch Changes
+
+- @cogitator-ai/core@0.11.1
+
 ## 0.2.10
 
 ### Patch Changes

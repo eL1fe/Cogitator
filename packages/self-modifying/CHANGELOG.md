@@ -1,5 +1,12 @@
 # @cogitator-ai/self-modifying
 
+## 8.0.1
+
+### Patch Changes
+
+- @cogitator-ai/core@0.11.1
+- @cogitator-ai/neuro-symbolic@8.0.1
+
 ## 8.0.0
 
 ### Patch Changes

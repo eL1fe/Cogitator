@@ -1,5 +1,11 @@
 # @cogitator-ai/openai-compat
 
+## 10.0.1
+
+### Patch Changes
+
+- @cogitator-ai/core@0.11.1
+
 ## 10.0.0
 
 ### Minor Changes

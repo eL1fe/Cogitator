@@ -1,5 +1,12 @@
 # @cogitator-ai/core
 
+## 0.11.1
+
+### Patch Changes
+
+- Updated dependencies [abdafa3]
+  - @cogitator-ai/sandbox@0.2.9
+
 ## 0.11.0
 
 ### Minor Changes
