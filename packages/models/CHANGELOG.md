@@ -1,5 +1,12 @@
 # @cogitator-ai/models
 
+## 13.0.0
+
+### Patch Changes
+
+- Updated dependencies
+  - @cogitator-ai/types@0.15.0
+
 ## 12.0.0
 
 ### Patch Changes

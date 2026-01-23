@@ -1,5 +1,32 @@
 # @cogitator-ai/core
 
+## 0.14.0
+
+### Minor Changes
+
+- feat(cost-routing): implement cost prediction before agent execution
+
+  Add `estimateCost()` method to Cogitator that estimates the cost of running an agent BEFORE execution.
+
+  New components:
+  - `TokenEstimator`: Heuristic-based token estimation
+  - `CostEstimator`: Combines task analysis, model pricing, and token estimation
+
+  Features:
+  - Complexity-based output token estimates (simple/moderate/complex)
+  - Iteration and tool call estimation based on task requirements
+  - Confidence scores (lower for complex tasks with many tools)
+  - Local model detection (Ollama models return $0 cost)
+  - Warnings for unpredictable costs, missing pricing data
+
+### Patch Changes
+
+- Updated dependencies
+  - @cogitator-ai/types@0.15.0
+  - @cogitator-ai/memory@0.6.5
+  - @cogitator-ai/models@13.0.0
+  - @cogitator-ai/sandbox@0.2.15
+
 ## 0.13.0
 
 ### Minor Changes
