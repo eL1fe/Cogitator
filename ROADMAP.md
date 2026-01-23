@@ -11,53 +11,7 @@
 
 ## 🔴 Critical Fixes
 
-### 1. Docker Timeout Fix
-
-**Package:** `packages/sandbox/src/executors/docker.ts`
-
-**Problem:** When timeout occurs, only a flag is set (`timedOut: true`) but the process is NOT actually killed. Container continues running in background, consuming resources.
-
-**Current behavior:**
-
-```typescript
-// Line ~200 in docker.ts
-timedOut: true; // but process keeps running!
-```
-
-**Required fix:**
-
-```typescript
-if (timedOut) {
-  await container.kill();
-  // or container.stop({ t: 0 })
-}
-```
-
-**Impact:** Security issue — runaway processes continue consuming resources indefinitely.
-
----
-
-### 2. Swarm Strategy Execution Tests
-
-**Package:** `packages/swarms/__tests__/strategies.test.ts`
-
-**Problem:** Only 52 lines of tests that check factory defaults. No actual execution tests for any of the 6 strategies.
-
-**Missing tests:**
-
-- Hierarchical: delegation flow, worker communication, depth limits
-- Round-robin: rotation correctness, sticky sessions
-- Consensus: voting logic, threshold enforcement, escalation
-- Pipeline: gate evaluation, stage routing, retry behavior
-- Debate: advocate/critic roles, moderator synthesis
-- Auction: bidding, selection (highest-bid vs weighted-random)
-- Negotiation: turn management, convergence, deadlock handling
-
-**Impact:** Core functionality without tests = time bomb.
-
----
-
-### 3. Workflow Parallel Edge Implementation
+### 1. Workflow Parallel Edge Implementation
 
 **Package:** `packages/workflows/src/executor.ts`
 
@@ -80,7 +34,7 @@ if (edge.type === 'loop') { ... }
 
 ## 🟠 High Impact Features
 
-### 4. Agent-as-Tool Composition
+### 2. Agent-as-Tool Composition
 
 **Package:** `packages/core`
 
@@ -114,7 +68,7 @@ const writer = new Agent({
 
 ---
 
-### 5. Semantic Memory Consolidation
+### 3. Semantic Memory Consolidation
 
 **Package:** `packages/memory`
 
@@ -151,7 +105,7 @@ const facts = await memory.getFacts({
 
 ---
 
-### 6. Hybrid Search (BM25 + Vector)
+### 4. Hybrid Search (BM25 + Vector)
 
 **Package:** `packages/memory`
 
@@ -203,7 +157,7 @@ export async function hybridSearch(
 
 ---
 
-### 7. Real-time Streaming for Workflows
+### 5. Real-time Streaming for Workflows
 
 **Package:** `packages/workflows`
 
@@ -240,7 +194,7 @@ for await (const event of stream) {
 
 ---
 
-### 8. Neuro-Symbolic Agent Tools
+### 6. Neuro-Symbolic Agent Tools
 
 **Package:** `packages/neuro-symbolic` + `packages/core`
 
@@ -275,7 +229,7 @@ const agent = new Agent({
 
 ## 🟡 Medium Priority
 
-### 9. Tool Caching Layer
+### 7. Tool Caching Layer
 
 **Package:** `packages/core`
 
@@ -309,7 +263,7 @@ const cachedWebSearch = withCache(webSearch, {
 
 ---
 
-### 10. Prompt Injection Detection
+### 8. Prompt Injection Detection
 
 **Package:** `packages/core/src/constitutional`
 
@@ -331,7 +285,7 @@ const filter = new InputFilter({
 
 ---
 
-### 11. Cost Prediction Before Run
+### 9. Cost Prediction Before Run
 
 **Package:** `packages/core/src/cost-routing`
 
@@ -369,7 +323,7 @@ const estimate = await cogitator.estimateCost({
 
 ---
 
-### 12. Agent Persistence/Serialization
+### 10. Agent Persistence/Serialization
 
 **Package:** `packages/core`
 
@@ -397,7 +351,7 @@ const restored = Agent.deserialize(snapshot, { toolRegistry });
 
 ---
 
-### 13. MCP Resource Publishing
+### 11. MCP Resource Publishing
 
 **Package:** `packages/mcp/src/server`
 
@@ -437,7 +391,7 @@ server.registerPrompt({
 
 ---
 
-### 14. WASM Tool Hot-Reload
+### 12. WASM Tool Hot-Reload
 
 **Package:** `packages/wasm-tools`
 
@@ -465,7 +419,7 @@ const tools = manager.getTools();
 
 ---
 
-### 15. Distributed Swarm Execution
+### 13. Distributed Swarm Execution
 
 **Package:** `packages/swarms` + `packages/worker`
 
@@ -498,7 +452,7 @@ const result = await swarm.run({
 
 ## 🟢 Nice to Have
 
-### 16. Agent Marketplace / Discovery
+### 14. Agent Marketplace / Discovery
 
 **Package:** New `packages/marketplace`
 
@@ -536,7 +490,7 @@ await marketplace.publish(myAgent, {
 
 ---
 
-### 17. Multi-Modal Tool Support
+### 15. Multi-Modal Tool Support
 
 **Package:** `packages/core/src/tools`
 
@@ -591,7 +545,7 @@ const audioTranscriber = tool({
 
 ---
 
-### 18. More WASM Pre-built Tools
+### 16. More WASM Pre-built Tools
 
 **Package:** `packages/wasm-tools`
 
@@ -614,7 +568,7 @@ const audioTranscriber = tool({
 
 ---
 
-### 19. Workflow Checkpoint Granularity
+### 17. Workflow Checkpoint Granularity
 
 **Package:** `packages/workflows`
 
@@ -634,7 +588,7 @@ const executor = new WorkflowExecutor({
 
 ---
 
-### 20. Knowledge Graph Adapter Implementation
+### 18. Knowledge Graph Adapter Implementation
 
 **Package:** `packages/neuro-symbolic`
 
@@ -655,27 +609,27 @@ const executor = new WorkflowExecutor({
 
 ## Implementation Order Recommendation
 
-### Phase 1: Stability (Week 1-2)
+### Phase 1: Stability
 
-1. Docker timeout fix
-2. Swarm strategy tests
+1. ~~Docker timeout fix~~ ✅
+2. ~~Swarm strategy tests~~ ✅
 3. Workflow parallel edge fix
 
-### Phase 2: Core Features (Week 3-6)
+### Phase 2: Core Features
 
 4. Agent-as-Tool composition
 5. Semantic memory consolidation
 6. Hybrid search
 7. Neuro-symbolic tools integration
 
-### Phase 3: DX & Polish (Week 7-10)
+### Phase 3: DX & Polish
 
 8. Real-time workflow streaming
 9. Tool caching
 10. Cost prediction
 11. Agent serialization
 
-### Phase 4: Ecosystem (Week 11+)
+### Phase 4: Ecosystem
 
 12. MCP resource publishing
 13. WASM hot-reload
