@@ -1770,17 +1770,20 @@ const providers: LLMProvidersConfig = {
 
 ## Documentation
 
-| Document                                     | Description                      |
-| -------------------------------------------- | -------------------------------- |
-| [Getting Started](./docs/GETTING_STARTED.md) | Quick start guide                |
-| [Architecture](./docs/ARCHITECTURE.md)       | Deep dive into system design     |
-| [Memory System](./docs/MEMORY.md)            | Hybrid memory architecture       |
-| [Agents](./docs/AGENTS.md)                   | Agent patterns and configuration |
-| [Tools](./docs/TOOLS.md)                     | Building and using tools         |
-| [Workflows](./docs/WORKFLOWS.md)             | DAG-based orchestration          |
-| [Swarms](./docs/SWARMS.md)                   | Multi-agent coordination         |
-| [Deployment](./docs/DEPLOYMENT.md)           | Production deployment guide      |
-| [API Reference](./docs/API.md)               | Complete API documentation       |
+| Document                                         | Description                      |
+| ------------------------------------------------ | -------------------------------- |
+| [Getting Started](./docs/GETTING_STARTED.md)     | Quick start guide                |
+| [Architecture](./docs/ARCHITECTURE.md)           | Deep dive into system design     |
+| [Memory System](./docs/MEMORY.md)                | Hybrid memory architecture       |
+| [Agents](./docs/AGENTS.md)                       | Agent patterns and configuration |
+| [Tools](./docs/TOOLS.md)                         | Building and using tools         |
+| [Workflows](./docs/WORKFLOWS.md)                 | DAG-based orchestration          |
+| [Swarms](./docs/SWARMS.md)                       | Multi-agent coordination         |
+| [Security](./docs/SECURITY.md)                   | Security model and hardening     |
+| [SOC2 Compliance](./docs/SOC2-COMPLIANCE.md)     | Enterprise compliance docs       |
+| [Disaster Recovery](./docs/DISASTER_RECOVERY.md) | Backup and recovery procedures   |
+| [Deployment](./docs/DEPLOYMENT.md)               | Production deployment guide      |
+| [API Reference](./docs/API.md)                   | Complete API documentation       |
 
 ---
 
@@ -1829,7 +1832,7 @@ const providers: LLMProvidersConfig = {
 - [ ] Cloud-managed control plane
 - [ ] Visual workflow builder
 - [ ] Agent templates library
-- [ ] SOC2 compliance documentation
+- [x] SOC2 compliance documentation
 - [ ] 1.0 stable release
 
 [📖 Detailed Roadmap](./docs/ROADMAP.md)
