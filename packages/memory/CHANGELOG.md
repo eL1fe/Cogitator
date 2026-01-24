@@ -1,5 +1,13 @@
 # @cogitator-ai/memory
 
+## 0.6.8
+
+### Patch Changes
+
+- Updated dependencies
+  - @cogitator-ai/types@0.18.0
+  - @cogitator-ai/redis@0.2.17
+
 ## 0.6.7
 
 ### Patch Changes

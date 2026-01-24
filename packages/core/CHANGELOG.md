@@ -1,5 +1,19 @@
 # @cogitator-ai/core
 
+## 0.17.0
+
+### Minor Changes
+
+- Add long-context optimization with automatic compression strategies
+
+### Patch Changes
+
+- Updated dependencies
+  - @cogitator-ai/types@0.18.0
+  - @cogitator-ai/memory@0.6.8
+  - @cogitator-ai/models@16.0.0
+  - @cogitator-ai/sandbox@0.2.18
+
 ## 0.16.0
 
 ### Minor Changes

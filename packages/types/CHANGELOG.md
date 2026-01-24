@@ -1,5 +1,11 @@
 # @cogitator-ai/types
 
+## 0.18.0
+
+### Minor Changes
+
+- Add long-context optimization with automatic compression strategies
+
 ## 0.17.0
 
 ### Minor Changes
