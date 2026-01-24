@@ -45,15 +45,16 @@ export function createCalculatorTool(): SimpleTool {
       },
       required: ['expression'],
     },
-    execute: async ({ expression }) => {
+    execute: async (args) => {
       try {
+        const expression = args.expression as string;
         const ops: Record<string, (a: number, b: number) => number> = {
           '+': (a, b) => a + b,
           '-': (a, b) => a - b,
           '*': (a, b) => a * b,
           '/': (a, b) => a / b,
         };
-        const match = expression.match(/^(\d+)\s*([+\-*/])\s*(\d+)$/);
+        const match = /^(\d+)\s*([+\-*/])\s*(\d+)$/.exec(expression);
         if (!match) return { error: 'Invalid expression' };
         const [, a, op, b] = match;
         const result = ops[op](Number(a), Number(b));

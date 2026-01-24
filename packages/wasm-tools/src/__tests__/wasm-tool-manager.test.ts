@@ -183,9 +183,20 @@ describe('WasmToolManager', () => {
       await manager.watch('./plugins/*.wasm', { onUnload });
 
       mockWatcherInstance!._callbacks?.onAdd('./plugins/calc.wasm');
-      mockWatcherInstance!._callbacks?.onUnlink('./plugins/calc.wasm');
+      await vi.waitFor(
+        () => {
+          expect(manager.getTool('calc')).toBeDefined();
+        },
+        { timeout: 1000 }
+      );
 
-      expect(onUnload).toHaveBeenCalledWith('calc', './plugins/calc.wasm');
+      mockWatcherInstance!._callbacks?.onUnlink('./plugins/calc.wasm');
+      await vi.waitFor(
+        () => {
+          expect(onUnload).toHaveBeenCalledWith('calc', './plugins/calc.wasm');
+        },
+        { timeout: 1000 }
+      );
       expect(manager.getTool('calc')).toBeUndefined();
     });
   });
