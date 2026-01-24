@@ -1,5 +1,19 @@
 # @cogitator-ai/workflows
 
+## 0.5.0
+
+### Minor Changes
+
+- Add per-node checkpoint granularity with `checkpointStrategy` option
+  - `'per-iteration'` (default): checkpoint after all parallel nodes complete
+  - `'per-node'`: checkpoint after each node completes, enabling resume from partial parallel execution
+
+### Patch Changes
+
+- Updated dependencies
+  - @cogitator-ai/types@0.19.0
+  - @cogitator-ai/core@0.17.1
+
 ## 0.4.7
 
 ### Patch Changes
