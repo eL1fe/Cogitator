@@ -47,8 +47,8 @@ const KNOWN_MODEL_CAPABILITIES: Record<string, Partial<ModelCapabilitiesInfo>> =
 };
 
 const KNOWN_CONTEXT_WINDOWS: Record<string, number> = {
-  'llama3.2:1b': 128000,
-  'llama3.2:3b': 128000,
+  'llama3.3:3b': 128000,
+  'llama3.3:8b': 128000,
   'llama3.1': 128000,
   llama3: 8192,
   'qwen2.5': 128000,
@@ -93,7 +93,7 @@ const CLOUD_MODELS: DiscoveredModel[] = [
     isAvailable: true,
   },
   {
-    id: 'gpt-4-turbo',
+    id: 'gpt-4.1',
     provider: 'openai',
     displayName: 'GPT-4 Turbo',
     capabilities: {
@@ -123,7 +123,7 @@ const CLOUD_MODELS: DiscoveredModel[] = [
     isAvailable: true,
   },
   {
-    id: 'claude-3-5-sonnet-20241022',
+    id: 'claude-sonnet-4-5-20250929',
     provider: 'anthropic',
     displayName: 'Claude 3.5 Sonnet',
     capabilities: {
@@ -148,7 +148,7 @@ const CLOUD_MODELS: DiscoveredModel[] = [
     isAvailable: true,
   },
   {
-    id: 'claude-3-opus-20240229',
+    id: 'claude-opus-4-5-20240229',
     provider: 'anthropic',
     displayName: 'Claude 3 Opus',
     capabilities: {
@@ -163,7 +163,7 @@ const CLOUD_MODELS: DiscoveredModel[] = [
     isAvailable: true,
   },
   {
-    id: 'gemini-1.5-pro',
+    id: 'gemini-2.5-pro',
     provider: 'google',
     displayName: 'Gemini 1.5 Pro',
     capabilities: {
@@ -178,7 +178,7 @@ const CLOUD_MODELS: DiscoveredModel[] = [
     isAvailable: true,
   },
   {
-    id: 'gemini-1.5-flash',
+    id: 'gemini-2.5-flash',
     provider: 'google',
     displayName: 'Gemini 1.5 Flash',
     capabilities: {

@@ -243,7 +243,7 @@ describe('Agent', () => {
  * ```typescript
  * const agent = new Agent({
  *   name: 'my-agent',
- *   model: 'llama3.2:latest',
+ *   model: 'llama3.3:latest',
  *   instructions: 'You are a helpful assistant.',
  * });
  * ```

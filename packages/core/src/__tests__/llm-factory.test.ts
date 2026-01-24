@@ -116,9 +116,9 @@ describe('createLLMBackend', () => {
 
 describe('parseModel', () => {
   it('should parse model with provider prefix', () => {
-    expect(parseModel('ollama/llama3.2:latest')).toEqual({
+    expect(parseModel('ollama/llama3.3:latest')).toEqual({
       provider: 'ollama',
-      model: 'llama3.2:latest',
+      model: 'llama3.3:latest',
     });
   });
 

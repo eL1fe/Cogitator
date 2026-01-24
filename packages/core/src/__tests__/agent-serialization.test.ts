@@ -53,7 +53,7 @@ describe('Agent Serialization', () => {
         id: 'custom-id',
         name: 'full-config-agent',
         description: 'Test description',
-        model: 'anthropic/claude-3-opus',
+        model: 'anthropic/claude-opus-4-5',
         provider: 'anthropic',
         instructions: 'Be precise.',
         temperature: 0.5,
@@ -160,12 +160,12 @@ describe('Agent Serialization', () => {
       const snapshot = original.serialize();
       const restored = Agent.deserialize(snapshot, {
         overrides: {
-          model: 'anthropic/claude-3-opus',
+          model: 'anthropic/claude-opus-4-5',
           temperature: 0.9,
         },
       });
 
-      expect(restored.model).toBe('anthropic/claude-3-opus');
+      expect(restored.model).toBe('anthropic/claude-opus-4-5');
       expect(restored.config.temperature).toBe(0.9);
       expect(restored.name).toBe('original');
     });
@@ -313,7 +313,7 @@ describe('Agent Serialization', () => {
         id: 'round-trip-id',
         name: 'round-trip-agent',
         description: 'Test description',
-        model: 'anthropic/claude-3-opus',
+        model: 'anthropic/claude-opus-4-5',
         provider: 'anthropic',
         instructions: 'Be helpful and use tools.',
         tools,

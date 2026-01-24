@@ -198,24 +198,24 @@ describe('transformLiteLLMData', () => {
 
   it('infers provider from model id prefix', () => {
     const data: LiteLLMModelData = {
-      'gpt-4-turbo': { max_tokens: 128000 },
-      'claude-3-opus': { max_tokens: 200000 },
+      'gpt-4.1': { max_tokens: 128000 },
+      'claude-opus-4-5': { max_tokens: 200000 },
     };
 
     const result = transformLiteLLMData(data);
 
-    expect(result.find((m) => m.id === 'gpt-4-turbo')?.provider).toBe('openai');
-    expect(result.find((m) => m.id === 'claude-3-opus')?.provider).toBe('anthropic');
+    expect(result.find((m) => m.id === 'gpt-4.1')?.provider).toBe('openai');
+    expect(result.find((m) => m.id === 'claude-opus-4-5')?.provider).toBe('anthropic');
   });
 
   it('creates display name from id', () => {
     const data: LiteLLMModelData = {
-      'gpt-4-turbo-preview': { max_tokens: 128000 },
+      'gpt-4.1': { max_tokens: 128000 },
     };
 
     const result = transformLiteLLMData(data);
 
-    expect(result[0].displayName).toBe('GPT 4 Turbo Preview');
+    expect(result[0].displayName).toBe('GPT 4.1');
   });
 
   it('defaults context window to 4096', () => {

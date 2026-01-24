@@ -34,7 +34,7 @@ describe('Structured Outputs / JSON Mode', () => {
       });
 
       await backend.chat({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [{ role: 'user', content: 'Return JSON' }],
         responseFormat: { type: 'json_object' },
       });
@@ -69,7 +69,7 @@ describe('Structured Outputs / JSON Mode', () => {
       });
 
       await backend.chat({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [{ role: 'user', content: 'Return person data' }],
         responseFormat: {
           type: 'json_schema',
@@ -102,7 +102,7 @@ describe('Structured Outputs / JSON Mode', () => {
       });
 
       await backend.chat({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [{ role: 'user', content: 'Say hello' }],
         responseFormat: { type: 'text' },
       });

@@ -147,7 +147,7 @@ export function createLLMBackend(
 
 /**
  * Parse model string to extract provider and model name
- * e.g., "ollama/llama3.2:latest" -> { provider: "ollama", model: "llama3.2:latest" }
+ * e.g., "ollama/llama3.3:latest" -> { provider: "ollama", model: "llama3.3:latest" }
  */
 export function parseModel(modelString: string): {
   provider: LLMProvider | null;

@@ -2,38 +2,41 @@ import type { TaskRequirements, ModelRecommendation, CostRoutingConfig } from '@
 import { getModelRegistry, type ModelInfo } from '@cogitator-ai/models';
 
 const ADVANCED_MODELS = [
+  'gpt-4.1',
   'gpt-4o',
-  'gpt-4-turbo',
-  'claude-3-opus',
-  'claude-sonnet-4',
-  'claude-3-5-sonnet',
-  'gemini-1.5-pro',
-  'llama3.1:70b',
-  'llama3.2:70b',
+  'o3',
+  'claude-opus-4-5',
+  'claude-sonnet-4-5',
+  'gemini-2.5-pro',
+  'gemini-3-pro',
+  'llama3.3:70b',
   'qwen2.5:72b',
   'mixtral',
   'deepseek-r1',
 ];
 
 const FAST_MODELS = [
+  'gpt-4.1-mini',
+  'gpt-4.1-nano',
   'gpt-4o-mini',
-  'claude-3-5-haiku',
-  'gemini-1.5-flash',
-  'gemini-2.0-flash',
-  'llama3.2:1b',
-  'llama3.2:3b',
-  'phi3',
+  'o4-mini',
+  'o3-mini',
+  'claude-haiku-4-5',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-3-flash',
+  'llama3.3:8b',
   'phi4',
   'qwen2.5:1.5b',
   'qwen2.5:3b',
 ];
 
 const CODE_MODELS = [
-  'claude-3-5-sonnet',
-  'claude-sonnet-4',
+  'claude-sonnet-4-5',
+  'claude-opus-4-5',
+  'gpt-4.1',
   'gpt-4o',
   'codellama',
-  'starcoder',
   'deepseek-coder',
   'qwen2.5-coder',
 ];
@@ -218,7 +221,7 @@ export class ModelSelector {
       score: 50,
       reasons: ['Fallback model - no suitable candidates found'],
       estimatedCost: 0.0005,
-      fallbacks: ['claude-3-5-haiku', 'gemini-1.5-flash'],
+      fallbacks: ['claude-haiku-4-5', 'gemini-2.5-flash'],
     };
   }
 

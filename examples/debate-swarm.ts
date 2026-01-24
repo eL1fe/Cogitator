@@ -10,7 +10,7 @@
 import { Cogitator, Agent } from '@cogitator-ai/core';
 import { Swarm, DebateStrategy } from '@cogitator-ai/swarms';
 
-const MODEL = process.env.MODEL || 'llama3.2:3b';
+const MODEL = process.env.MODEL || 'llama3.3:8b';
 
 console.log(`\n🤖 Using model: ${MODEL}`);
 console.log('   (Set MODEL env var to use a different one)\n');

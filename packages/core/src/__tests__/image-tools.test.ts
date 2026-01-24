@@ -96,14 +96,14 @@ describe('image tools', () => {
       };
       (mockLlm.chat as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse);
 
-      const tool = createAnalyzeImageTool({ llm: mockLlm, defaultModel: 'gpt-4-turbo' });
+      const tool = createAnalyzeImageTool({ llm: mockLlm, defaultModel: 'gpt-4.1' });
       await tool.execute({
         image: 'https://example.com/image.jpg',
-        model: 'claude-3-opus',
+        model: 'claude-opus-4-5',
       });
 
       expect(mockLlm.chat).toHaveBeenCalledWith(
-        expect.objectContaining({ model: 'claude-3-opus' })
+        expect.objectContaining({ model: 'claude-opus-4-5' })
       );
     });
 

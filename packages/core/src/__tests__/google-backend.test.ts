@@ -59,7 +59,7 @@ describe('GoogleBackend', () => {
       });
 
       await backend.chat({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [
           { role: 'system', content: 'You are helpful.' },
           { role: 'user', content: 'Hello' },
@@ -68,7 +68,7 @@ describe('GoogleBackend', () => {
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
       const [url, options] = mockFetch.mock.calls[0] as [string, RequestInit];
-      expect(url).toContain('gemini-1.5-flash:generateContent');
+      expect(url).toContain('gemini-2.5-flash:generateContent');
       expect(url).toContain('key=test-api-key');
       expect(options.method).toBe('POST');
 
@@ -100,7 +100,7 @@ describe('GoogleBackend', () => {
       });
 
       const response = await backend.chat({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [{ role: 'user', content: 'Hi' }],
       });
 
@@ -140,7 +140,7 @@ describe('GoogleBackend', () => {
       });
 
       const response = await backend.chat({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [{ role: 'user', content: 'What is the weather in Tokyo?' }],
         tools: [
           {
@@ -182,7 +182,7 @@ describe('GoogleBackend', () => {
       });
 
       await backend.chat({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [{ role: 'user', content: 'Test' }],
         tools: [
           {
@@ -227,7 +227,7 @@ describe('GoogleBackend', () => {
       });
 
       await backend.chat({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [
           { role: 'user', content: 'What is the weather?' },
           { role: 'assistant', content: '' },
@@ -288,7 +288,7 @@ describe('GoogleBackend', () => {
       });
 
       const [url] = mockFetch.mock.calls[0] as [string, RequestInit];
-      expect(url).toContain('gemini-1.5-flash:generateContent');
+      expect(url).toContain('gemini-2.5-flash:generateContent');
     });
 
     it('should include generation config', async () => {
@@ -310,7 +310,7 @@ describe('GoogleBackend', () => {
       });
 
       await backend.chat({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [{ role: 'user', content: 'Test' }],
         temperature: 0.7,
         topP: 0.9,
@@ -354,7 +354,7 @@ describe('GoogleBackend', () => {
         });
 
         const response = await backend.chat({
-          model: 'gemini-1.5-flash',
+          model: 'gemini-2.5-flash',
           messages: [{ role: 'user', content: 'Test' }],
         });
 
@@ -391,7 +391,7 @@ describe('GoogleBackend', () => {
 
       const results: string[] = [];
       for await (const chunk of backend.chatStream({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [{ role: 'user', content: 'Hi' }],
       })) {
         if (chunk.delta.content) {
@@ -428,7 +428,7 @@ describe('GoogleBackend', () => {
 
       const toolCalls: unknown[] = [];
       for await (const chunk of backend.chatStream({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [{ role: 'user', content: 'Weather?' }],
       })) {
         if (chunk.delta.toolCalls) {
@@ -457,7 +457,7 @@ describe('GoogleBackend', () => {
       });
 
       for await (const _ of backend.chatStream({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [{ role: 'user', content: 'Test' }],
       })) {
         /* consume stream */
@@ -477,7 +477,7 @@ describe('GoogleBackend', () => {
 
       await expect(async () => {
         for await (const _ of backend.chatStream({
-          model: 'gemini-1.5-flash',
+          model: 'gemini-2.5-flash',
           messages: [{ role: 'user', content: 'Test' }],
         })) {
           /* consume stream */

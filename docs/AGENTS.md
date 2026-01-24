@@ -19,7 +19,7 @@ interface Agent {
   description?: string;
 
   // Model configuration
-  model: string; // 'ollama/llama3.2:70b', 'openai/gpt-4o'
+  model: string; // 'ollama/llama3.3:70b', 'openai/gpt-4o'
   temperature?: number; // 0-2, default 0.7
   topP?: number; // 0-1, default 1
   maxTokens?: number; // Max output tokens
@@ -52,7 +52,7 @@ import { Agent } from '@cogitator-ai/core';
 
 const assistant = new Agent({
   name: 'assistant',
-  model: 'llama3.2:latest',
+  model: 'llama3.3:latest',
   instructions: `You are a helpful assistant. Answer questions clearly and concisely.
                  If you don't know something, say so.`,
 });
@@ -103,7 +103,7 @@ const researcher = new Agent({
 ```typescript
 const analyzer = new Agent({
   name: 'analyzer',
-  model: 'claude-3-5-sonnet',
+  model: 'claude-sonnet-4-5',
   instructions: 'Analyze the given text and extract structured information.',
   responseFormat: {
     type: 'json_schema',
@@ -184,7 +184,7 @@ Executes specific tasks with tools.
 ```typescript
 const executor = new Agent({
   name: 'executor',
-  model: 'claude-3-5-sonnet',
+  model: 'claude-sonnet-4-5',
   instructions: `You are a task execution agent. Execute the given task precisely.
                  Use tools when needed. Report success or failure clearly.`,
   tools: [fileRead, fileWrite, shellExecute, webSearch],
@@ -266,7 +266,7 @@ Self-improves through reflection.
 ```typescript
 const reflectiveAgent = new Agent({
   name: 'reflective-coder',
-  model: 'claude-3-5-sonnet',
+  model: 'claude-sonnet-4-5',
   instructions: `You are a thoughtful coder. For each task:
 
                  1. THINK: Analyze the requirements
@@ -288,7 +288,7 @@ const reflectiveAgent = new Agent({
 
 ```typescript
 // Local models (via Ollama)
-model: 'ollama/llama3.2:latest';
+model: 'ollama/llama3.3:latest';
 model: 'ollama/codellama:34b';
 model: 'ollama/mistral:7b-instruct';
 
@@ -298,11 +298,11 @@ model: 'openai/gpt-4o-mini';
 model: 'openai/o1-preview';
 
 // Anthropic
-model: 'anthropic/claude-3-5-sonnet';
-model: 'anthropic/claude-3-opus';
+model: 'anthropic/claude-sonnet-4-5';
+model: 'anthropic/claude-opus-4-5';
 
 // Google
-model: 'google/gemini-pro';
+model: 'google/gemini-2.5-flash';
 model: 'google/gemini-ultra';
 
 // vLLM (self-hosted)
@@ -610,14 +610,14 @@ describe('Agent Integration', () => {
 
   beforeAll(async () => {
     cog = new Cogitator({
-      llm: { provider: 'ollama', model: 'llama3.2:latest' },
+      llm: { provider: 'ollama', model: 'llama3.3:latest' },
     });
   });
 
   it('should complete a real task', async () => {
     const agent = new Agent({
       name: 'test-agent',
-      model: 'llama3.2:latest',
+      model: 'llama3.3:latest',
       instructions: 'You are a helpful assistant.',
     });
 
@@ -685,7 +685,7 @@ const classifier = new Agent({
 
 // Use powerful models for complex reasoning
 const architect = new Agent({
-  model: 'claude-3-opus', // Best reasoning
+  model: 'claude-opus-4-5', // Best reasoning
   // ...
 });
 ```

@@ -442,7 +442,7 @@ describe('SwarmAssessor', () => {
           {
             agentName: 'supervisor',
             originalModel: 'gpt-4o',
-            assignedModel: 'claude-3-opus',
+            assignedModel: 'claude-opus-4-5',
             provider: 'anthropic' as const,
             score: 90,
             reasons: [],
@@ -452,7 +452,7 @@ describe('SwarmAssessor', () => {
           {
             agentName: 'worker1',
             originalModel: 'gpt-3.5-turbo',
-            assignedModel: 'llama3.2',
+            assignedModel: 'llama3.3',
             provider: 'ollama' as const,
             score: 80,
             reasons: [],
@@ -468,7 +468,7 @@ describe('SwarmAssessor', () => {
       const updatedConfig = assessor.assignModels(config, result);
 
       expect(updatedConfig.supervisor?.model).toBe('gpt-4o');
-      expect(updatedConfig.workers?.[0]?.model).toBe('llama3.2');
+      expect(updatedConfig.workers?.[0]?.model).toBe('llama3.3');
     });
   });
 });

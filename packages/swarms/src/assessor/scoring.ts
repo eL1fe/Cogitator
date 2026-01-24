@@ -8,11 +8,11 @@ export interface ScoredModel {
 
 const ADVANCED_MODELS = [
   'gpt-4o',
-  'gpt-4-turbo',
-  'claude-3-opus',
+  'gpt-4.1',
+  'claude-opus-4-5',
   'claude-sonnet-4',
-  'claude-3-5-sonnet',
-  'gemini-1.5-pro',
+  'claude-sonnet-4-5',
+  'gemini-2.5-pro',
   'llama3.1:70b',
   'llama3.2:70b',
   'qwen2.5:72b',
@@ -23,10 +23,10 @@ const ADVANCED_MODELS = [
 const FAST_MODELS = [
   'gpt-4o-mini',
   'claude-3-5-haiku',
-  'gemini-1.5-flash',
+  'gemini-2.5-flash',
   'gemini-2.0-flash',
-  'llama3.2:1b',
-  'llama3.2:3b',
+  'llama3.3:3b',
+  'llama3.3:8b',
   'phi3',
   'phi4',
   'qwen2.5:1.5b',
@@ -34,7 +34,7 @@ const FAST_MODELS = [
 ];
 
 const CODE_MODELS = [
-  'claude-3-5-sonnet',
+  'claude-sonnet-4-5',
   'claude-sonnet-4',
   'gpt-4o',
   'codellama',

@@ -63,16 +63,16 @@ console.log(result.output);
 
 ```typescript
 // Ollama (local, default)
-const cog = new Cogitator({ defaultModel: 'ollama/llama3.2:3b' });
+const cog = new Cogitator({ defaultModel: 'ollama/llama3.3:8b' });
 
 // OpenAI
 const cog = new Cogitator({ defaultModel: 'openai/gpt-4o' });
 
 // Anthropic Claude
-const cog = new Cogitator({ defaultModel: 'anthropic/claude-sonnet-4-20250514' });
+const cog = new Cogitator({ defaultModel: 'anthropic/claude-sonnet-4-5-20250929' });
 
 // Google Gemini
-const cog = new Cogitator({ defaultModel: 'google/gemini-1.5-flash' });
+const cog = new Cogitator({ defaultModel: 'google/gemini-2.5-flash' });
 
 // vLLM
 const cog = new Cogitator({ defaultModel: 'vllm/mistral-7b' });
@@ -1227,8 +1227,8 @@ const degraded = await withGracefulDegradation(
 
 const llmExecutor = createLLMFallbackExecutor([
   { provider: 'openai', model: 'gpt-4o' },
-  { provider: 'anthropic', model: 'claude-sonnet-4-20250514' },
-  { provider: 'ollama', model: 'llama3.2:70b' },
+  { provider: 'anthropic', model: 'claude-sonnet-4-5-20250929' },
+  { provider: 'ollama', model: 'llama3.3:70b' },
 ]);
 const response = await llmExecutor.chat(request);
 ```

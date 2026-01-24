@@ -184,7 +184,7 @@ export function getAvailableProviders(): AvailableProvider[] {
       models: [
         'gpt-4o',
         'gpt-4o-mini',
-        'gpt-4-turbo',
+        'gpt-4.1',
         'gpt-4',
         'gpt-3.5-turbo',
         'o1-preview',
@@ -197,9 +197,9 @@ export function getAvailableProviders(): AvailableProvider[] {
       configured: !!process.env.ANTHROPIC_API_KEY,
       models: [
         'claude-sonnet-4-20250514',
-        'claude-3-5-sonnet-20241022',
+        'claude-sonnet-4-5-20250929',
         'claude-3-5-haiku-20241022',
-        'claude-3-opus-20240229',
+        'claude-opus-4-5-20240229',
       ],
     },
     {
@@ -210,8 +210,8 @@ export function getAvailableProviders(): AvailableProvider[] {
         'gemini-2.5-pro-preview-06-05',
         'gemini-2.5-flash-preview-05-20',
         'gemini-2.0-flash',
-        'gemini-1.5-pro',
-        'gemini-1.5-flash',
+        'gemini-2.5-pro',
+        'gemini-2.5-flash',
       ],
     },
   ];

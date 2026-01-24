@@ -147,7 +147,7 @@ const client = new OpenAI({
 });
 
 const assistant = await client.beta.assistants.create({
-  model: 'llama3.2:70b', // Use local model
+  model: 'llama3.3:70b', // Use local model
   instructions: 'You are a helpful assistant.',
   tools: [{ type: 'code_interpreter' }],
 });

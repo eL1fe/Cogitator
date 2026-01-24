@@ -61,14 +61,14 @@ const devTeam = new Swarm({
   workers: [
     new Agent({
       name: 'frontend-dev',
-      model: 'claude-3-5-sonnet',
+      model: 'claude-sonnet-4-5',
       instructions: 'You are a frontend developer. Build React/Vue components.',
       tools: [fileWrite, npmRun],
     }),
 
     new Agent({
       name: 'backend-dev',
-      model: 'claude-3-5-sonnet',
+      model: 'claude-sonnet-4-5',
       instructions: 'You are a backend developer. Build APIs and services.',
       tools: [fileWrite, databaseTool],
     }),

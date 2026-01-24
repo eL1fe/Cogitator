@@ -83,7 +83,7 @@ const techLead = new Agent({
 
 const frontendDev = new Agent({
   name: 'frontend-dev',
-  model: 'claude-3-5-sonnet',
+  model: 'claude-sonnet-4-5',
   instructions: `You are a frontend developer specializing in:
     - React and TypeScript
     - UI/UX implementation
@@ -98,7 +98,7 @@ const frontendDev = new Agent({
 
 const backendDev = new Agent({
   name: 'backend-dev',
-  model: 'claude-3-5-sonnet',
+  model: 'claude-sonnet-4-5',
   instructions: `You are a backend developer specializing in:
     - Node.js and TypeScript
     - REST API design

@@ -154,7 +154,7 @@ export async function seedDefaultAgents(): Promise<void> {
       },
       {
         name: 'Code Assistant',
-        model: 'claude-3-5-sonnet',
+        model: 'claude-sonnet-4-5',
         description: 'Helps with code reviews, refactoring, and documentation',
       },
       {

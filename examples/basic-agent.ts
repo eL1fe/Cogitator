@@ -46,7 +46,7 @@ const calculate = tool({
 
 const assistant = new Agent({
   name: 'helpful-assistant',
-  model: 'llama3.1:8b',
+  model: 'llama3.3:8b',
   instructions: `You are a helpful assistant. You can:
     - Answer questions
     - Perform calculations using the calculate tool

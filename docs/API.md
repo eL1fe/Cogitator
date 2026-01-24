@@ -178,7 +178,7 @@ interface AgentConfig {
   description?: string;
 
   // Model
-  model: string; // e.g., 'ollama/llama3.2:70b', 'openai/gpt-4o'
+  model: string; // e.g., 'ollama/llama3.3:70b', 'openai/gpt-4o'
   temperature?: number;
   topP?: number;
   maxTokens?: number;
@@ -680,7 +680,7 @@ Content-Type: application/json
 
 {
   "name": "my-agent",
-  "model": "llama3.2:latest",
+  "model": "llama3.3:latest",
   "instructions": "You are a helpful assistant."
 }
 
@@ -765,7 +765,7 @@ POST /v1/chat/completions
 Content-Type: application/json
 
 {
-  "model": "llama3.2:latest",
+  "model": "llama3.3:latest",
   "messages": [
     {"role": "user", "content": "Hello!"}
   ]

@@ -65,7 +65,7 @@ export class ContextManager {
 
     const lowerId = modelId.toLowerCase();
     if (lowerId.includes('gpt-4o')) return 128000;
-    if (lowerId.includes('gpt-4-turbo')) return 128000;
+    if (lowerId.includes('gpt-4.1')) return 128000;
     if (lowerId.includes('gpt-4')) return 8192;
     if (lowerId.includes('gpt-3.5')) return 16385;
     if (

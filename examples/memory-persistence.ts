@@ -21,7 +21,7 @@ const takeNote = tool({
 
 const assistant = new Agent({
   name: 'memory-assistant',
-  model: 'llama3.1:8b',
+  model: 'llama3.3:8b',
   instructions: `You are a helpful assistant with persistent memory.
     You can remember facts about the user across conversations.
     When the user tells you something about themselves, acknowledge it.

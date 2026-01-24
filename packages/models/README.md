@@ -31,7 +31,7 @@ const model = getModel('gpt-4o');
 console.log(model?.contextWindow);
 console.log(model?.capabilities?.supportsVision);
 
-const price = getPrice('claude-sonnet-4-20250514');
+const price = getPrice('claude-sonnet-4-5-20250929');
 console.log(`Input: $${price?.input}/M tokens`);
 console.log(`Output: $${price?.output}/M tokens`);
 
@@ -99,7 +99,7 @@ await registry.initialize();
 
 const model = registry.getModel('gpt-4o');
 
-const price = registry.getPrice('claude-3-5-sonnet-20241022');
+const price = registry.getPrice('claude-sonnet-4-5-20250929');
 
 const models = registry.listModels({
   provider: 'anthropic',
@@ -317,18 +317,18 @@ import {
 
 ### Anthropic Models
 
-- claude-sonnet-4-20250514
-- claude-3-5-sonnet-20241022
-- claude-3-5-haiku-20241022
-- claude-3-opus-20240229
+- claude-sonnet-4-5-20250929
+- claude-sonnet-4-5-20250929
+- claude-haiku-4-5-20241022
+- claude-opus-4-5-20240229
 
 ### Google Models
 
 - gemini-2.5-pro
 - gemini-2.5-flash
-- gemini-2.0-flash
-- gemini-1.5-pro
-- gemini-1.5-flash
+- gemini-2.5-flash
+- gemini-2.5-pro
+- gemini-2.5-flash
 
 ---
 

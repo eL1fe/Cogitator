@@ -52,7 +52,7 @@ const cog = new Cogitator({
 
 const assistant = new Agent({
   name: 'assistant',
-  model: 'llama3.1:8b',
+  model: 'llama3.3:8b',
   instructions: 'You are a helpful assistant with access to web search and calculation tools.',
   tools: [searchWeb, calculate],
 });

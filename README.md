@@ -118,7 +118,7 @@ const searchWeb = tool({
 // Create an agent
 const researcher = new Agent({
   name: 'researcher',
-  model: 'llama3.2:latest', // or 'gpt-4o', 'claude-3-5-sonnet'
+  model: 'llama3.3:latest', // or 'gpt-4o', 'claude-sonnet-4-5'
   instructions: `You are a research assistant. Use tools to find accurate information.
                  Always cite your sources.`,
   tools: [searchWeb],
@@ -182,7 +182,7 @@ const researcher = new Agent({
 // Main agent that can delegate to researcher
 const writer = new Agent({
   name: 'writer',
-  model: 'claude-3-5-sonnet',
+  model: 'claude-sonnet-4-5',
   instructions: 'Write articles. Use the research tool when you need facts.',
   tools: [
     agentAsTool(cog, researcher, {
@@ -214,14 +214,14 @@ const planner = new Agent({
 
 const coder = new Agent({
   name: 'coder',
-  model: 'claude-3-5-sonnet',
+  model: 'claude-sonnet-4-5',
   instructions: 'Write clean, tested code.',
   tools: [fileWrite, runTests],
 });
 
 const reviewer = new Agent({
   name: 'reviewer',
-  model: 'llama3.2:70b',
+  model: 'llama3.3:70b',
   instructions: 'Review code for bugs and security issues.',
 });
 
@@ -296,10 +296,10 @@ const result = await cog.run(devTeam, {
 ```typescript
 // Same code, any provider
 const agent = new Agent({
-  model: 'ollama/llama3.2:70b', // Local
+  model: 'ollama/llama3.3:70b', // Local
   // model: 'openai/gpt-4o',              // OpenAI
-  // model: 'anthropic/claude-3-5-sonnet', // Anthropic
-  // model: 'google/gemini-pro',           // Google
+  // model: 'anthropic/claude-sonnet-4-5', // Anthropic
+  // model: 'google/gemini-2.5-flash',           // Google
   // model: 'azure/gpt-4o',                // Azure OpenAI
   // model: 'bedrock/anthropic.claude-3-sonnet', // AWS Bedrock
   // model: 'mistral/mistral-large',       // Mistral
@@ -855,7 +855,7 @@ const cog = new Cogitator();
 
 const visionAgent = new Agent({
   name: 'vision-assistant',
-  model: 'gpt-4o', // or 'claude-3-5-sonnet', 'gemini-pro-vision', 'ollama/llava'
+  model: 'gpt-4o', // or 'claude-sonnet-4-5', 'gemini-2.5-flash', 'ollama/llava'
   instructions: 'You can see and analyze images.',
 });
 
@@ -922,8 +922,8 @@ await cog.run(creativeAgent, {
 | Provider  | Models                      | URL Images | Base64 | Generation |
 | --------- | --------------------------- | ---------- | ------ | ---------- |
 | OpenAI    | gpt-4o, gpt-4o-mini         | ✅         | ✅     | ✅ DALL-E  |
-| Anthropic | claude-3-5-sonnet, claude-3 | ✅         | ✅     | ❌         |
-| Google    | gemini-pro-vision           | ✅         | ✅     | ❌         |
+| Anthropic | claude-sonnet-4-5, claude-3 | ✅         | ✅     | ❌         |
+| Google    | gemini-2.5-flash            | ✅         | ✅     | ❌         |
 | Ollama    | llava, bakllava             | ✅         | ✅     | ❌         |
 | Azure     | gpt-4o (via Azure)          | ✅         | ✅     | ✅ DALL-E  |
 | Bedrock   | claude-3 (via AWS)          | ✅         | ✅     | ❌         |
@@ -1060,7 +1060,7 @@ const cog = new Cogitator({
 
 const agent = new Agent({
   name: 'research-assistant',
-  model: 'anthropic/claude-sonnet-4-20250514', // 200k context window
+  model: 'anthropic/claude-sonnet-4-5-20250929', // 200k context window
   instructions: 'You are a research assistant for long conversations.',
 });
 

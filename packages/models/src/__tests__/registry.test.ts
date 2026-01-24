@@ -18,7 +18,7 @@ describe('ModelRegistry', () => {
     });
 
     it('should return model by alias', () => {
-      const model = registry.getModel('claude-3-5-sonnet');
+      const model = registry.getModel('claude-sonnet-4-5');
       expect(model).toBeDefined();
       expect(model?.provider).toBe('anthropic');
     });
@@ -61,8 +61,8 @@ describe('ModelRegistry', () => {
       expect(price?.output).toBe(0.6);
     });
 
-    it('should return correct pricing for claude-3-5-sonnet', () => {
-      const price = registry.getPrice('claude-3-5-sonnet-20241022');
+    it('should return correct pricing for claude-sonnet-4-5', () => {
+      const price = registry.getPrice('claude-sonnet-4-5-20250929');
       expect(price).toBeDefined();
       expect(price?.input).toBe(3);
       expect(price?.output).toBe(15);

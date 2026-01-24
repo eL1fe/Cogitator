@@ -135,7 +135,7 @@ const runTests = tool({
 
 const codeAssistant = new Agent({
   name: 'code-assistant',
-  model: 'claude-3-5-sonnet',
+  model: 'claude-sonnet-4-5',
   instructions: `You are an expert software engineer assistant. You can:
 
     1. Read and analyze code files
