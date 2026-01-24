@@ -998,6 +998,87 @@ const result = await transcribeAudio.execute(
 | marin   | Natural, modern        |
 | cedar   | Grounded, trustworthy  |
 
+### 📏 Long Context Management
+
+Automatic context compression when conversations exceed model token limits — supports 128k+ token contexts with intelligent strategies:
+
+```typescript
+import { Cogitator, Agent } from '@cogitator-ai/core';
+
+const cog = new Cogitator({
+  context: {
+    enabled: true,
+    strategy: 'hybrid', // 'truncate' | 'sliding-window' | 'summarize' | 'hybrid'
+    compressionThreshold: 0.8, // Compress at 80% of model limit
+    outputReserve: 0.15, // Reserve 15% for output tokens
+    summaryModel: 'openai/gpt-4o-mini', // Cheap model for summaries
+    windowSize: 10, // Keep last 10 messages intact
+  },
+});
+
+const agent = new Agent({
+  name: 'research-assistant',
+  model: 'anthropic/claude-sonnet-4-20250514', // 200k context window
+  instructions: 'You are a research assistant for long conversations.',
+});
+
+// Context is automatically managed during long conversations
+// The system detects when approaching limits and compresses intelligently
+const result = await cog.run(agent, {
+  input: 'Continue our analysis...',
+  threadId: 'long-research-session',
+});
+```
+
+**Compression Strategies:**
+
+| Strategy         | Speed   | Quality | Use Case                           |
+| ---------------- | ------- | ------- | ---------------------------------- |
+| `truncate`       | Fastest | Low     | Speed critical, context disposable |
+| `sliding-window` | Fast    | Medium  | Balanced approach with overlap     |
+| `summarize`      | Slow    | High    | Context preservation critical      |
+| `hybrid`         | Medium  | High    | Production recommended (default)   |
+
+**How Hybrid Works:**
+
+- Below 50% limit: No compression
+- 50-80%: Sliding window (keep recent, summarize old)
+- 80%+: Aggressive LLM summarization with cheap model
+
+**Standalone Usage:**
+
+```typescript
+import { ContextManager } from '@cogitator-ai/core';
+
+const manager = new ContextManager({
+  enabled: true,
+  strategy: 'hybrid',
+  compressionThreshold: 0.8,
+  windowSize: 10,
+});
+
+// Check context state
+const state = manager.checkState(messages, 'gpt-4o');
+console.log(`Utilization: ${state.utilizationPercent.toFixed(1)}%`);
+console.log(`Needs compression: ${state.needsCompression}`);
+
+// Compress if needed
+if (state.needsCompression) {
+  const result = await manager.compress(messages, 'gpt-4o');
+  console.log(`Compressed ${result.originalTokens} → ${result.compressedTokens} tokens`);
+  console.log(`Strategy: ${result.strategy}`);
+  console.log(`Messages summarized: ${result.summarized ?? 0}`);
+}
+```
+
+**Model Context Limits:**
+The system automatically detects model limits from the registry:
+
+- GPT-4o: 128k tokens
+- Claude 3.5 Sonnet: 200k tokens
+- Gemini Pro: 1M tokens
+- Llama 3.2: 8k tokens
+
 ### 🧮 Neuro-Symbolic Agent Tools
 
 Give your agents formal reasoning capabilities — Prolog-style logic, constraint solving, and knowledge graphs:
@@ -1740,7 +1821,7 @@ const providers: LLMProvidersConfig = {
 - [x] Causal Reasoning Engine (Pearl's Ladder, d-separation, counterfactuals)
 - [x] Multi-modal Vision (image analysis, generation with DALL-E)
 - [x] Audio/Speech (Whisper transcription, TTS generation)
-- [ ] Long-context optimization (128k+ tokens)
+- [x] Long-context optimization (128k+ tokens)
 
 ### Phase 4: Ecosystem (Months 10-12)
 
@@ -1780,6 +1861,7 @@ const providers: LLMProvidersConfig = {
 | Tool Caching        | ✅        | ❌          | ❌                | ❌          |
 | Injection Detection | ✅        | ❌          | ❌                | ❌          |
 | Agent Serialization | ✅        | ⚠️ Basic    | ❌                | ❌          |
+| Long Context Mgmt   | ✅        | ❌          | ❌                | ❌          |
 | Dependencies        | ~20       | 150+        | N/A               | ~30         |
 
 ---

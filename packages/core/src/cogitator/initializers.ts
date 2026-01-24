@@ -11,6 +11,7 @@ import { ReflectionEngine, InMemoryInsightStore } from '../reflection/index';
 import { ConstitutionalAI } from '../constitutional/index';
 import { CostAwareRouter } from '../cost-routing/index';
 import { PromptInjectionDetector } from '../security/index';
+import { ContextManager } from '../context/index';
 import type { Agent } from '../agent';
 
 export type SandboxManager = {
@@ -54,6 +55,8 @@ export interface InitializerState {
   costRoutingInitialized: boolean;
   injectionDetector?: PromptInjectionDetector;
   securityInitialized: boolean;
+  contextManager?: ContextManager;
+  contextManagerInitialized: boolean;
 }
 
 export async function initializeMemory(
@@ -200,6 +203,21 @@ export function initializeSecurity(
   state.securityInitialized = true;
 }
 
+export function initializeContextManager(
+  config: CogitatorConfig,
+  state: InitializerState,
+  getBackend: (model: string) => LLMBackend
+): void {
+  if (state.contextManagerInitialized) return;
+  if (!config.context?.enabled) {
+    state.contextManagerInitialized = true;
+    return;
+  }
+
+  state.contextManager = new ContextManager(config.context, { getBackend });
+  state.contextManagerInitialized = true;
+}
+
 export async function cleanupState(state: InitializerState): Promise<void> {
   if (state.memoryAdapter) {
     await state.memoryAdapter.disconnect();
@@ -221,4 +239,6 @@ export async function cleanupState(state: InitializerState): Promise<void> {
   state.costRoutingInitialized = false;
   state.injectionDetector = undefined;
   state.securityInitialized = false;
+  state.contextManager = undefined;
+  state.contextManagerInitialized = false;
 }

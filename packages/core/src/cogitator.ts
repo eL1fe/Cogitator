@@ -29,6 +29,7 @@ import {
   initializeGuardrails,
   initializeCostRouting,
   initializeSecurity,
+  initializeContextManager,
   cleanupState,
 } from './cogitator/initializers';
 import { CogitatorError, ErrorCode } from '@cogitator-ai/types';
@@ -104,6 +105,7 @@ export class Cogitator {
     guardrailsInitialized: false,
     costRoutingInitialized: false,
     securityInitialized: false,
+    contextManagerInitialized: false,
   };
 
   private costEstimator?: CostEstimator;
@@ -274,6 +276,15 @@ export class Cogitator {
       while (iterations < maxIterations) {
         if (abortController.signal.aborted) {
           throw abortController.signal.reason ?? new Error('Run aborted');
+        }
+
+        if (this.state.contextManager?.shouldCompress(messages, effectiveModel)) {
+          const compressionResult = await this.state.contextManager.compress(
+            messages,
+            effectiveModel
+          );
+          messages.length = 0;
+          messages.push(...compressionResult.messages);
         }
 
         iterations++;
@@ -619,6 +630,10 @@ export class Cogitator {
 
     if (this.config.security?.promptInjection && !this.state.securityInitialized) {
       initializeSecurity(this.config, this.state, (model) => this.getBackend(model));
+    }
+
+    if (this.config.context?.enabled && !this.state.contextManagerInitialized) {
+      initializeContextManager(this.config, this.state, (model) => this.getBackend(model));
     }
   }
 

@@ -387,3 +387,19 @@ export type {
   InjectionPattern,
 } from '@cogitator-ai/types';
 export { DEFAULT_INJECTION_CONFIG } from '@cogitator-ai/types';
+
+export { ContextManager } from './context/index';
+export {
+  TruncateStrategy,
+  SlidingWindowStrategy,
+  SummarizeStrategy,
+  HybridStrategy,
+} from './context/index';
+export type {
+  CompressionStrategy,
+  ContextManagerConfig,
+  CompressionResult,
+  ContextState,
+  CompressionContext,
+  CompressionStrategyHandler,
+} from '@cogitator-ai/types';
