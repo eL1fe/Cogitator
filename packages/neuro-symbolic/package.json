@@ -49,7 +49,7 @@
     "zod": "^3.22.4"
   },
   "optionalDependencies": {
-    "neo4j-driver": "^5.27.0",
+    "neo4j-driver": "^6.0.1",
     "pg": "^8.11.3",
     "z3-solver": "^4.13.0"
   },
