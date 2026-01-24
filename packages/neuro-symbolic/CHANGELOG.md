@@ -1,5 +1,12 @@
 # @cogitator-ai/neuro-symbolic
 
+## 15.1.0
+
+### Minor Changes
+
+- Add PostgreSQL and Neo4j graph adapters for persistent knowledge graphs
+- Add PostgreSQL and Neo4j graph adapters for persistent knowledge graphs
+
 ## 15.0.1
 
 ### Patch Changes
