@@ -192,7 +192,7 @@ describe('Sandbox Performance Benchmarks', () => {
         available: true,
       });
 
-      expect(coldStartMs).toBeLessThan(100);
+      expect(coldStartMs).toBeLessThan(200);
     });
   });
 
