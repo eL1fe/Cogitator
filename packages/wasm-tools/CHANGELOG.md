@@ -1,5 +1,21 @@
 # @cogitator-ai/wasm-tools
 
+## 0.5.0
+
+### Minor Changes
+
+- Add 10 new WASM-based tools expanding the library from 4 to 14 built-in tools:
+  - **slug**: URL-safe slug generation with Unicode transliteration
+  - **validation**: Email, URL, UUID, IPv4, IPv6 validation
+  - **diff**: Myers diff algorithm with unified/inline output
+  - **regex**: Pattern matching with ReDoS protection (100k step limit)
+  - **csv**: RFC 4180 compliant CSV parsing and generation
+  - **markdown**: GFM subset Markdown to HTML converter
+  - **xml**: SAX-style XML parser with XPath-like queries
+  - **datetime**: Date operations with UTC + offset timezone support
+  - **compression**: Pure JS gzip/deflate/zlib implementation
+  - **signing**: Ed25519 digital signatures (pure JS, no dependencies)
+
 ## 0.4.2
 
 ### Patch Changes
