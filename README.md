@@ -886,6 +886,118 @@ await cog.run(creativeAgent, {
 | Azure     | gpt-4o (via Azure)          | ✅         | ✅     | ✅ DALL-E  |
 | Bedrock   | claude-3 (via AWS)          | ✅         | ✅     | ❌         |
 
+### 🎤 Audio & Speech
+
+Transcribe audio with OpenAI Whisper and generate speech with TTS:
+
+```typescript
+import {
+  Cogitator,
+  Agent,
+  createTranscribeAudioTool,
+  createGenerateSpeechTool,
+} from '@cogitator-ai/core';
+
+const cog = new Cogitator();
+
+// Create audio tools
+const transcribeAudio = createTranscribeAudioTool({
+  apiKey: process.env.OPENAI_API_KEY,
+  defaultModel: 'whisper-1', // or 'gpt-4o-transcribe', 'gpt-4o-mini-transcribe'
+});
+
+const generateSpeech = createGenerateSpeechTool({
+  apiKey: process.env.OPENAI_API_KEY,
+  defaultVoice: 'nova', // alloy, ash, ballad, coral, echo, fable, nova, onyx, sage, shimmer
+  defaultModel: 'tts-1-hd', // or 'tts-1', 'gpt-4o-mini-tts'
+});
+
+// Agent with audio capabilities
+const voiceAgent = new Agent({
+  name: 'voice-assistant',
+  model: 'gpt-4o',
+  instructions: `You can transcribe audio and generate speech.
+Use transcribeAudio to convert audio files to text.
+Use generateSpeech to create audio responses.`,
+  tools: [transcribeAudio, generateSpeech],
+});
+
+// Automatic transcription via audio option
+const result = await cog.run(voiceAgent, {
+  input: 'Summarize what was said in this recording',
+  audio: ['https://example.com/meeting.mp3'],
+});
+// Audio is automatically transcribed and prepended to input
+
+// Direct transcription with timestamps
+const transcription = await transcribeAudio.execute(
+  {
+    audio: 'https://example.com/podcast.mp3',
+    language: 'en',
+    timestamps: true, // Get word-level timestamps (whisper-1 only)
+  },
+  context
+);
+
+console.log(transcription.text); // Full transcript
+console.log(transcription.duration); // Audio duration
+console.log(transcription.words); // Word timestamps
+
+// Text-to-speech generation
+const speech = await generateSpeech.execute(
+  {
+    text: 'Hello! This is a test of text to speech.',
+    voice: 'marin', // New voices: marin, cedar
+    speed: 1.0, // 0.25 - 4.0
+    format: 'mp3', // mp3, opus, aac, flac, wav, pcm
+  },
+  context
+);
+
+// speech.audioBase64 contains the audio data
+fs.writeFileSync('output.mp3', Buffer.from(speech.audioBase64, 'base64'));
+```
+
+**Base64 Audio Input:**
+
+```typescript
+// For local files
+const result = await transcribeAudio.execute(
+  {
+    audio: {
+      data: fs.readFileSync('recording.mp3').toString('base64'),
+      format: 'mp3',
+    },
+  },
+  context
+);
+```
+
+**Supported Formats:**
+
+| API     | Formats                              | Max Size | Models                                               |
+| ------- | ------------------------------------ | -------- | ---------------------------------------------------- |
+| Whisper | mp3, mp4, mpeg, mpga, m4a, wav, webm | 25MB     | whisper-1, gpt-4o-transcribe, gpt-4o-mini-transcribe |
+| TTS     | mp3, opus, aac, flac, wav, pcm       | N/A      | tts-1, tts-1-hd, gpt-4o-mini-tts                     |
+
+**TTS Voices:**
+
+| Voice   | Description            |
+| ------- | ---------------------- |
+| alloy   | Neutral, balanced      |
+| ash     | Warm, friendly         |
+| ballad  | Expressive, dramatic   |
+| coral   | Clear, professional    |
+| echo    | Soft, calm             |
+| fable   | Animated, storytelling |
+| nova    | Bright, conversational |
+| onyx    | Deep, authoritative    |
+| sage    | Wise, measured         |
+| shimmer | Light, cheerful        |
+| verse   | Poetic, flowing        |
+| marin   | Natural, modern        |
+| cedar   | Grounded, trustworthy  |
+
 ### 🧮 Neuro-Symbolic Agent Tools
 
 Give your agents formal reasoning capabilities — Prolog-style logic, constraint solving, and knowledge graphs:
@@ -1627,6 +1739,7 @@ const providers: LLMProvidersConfig = {
 - [x] Neuro-Symbolic Reasoning (SAT/SMT integration, formal verification)
 - [x] Causal Reasoning Engine (Pearl's Ladder, d-separation, counterfactuals)
 - [x] Multi-modal Vision (image analysis, generation with DALL-E)
+- [x] Audio/Speech (Whisper transcription, TTS generation)
 - [ ] Long-context optimization (128k+ tokens)
 
 ### Phase 4: Ecosystem (Months 10-12)
@@ -1663,6 +1776,7 @@ const providers: LLMProvidersConfig = {
 | Self-Modifying      | ✅        | ❌          | ❌                | ❌          |
 | Causal Reasoning    | ✅        | ❌          | ❌                | ❌          |
 | Vision/Multi-Modal  | ✅        | ✅          | ✅                | ⚠️ Basic    |
+| Audio/Speech        | ✅        | ⚠️ Basic    | ✅                | ❌          |
 | Tool Caching        | ✅        | ❌          | ❌                | ❌          |
 | Injection Detection | ✅        | ❌          | ❌                | ❌          |
 | Agent Serialization | ✅        | ⚠️ Basic    | ❌                | ❌          |
@@ -1726,6 +1840,7 @@ Run any example with `npx tsx examples/<name>.ts`:
 | `mcp-integration.ts`           | MCP server integration                   |
 | `constitutional-guardrails.ts` | Safety guardrails with Constitutional AI |
 | `vision-agent.ts`              | Image analysis and generation            |
+| `audio-agent.ts`               | Audio transcription and speech synthesis |
 | `research-agent.ts`            | Web research agent                       |
 | `code-assistant.ts`            | Code assistant with file tools           |
 | `dev-team-swarm.ts`            | Hierarchical dev team swarm              |

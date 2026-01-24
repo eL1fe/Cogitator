@@ -47,10 +47,16 @@ export type ImageInput =
   | string
   | { data: string; mimeType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' };
 
+export type AudioFormat = 'mp3' | 'mp4' | 'mpeg' | 'mpga' | 'm4a' | 'wav' | 'webm' | 'ogg' | 'flac';
+
+export type AudioInput = string | { data: string; format: AudioFormat };
+
 export interface RunOptions {
   input: string;
   /** Images to include with the input. Can be URLs or base64 encoded data. */
   images?: ImageInput[];
+  /** Audio files to transcribe and include with the input. Can be URLs or base64 encoded data. */
+  audio?: AudioInput[];
   context?: Record<string, unknown>;
   threadId?: string;
   timeout?: number;

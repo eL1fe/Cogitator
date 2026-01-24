@@ -13,6 +13,34 @@ export { ToolRegistry } from './registry';
 
 export { calculator, datetime, builtinTools } from './tools/index';
 
+export {
+  createAnalyzeImageTool,
+  createGenerateImageTool,
+  createTranscribeAudioTool,
+  createGenerateSpeechTool,
+} from './tools/index';
+export type {
+  AnalyzeImageConfig,
+  GenerateImageConfig,
+  TranscribeAudioConfig,
+  TranscriptionModel,
+  TranscriptionResult,
+  GenerateSpeechConfig,
+  TTSModel,
+  TTSVoice,
+  TTSFormat,
+  SpeechResult,
+} from './tools/index';
+
+export {
+  fetchImageAsBase64,
+  fetchAudioAsBuffer,
+  audioInputToBuffer,
+  isValidAudioFormat,
+  getAudioMimeType,
+} from './utils/index';
+export type { FetchedImage, FetchedAudio } from './utils/index';
+
 export { Logger, getLogger, setLogger, createLogger } from './logger';
 export type { LogLevel, LogContext, LogEntry, LoggerOptions } from './logger';
 

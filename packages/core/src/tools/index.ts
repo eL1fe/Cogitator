@@ -35,6 +35,22 @@ export {
   type GenerateImageInput,
 } from './image-generate';
 
+export {
+  createTranscribeAudioTool,
+  type TranscribeAudioConfig,
+  type TranscriptionModel,
+  type TranscriptionWord,
+  type TranscriptionResult,
+} from './audio-transcribe';
+export {
+  createGenerateSpeechTool,
+  type GenerateSpeechConfig,
+  type TTSModel,
+  type TTSVoice,
+  type TTSFormat,
+  type SpeechResult,
+} from './audio-generate';
+
 import { calculator } from './calculator';
 import { datetime } from './datetime';
 import { uuid } from './uuid';
