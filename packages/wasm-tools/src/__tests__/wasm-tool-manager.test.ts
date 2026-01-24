@@ -1,10 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WasmToolManager } from '../manager/wasm-tool-manager.js';
 
-vi.mock('../manager/wasm-loader.js', () => ({
-  WasmLoader: vi.fn().mockImplementation(() => ({
-    initialize: vi.fn().mockResolvedValue(undefined),
-    load: vi.fn().mockImplementation((path: string) => {
+let mockWatcherInstance: {
+  _callbacks: {
+    onAdd: (p: string) => void;
+    onChange: (p: string) => void;
+    onUnlink: (p: string) => void;
+  } | null;
+  watch: ReturnType<typeof vi.fn>;
+  close: ReturnType<typeof vi.fn>;
+} | null = null;
+
+vi.mock('../manager/wasm-loader.js', () => {
+  class WasmLoader {
+    initialize = vi.fn().mockResolvedValue(undefined);
+    load = vi.fn().mockImplementation((path: string) => {
       return Promise.resolve({
         call: vi.fn().mockResolvedValue({
           text: () => JSON.stringify({ result: `executed-${path}` }),
@@ -12,32 +22,44 @@ vi.mock('../manager/wasm-loader.js', () => ({
         }),
         close: vi.fn().mockResolvedValue(undefined),
       });
-    }),
-  })),
-}));
-
-vi.mock('../manager/file-watcher.js', () => ({
-  FileWatcher: vi.fn().mockImplementation(() => {
-    const instance = {
-      watch: vi.fn(),
-      close: vi.fn().mockResolvedValue(undefined),
-      _callbacks: null as {
-        onAdd: (p: string) => void;
-        onChange: (p: string) => void;
-        onUnlink: (p: string) => void;
-      } | null,
-    };
-    instance.watch = vi.fn().mockImplementation((_pattern, callbacks) => {
-      instance._callbacks = callbacks;
     });
-    return instance;
-  }),
-}));
+  }
+  return { WasmLoader };
+});
+
+vi.mock('../manager/file-watcher.js', () => {
+  class FileWatcher {
+    _callbacks: {
+      onAdd: (p: string) => void;
+      onChange: (p: string) => void;
+      onUnlink: (p: string) => void;
+    } | null = null;
+    watch = vi.fn().mockImplementation(
+      (
+        _pattern: string,
+        callbacks: {
+          onAdd: (p: string) => void;
+          onChange: (p: string) => void;
+          onUnlink: (p: string) => void;
+        }
+      ) => {
+        this._callbacks = callbacks;
+      }
+    );
+    close = vi.fn().mockResolvedValue(undefined);
+
+    constructor() {
+      mockWatcherInstance = this;
+    }
+  }
+  return { FileWatcher };
+});
 
 describe('WasmToolManager', () => {
   let manager: WasmToolManager;
 
   beforeEach(() => {
+    mockWatcherInstance = null;
     manager = new WasmToolManager({ debounceMs: 50 });
     vi.clearAllMocks();
   });
@@ -116,18 +138,13 @@ describe('WasmToolManager', () => {
 
   describe('watch()', () => {
     it('starts watching for WASM files', async () => {
-      const callbacks = {
-        onLoad: vi.fn(),
-        onReload: vi.fn(),
-        onError: vi.fn(),
-      };
+      await manager.watch('./plugins/*.wasm');
 
-      await manager.watch('./plugins/*.wasm', callbacks);
-
-      const { FileWatcher } = await import('../manager/file-watcher.js');
-      const watcherInstance = (FileWatcher as ReturnType<typeof vi.fn>).mock.results[0].value;
-
-      expect(watcherInstance.watch).toHaveBeenCalledWith('./plugins/*.wasm', expect.any(Object));
+      expect(mockWatcherInstance).not.toBeNull();
+      expect(mockWatcherInstance!.watch).toHaveBeenCalledWith(
+        './plugins/*.wasm',
+        expect.any(Object)
+      );
     });
 
     it('throws if watch called twice', async () => {
@@ -139,10 +156,7 @@ describe('WasmToolManager', () => {
       const onLoad = vi.fn();
       await manager.watch('./plugins/*.wasm', { onLoad });
 
-      const { FileWatcher } = await import('../manager/file-watcher.js');
-      const watcherInstance = (FileWatcher as ReturnType<typeof vi.fn>).mock.results[0].value;
-
-      watcherInstance._callbacks?.onAdd('./plugins/calc.wasm');
+      mockWatcherInstance!._callbacks?.onAdd('./plugins/calc.wasm');
       await vi.waitFor(() => {
         expect(onLoad).toHaveBeenCalledWith('calc', './plugins/calc.wasm');
       });
@@ -152,15 +166,12 @@ describe('WasmToolManager', () => {
       const onReload = vi.fn();
       await manager.watch('./plugins/*.wasm', { onReload });
 
-      const { FileWatcher } = await import('../manager/file-watcher.js');
-      const watcherInstance = (FileWatcher as ReturnType<typeof vi.fn>).mock.results[0].value;
-
-      watcherInstance._callbacks?.onAdd('./plugins/calc.wasm');
+      mockWatcherInstance!._callbacks?.onAdd('./plugins/calc.wasm');
       await vi.waitFor(() => {
         expect(manager.getTool('calc')).toBeDefined();
       });
 
-      watcherInstance._callbacks?.onChange('./plugins/calc.wasm');
+      mockWatcherInstance!._callbacks?.onChange('./plugins/calc.wasm');
       await vi.waitFor(() => {
         expect(onReload).toHaveBeenCalledWith('calc', './plugins/calc.wasm');
       });
@@ -170,11 +181,8 @@ describe('WasmToolManager', () => {
       const onUnload = vi.fn();
       await manager.watch('./plugins/*.wasm', { onUnload });
 
-      const { FileWatcher } = await import('../manager/file-watcher.js');
-      const watcherInstance = (FileWatcher as ReturnType<typeof vi.fn>).mock.results[0].value;
-
-      await watcherInstance._callbacks?.onAdd('./plugins/calc.wasm');
-      await watcherInstance._callbacks?.onUnlink('./plugins/calc.wasm');
+      await mockWatcherInstance!._callbacks?.onAdd('./plugins/calc.wasm');
+      await mockWatcherInstance!._callbacks?.onUnlink('./plugins/calc.wasm');
 
       expect(onUnload).toHaveBeenCalledWith('calc', './plugins/calc.wasm');
       expect(manager.getTool('calc')).toBeUndefined();
@@ -210,12 +218,9 @@ describe('WasmToolManager', () => {
       await manager.load('./hash.wasm');
       await manager.watch('./plugins/*.wasm');
 
-      const { FileWatcher } = await import('../manager/file-watcher.js');
-      const watcherInstance = (FileWatcher as ReturnType<typeof vi.fn>).mock.results[0].value;
-
       await manager.close();
 
-      expect(watcherInstance.close).toHaveBeenCalled();
+      expect(mockWatcherInstance!.close).toHaveBeenCalled();
       expect(manager.getTools()).toHaveLength(0);
     });
   });

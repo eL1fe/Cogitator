@@ -1,7 +1,7 @@
 {
-  "name": "@cogitator-ai/sandbox",
-  "version": "0.2.19",
-  "description": "Sandbox execution for Cogitator agents (Docker and WASM)",
+  "name": "@cogitator-ai/test-utils",
+  "version": "0.1.0",
+  "description": "Shared testing utilities for Cogitator packages",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -24,34 +24,16 @@
   },
   "dependencies": {
     "@cogitator-ai/types": "workspace:*",
-    "@types/dockerode": "^3.3.31",
-    "@types/node": "^25.0.0",
     "nanoid": "^5.0.4"
-  },
-  "optionalDependencies": {
-    "@extism/extism": "^1.0.3",
-    "dockerode": "^4.0.2"
   },
   "devDependencies": {
     "typescript": "^5.3.0",
     "vitest": "^4.0.18"
   },
-  "peerDependencies": {
-    "@extism/extism": "^1.0.0",
-    "dockerode": "^4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@extism/extism": {
-      "optional": true
-    },
-    "dockerode": {
-      "optional": true
-    }
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/eL1fe/cogitator.git",
-    "directory": "packages/sandbox"
+    "directory": "packages/test-utils"
   },
   "publishConfig": {
     "access": "public"

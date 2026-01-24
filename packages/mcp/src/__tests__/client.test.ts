@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MCPClient, connectMCPServer } from '../client/mcp-client';
 
-vi.mock('@modelcontextprotocol/sdk/client/index.js', () => ({
-  Client: vi.fn().mockImplementation(() => ({
-    connect: vi.fn().mockResolvedValue(undefined),
-    close: vi.fn().mockResolvedValue(undefined),
-    getServerCapabilities: vi.fn().mockReturnValue({
+vi.mock('@modelcontextprotocol/sdk/client/index.js', () => {
+  class Client {
+    connect = vi.fn().mockResolvedValue(undefined);
+    close = vi.fn().mockResolvedValue(undefined);
+    getServerCapabilities = vi.fn().mockReturnValue({
       tools: true,
       resources: true,
       prompts: true,
-    }),
-    listTools: vi.fn().mockResolvedValue({
+    });
+    listTools = vi.fn().mockResolvedValue({
       tools: [
         {
           name: 'test_tool',
@@ -22,11 +22,11 @@ vi.mock('@modelcontextprotocol/sdk/client/index.js', () => ({
           },
         },
       ],
-    }),
-    callTool: vi.fn().mockResolvedValue({
+    });
+    callTool = vi.fn().mockResolvedValue({
       content: [{ type: 'text', text: '{"result": "success"}' }],
-    }),
-    listResources: vi.fn().mockResolvedValue({
+    });
+    listResources = vi.fn().mockResolvedValue({
       resources: [
         {
           uri: 'file://test.txt',
@@ -35,11 +35,11 @@ vi.mock('@modelcontextprotocol/sdk/client/index.js', () => ({
           mimeType: 'text/plain',
         },
       ],
-    }),
-    readResource: vi.fn().mockResolvedValue({
+    });
+    readResource = vi.fn().mockResolvedValue({
       contents: [{ uri: 'file://test.txt', text: 'Hello World' }],
-    }),
-    listPrompts: vi.fn().mockResolvedValue({
+    });
+    listPrompts = vi.fn().mockResolvedValue({
       prompts: [
         {
           name: 'test_prompt',
@@ -47,12 +47,13 @@ vi.mock('@modelcontextprotocol/sdk/client/index.js', () => ({
           arguments: [{ name: 'arg1', description: 'First argument', required: true }],
         },
       ],
-    }),
-    getPrompt: vi.fn().mockResolvedValue({
+    });
+    getPrompt = vi.fn().mockResolvedValue({
       messages: [{ role: 'user', content: { type: 'text', text: 'Hello' } }],
-    }),
-  })),
-}));
+    });
+  }
+  return { Client };
+});
 
 vi.mock('../client/transports', () => ({
   createStdioTransport: vi.fn().mockReturnValue({}),

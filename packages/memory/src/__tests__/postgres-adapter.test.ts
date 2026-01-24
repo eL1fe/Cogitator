@@ -8,12 +8,17 @@ const mockPool = {
   end: vi.fn().mockResolvedValue(undefined),
 };
 
-vi.mock('pg', () => ({
-  default: {
-    Pool: vi.fn().mockImplementation(() => mockPool),
-  },
-  Pool: vi.fn().mockImplementation(() => mockPool),
-}));
+vi.mock('pg', () => {
+  class Pool {
+    query = mockPool.query;
+    connect = mockPool.connect;
+    end = mockPool.end;
+  }
+  return {
+    default: { Pool },
+    Pool,
+  };
+});
 
 describe('PostgresAdapter', () => {
   let adapter: PostgresAdapter;

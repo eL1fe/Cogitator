@@ -3,22 +3,29 @@ import { z } from 'zod';
 import { MCPServer, serveMCPTools } from '../server/mcp-server';
 import type { Tool, ToolSchema } from '@cogitator-ai/types';
 
-vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
-  McpServer: vi.fn().mockImplementation(() => ({
-    tool: vi.fn(),
-    registerResource: vi.fn(),
-    registerPrompt: vi.fn(),
-    connect: vi.fn().mockResolvedValue(undefined),
-    close: vi.fn().mockResolvedValue(undefined),
-  })),
-  ResourceTemplate: vi.fn().mockImplementation((uri: string) => ({
-    uriTemplate: { template: uri },
-  })),
-}));
+vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => {
+  class McpServer {
+    tool = vi.fn();
+    registerResource = vi.fn();
+    registerPrompt = vi.fn();
+    connect = vi.fn().mockResolvedValue(undefined);
+    close = vi.fn().mockResolvedValue(undefined);
+  }
 
-vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
-  StdioServerTransport: vi.fn().mockImplementation(() => ({})),
-}));
+  class ResourceTemplate {
+    uriTemplate: { template: string };
+    constructor(uri: string) {
+      this.uriTemplate = { template: uri };
+    }
+  }
+
+  return { McpServer, ResourceTemplate };
+});
+
+vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => {
+  class StdioServerTransport {}
+  return { StdioServerTransport };
+});
 
 const mockTool: Tool = {
   name: 'test_tool',

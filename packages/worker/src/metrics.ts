@@ -90,6 +90,7 @@ export class DurationHistogram {
     for (const bucket of DURATION_BUCKETS) {
       if (durationSeconds <= bucket) {
         this.buckets.set(bucket, (this.buckets.get(bucket) ?? 0) + 1);
+        break;
       }
     }
   }

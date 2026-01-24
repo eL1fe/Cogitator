@@ -6,18 +6,20 @@ vi.mock('node:fs/promises', () => ({
   readFile: vi.fn().mockResolvedValue(new Uint8Array([0, 97, 115, 109])),
 }));
 
-vi.mock('@extism/extism', () => ({
-  default: vi.fn().mockImplementation((source, _options) => {
-    return Promise.resolve({
-      call: vi.fn().mockResolvedValue({
-        text: () => JSON.stringify({ result: 'mock' }),
-        bytes: () => new Uint8Array(),
-      }),
-      close: vi.fn().mockResolvedValue(undefined),
-      source,
-    });
-  }),
-}));
+const mockCreatePlugin = vi.fn().mockImplementation((source: unknown, _options: unknown) => {
+  return Promise.resolve({
+    call: vi.fn().mockResolvedValue({
+      text: () => JSON.stringify({ result: 'mock' }),
+      bytes: () => new Uint8Array(),
+    }),
+    close: vi.fn().mockResolvedValue(undefined),
+    source,
+  });
+});
+
+vi.mock('@extism/extism', () => {
+  return { default: mockCreatePlugin };
+});
 
 describe('WasmLoader', () => {
   let loader: WasmLoader;
@@ -77,9 +79,7 @@ describe('WasmLoader', () => {
     await loader.initialize();
     await loader.load('./test.wasm', true);
 
-    const extism = await import('@extism/extism');
-    const createPlugin = extism.default as ReturnType<typeof vi.fn>;
-    expect(createPlugin).toHaveBeenCalledWith(
+    expect(mockCreatePlugin).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({ useWasi: true })
     );
