@@ -492,8 +492,8 @@ importers:
         specifier: workspace:*
         version: link:../types
       '@types/dockerode':
-        specifier: ^3.3.31
-        version: 3.3.47
+        specifier: ^4.0.1
+        version: 4.0.1
       '@types/node':
         specifier: ^25.0.0
         version: 25.0.3
@@ -3448,15 +3448,15 @@ packages:
   /@types/docker-modem@3.0.6:
     resolution: {integrity: sha512-yKpAGEuKRSS8wwx0joknWxsmLha78wNMe9R2S3UNsVOkZded8UqOrV8KoeDXoXsjndxwyF3eIhyClGbO1SEhEg==}
     dependencies:
-      '@types/node': 25.0.3
+      '@types/node': 25.0.10
       '@types/ssh2': 1.15.5
     dev: false
 
-  /@types/dockerode@3.3.47:
-    resolution: {integrity: sha512-ShM1mz7rCjdssXt7Xz0u1/R2BJC7piWa3SJpUBiVjCf2A3XNn4cP6pUVaD8bLanpPVVn4IKzJuw3dOvkJ8IbYw==}
+  /@types/dockerode@4.0.1:
+    resolution: {integrity: sha512-cmUpB+dPN955PxBEuXE3f6lKO1hHiIGYJA46IVF3BJpNsZGvtBDcRnlrHYHtOH/B6vtDOyl2kZ2ShAu3mgc27Q==}
     dependencies:
       '@types/docker-modem': 3.0.6
-      '@types/node': 25.0.3
+      '@types/node': 25.0.10
       '@types/ssh2': 1.15.5
     dev: false
 
@@ -3551,7 +3551,7 @@ packages:
   /@types/ws@8.18.1:
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
     dependencies:
-      '@types/node': 22.19.3
+      '@types/node': 25.0.10
     dev: false
 
   /@typescript-eslint/eslint-plugin@8.53.1(@typescript-eslint/parser@8.53.1)(eslint@9.39.2)(typescript@5.9.3):
@@ -3741,7 +3741,7 @@ packages:
       '@vitest/spy': 4.0.18
       estree-walker: 3.0.3
       magic-string: 0.30.21
-      vite: 7.3.1(@types/node@25.0.10)(tsx@4.21.0)
+      vite: 7.3.1(@types/node@20.19.27)(tsx@4.21.0)
     dev: true
 
   /@vitest/pretty-format@4.0.18:
@@ -6489,7 +6489,7 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 25.0.3
+      '@types/node': 25.0.10
       long: 5.3.2
     dev: false
     optional: true
