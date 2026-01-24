@@ -3,7 +3,6 @@ import type {
   MemoryAdapter,
   MemoryEntry,
   Thread,
-  Message,
   MemoryResult,
   MemoryProvider,
   MemoryQueryOptions,

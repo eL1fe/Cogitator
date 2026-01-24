@@ -43,12 +43,13 @@ vi.mock('../manager/file-watcher.js', () => {
           onUnlink: (p: string) => void;
         }
       ) => {
-        this._callbacks = callbacks;
+        mockWatcherInstance!._callbacks = callbacks;
       }
     );
     close = vi.fn().mockResolvedValue(undefined);
 
     constructor() {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       mockWatcherInstance = this;
     }
   }
@@ -181,8 +182,8 @@ describe('WasmToolManager', () => {
       const onUnload = vi.fn();
       await manager.watch('./plugins/*.wasm', { onUnload });
 
-      await mockWatcherInstance!._callbacks?.onAdd('./plugins/calc.wasm');
-      await mockWatcherInstance!._callbacks?.onUnlink('./plugins/calc.wasm');
+      mockWatcherInstance!._callbacks?.onAdd('./plugins/calc.wasm');
+      mockWatcherInstance!._callbacks?.onUnlink('./plugins/calc.wasm');
 
       expect(onUnload).toHaveBeenCalledWith('calc', './plugins/calc.wasm');
       expect(manager.getTool('calc')).toBeUndefined();

@@ -68,7 +68,7 @@ describe('sql-query tool', () => {
         rows: [{ id: 1 }],
       });
 
-      const result = await sqlQuery.execute({ query: 'SELECT 1' });
+      await sqlQuery.execute({ query: 'SELECT 1' });
 
       expect(mockInstance.connect).toHaveBeenCalled();
     });

@@ -604,6 +604,7 @@ describe('OllamaBackend', () => {
         model: 'llama3.2',
         messages: [{ role: 'user', content: 'Test' }],
       })) {
+        /* consume stream */
       }
 
       const [url, options] = mockFetch.mock.calls[0] as [string, RequestInit];
@@ -620,6 +621,7 @@ describe('OllamaBackend', () => {
           model: 'llama3.2',
           messages: [{ role: 'user', content: 'Test' }],
         })) {
+          /* consume stream */
         }
       }).rejects.toThrow(/Failed to connect to Ollama/);
     });
@@ -635,6 +637,7 @@ describe('OllamaBackend', () => {
           model: 'llama3.2',
           messages: [{ role: 'user', content: 'Test' }],
         })) {
+          /* consume stream */
         }
       }).rejects.toThrow(/No response body/);
     });

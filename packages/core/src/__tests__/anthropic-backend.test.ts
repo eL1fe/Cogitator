@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { AnthropicBackend } from '../llm/anthropic';
-import Anthropic from '@anthropic-ai/sdk';
 
 const mockCreate = vi.fn();
 const mockStream = vi.fn();
@@ -706,6 +705,7 @@ describe('AnthropicBackend', () => {
           model: 'claude-sonnet-4-20250514',
           messages: [{ role: 'user', content: 'Test' }],
         })) {
+          /* consume stream */
         }
       }).rejects.toThrow('Rate limit exceeded');
     });

@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { OpenAIBackend } from '../llm/openai';
-import OpenAI from 'openai';
 
 const mockCreate = vi.fn();
 
@@ -607,6 +606,7 @@ describe('OpenAIBackend', () => {
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: 'Test' }],
       })) {
+        /* consume stream */
       }
 
       expect(mockCreate).toHaveBeenCalledWith(
@@ -625,6 +625,7 @@ describe('OpenAIBackend', () => {
           model: 'gpt-4o-mini',
           messages: [{ role: 'user', content: 'Test' }],
         })) {
+          /* consume stream */
         }
       }).rejects.toThrow('Rate limit exceeded');
     });

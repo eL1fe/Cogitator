@@ -76,7 +76,7 @@ describe('JobQueue', () => {
 
   describe('addAgentJob', () => {
     it('adds an agent job to the queue', async () => {
-      const job = await queue.addAgentJob(mockAgentConfig, 'Hello');
+      await queue.addAgentJob(mockAgentConfig, 'Hello');
 
       expect(mockAdd).toHaveBeenCalledTimes(1);
       expect(mockAdd).toHaveBeenCalledWith(
@@ -132,7 +132,7 @@ describe('JobQueue', () => {
 
   describe('addWorkflowJob', () => {
     it('adds a workflow job to the queue', async () => {
-      const job = await queue.addWorkflowJob(mockWorkflowConfig, { key: 'value' });
+      await queue.addWorkflowJob(mockWorkflowConfig, { key: 'value' });
 
       expect(mockAdd).toHaveBeenCalledTimes(1);
       expect(mockAdd).toHaveBeenCalledWith(
@@ -161,7 +161,7 @@ describe('JobQueue', () => {
 
   describe('addSwarmJob', () => {
     it('adds a swarm job to the queue', async () => {
-      const job = await queue.addSwarmJob(mockSwarmConfig, 'Task input');
+      await queue.addSwarmJob(mockSwarmConfig, 'Task input');
 
       expect(mockAdd).toHaveBeenCalledTimes(1);
       expect(mockAdd).toHaveBeenCalledWith(
@@ -178,7 +178,7 @@ describe('JobQueue', () => {
 
   describe('addSwarmAgentJob', () => {
     it('adds a swarm agent job to the queue', async () => {
-      const job = await queue.addSwarmAgentJob('swarm_123', 'agent1', mockAgentConfig, 'Task');
+      await queue.addSwarmAgentJob('swarm_123', 'agent1', mockAgentConfig, 'Task');
 
       expect(mockAdd).toHaveBeenCalledTimes(1);
       expect(mockAdd).toHaveBeenCalledWith(
