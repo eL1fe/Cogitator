@@ -57,5 +57,9 @@
     "type": "git",
     "url": "https://github.com/eL1fe/Cogitator.git",
     "directory": "packages/self-modifying"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
   }
 }
