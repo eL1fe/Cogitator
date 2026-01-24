@@ -1,5 +1,13 @@
 # @cogitator-ai/mcp
 
+## 17.0.2
+
+### Patch Changes
+
+- fix: update repository URLs for GitHub Packages linking
+- Updated dependencies
+  - @cogitator-ai/types@0.19.2
+
 ## 17.0.1
 
 ### Patch Changes

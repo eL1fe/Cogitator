@@ -1,5 +1,15 @@
 # @cogitator-ai/neuro-symbolic
 
+## 15.1.3
+
+### Patch Changes
+
+- fix: update repository URLs for GitHub Packages linking
+- Updated dependencies
+  - @cogitator-ai/core@0.17.4
+  - @cogitator-ai/types@0.19.2
+  - @cogitator-ai/memory@0.6.11
+
 ## 15.1.2
 
 ### Patch Changes

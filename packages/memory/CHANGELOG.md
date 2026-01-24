@@ -1,5 +1,14 @@
 # @cogitator-ai/memory
 
+## 0.6.11
+
+### Patch Changes
+
+- fix: update repository URLs for GitHub Packages linking
+- Updated dependencies
+  - @cogitator-ai/types@0.19.2
+  - @cogitator-ai/redis@0.2.20
+
 ## 0.6.10
 
 ### Patch Changes

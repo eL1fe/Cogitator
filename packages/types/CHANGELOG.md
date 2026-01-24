@@ -1,5 +1,11 @@
 # @cogitator-ai/types
 
+## 0.19.2
+
+### Patch Changes
+
+- fix: update repository URLs for GitHub Packages linking
+
 ## 0.19.1
 
 ### Patch Changes

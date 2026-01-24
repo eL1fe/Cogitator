@@ -1,5 +1,14 @@
 # @cogitator-ai/openai-compat
 
+## 19.0.3
+
+### Patch Changes
+
+- fix: update repository URLs for GitHub Packages linking
+- Updated dependencies
+  - @cogitator-ai/core@0.17.4
+  - @cogitator-ai/types@0.19.2
+
 ## 19.0.2
 
 ### Patch Changes

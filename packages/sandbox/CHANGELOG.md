@@ -1,5 +1,13 @@
 # @cogitator-ai/sandbox
 
+## 0.2.21
+
+### Patch Changes
+
+- fix: update repository URLs for GitHub Packages linking
+- Updated dependencies
+  - @cogitator-ai/types@0.19.2
+
 ## 0.2.20
 
 ### Patch Changes

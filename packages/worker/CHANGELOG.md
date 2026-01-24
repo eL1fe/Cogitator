@@ -1,5 +1,17 @@
 # @cogitator-ai/worker
 
+## 0.3.6
+
+### Patch Changes
+
+- fix: update repository URLs for GitHub Packages linking
+- Updated dependencies
+  - @cogitator-ai/core@0.17.4
+  - @cogitator-ai/types@0.19.2
+  - @cogitator-ai/redis@0.2.20
+  - @cogitator-ai/swarms@0.4.6
+  - @cogitator-ai/workflows@0.5.3
+
 ## 0.3.5
 
 ### Patch Changes

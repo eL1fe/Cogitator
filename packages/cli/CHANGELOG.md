@@ -1,5 +1,14 @@
 # @cogitator-ai/cli
 
+## 0.2.25
+
+### Patch Changes
+
+- fix: update repository URLs for GitHub Packages linking
+- Updated dependencies
+  - @cogitator-ai/core@0.17.4
+  - @cogitator-ai/config@0.3.13
+
 ## 0.2.24
 
 ### Patch Changes

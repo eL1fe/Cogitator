@@ -1,5 +1,14 @@
 # @cogitator-ai/workflows
 
+## 0.5.3
+
+### Patch Changes
+
+- fix: update repository URLs for GitHub Packages linking
+- Updated dependencies
+  - @cogitator-ai/core@0.17.4
+  - @cogitator-ai/types@0.19.2
+
 ## 0.5.2
 
 ### Patch Changes

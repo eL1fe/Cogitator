@@ -1,5 +1,15 @@
 # @cogitator-ai/swarms
 
+## 0.4.6
+
+### Patch Changes
+
+- fix: update repository URLs for GitHub Packages linking
+- Updated dependencies
+  - @cogitator-ai/core@0.17.4
+  - @cogitator-ai/types@0.19.2
+  - @cogitator-ai/workflows@0.5.3
+
 ## 0.4.5
 
 ### Patch Changes

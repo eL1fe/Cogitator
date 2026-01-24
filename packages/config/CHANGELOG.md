@@ -1,5 +1,13 @@
 # @cogitator-ai/config
 
+## 0.3.13
+
+### Patch Changes
+
+- fix: update repository URLs for GitHub Packages linking
+- Updated dependencies
+  - @cogitator-ai/types@0.19.2
+
 ## 0.3.12
 
 ### Patch Changes

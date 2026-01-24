@@ -1,5 +1,16 @@
 # @cogitator-ai/core
 
+## 0.17.4
+
+### Patch Changes
+
+- fix: update repository URLs for GitHub Packages linking
+- Updated dependencies
+  - @cogitator-ai/types@0.19.2
+  - @cogitator-ai/memory@0.6.11
+  - @cogitator-ai/models@17.1.2
+  - @cogitator-ai/sandbox@0.2.21
+
 ## 0.17.3
 
 ### Patch Changes
