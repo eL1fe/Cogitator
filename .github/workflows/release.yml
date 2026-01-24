@@ -27,13 +27,12 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@cogitator-ai'
 
       - name: Configure npm for GitHub Packages
         run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
           echo "@cogitator-ai:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          cat ~/.npmrc
 
       - run: pnpm install --frozen-lockfile
 
@@ -47,7 +46,9 @@ jobs:
           version: pnpm version
           title: 'chore: version packages'
           commit: 'chore: version packages'
+          setupGitUser: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_REGISTRY: https://npm.pkg.github.com
+          NPM_CONFIG__AUTH: ${{ secrets.GITHUB_TOKEN }}
