@@ -175,6 +175,7 @@ export class BedrockBackend extends BaseLLMBackend {
       this.clientPromise = (async () => {
         const ctx: LLMErrorContext = { provider: this.provider };
         try {
+          // @ts-ignore - optional peer dependency, resolved at runtime
           const { BedrockRuntimeClient } = await import('@aws-sdk/client-bedrock-runtime');
 
           const clientConfig: Record<string, unknown> = {};
@@ -207,6 +208,7 @@ export class BedrockBackend extends BaseLLMBackend {
     };
 
     const client = await this.getClient();
+    // @ts-ignore - optional peer dependency, resolved at runtime
     const { ConverseCommand } = await import('@aws-sdk/client-bedrock-runtime');
 
     const { system, messages } = await this.convertMessages(request.messages);
@@ -259,6 +261,7 @@ export class BedrockBackend extends BaseLLMBackend {
     };
 
     const client = await this.getClient();
+    // @ts-ignore - optional peer dependency, resolved at runtime
     const { ConverseStreamCommand } = await import('@aws-sdk/client-bedrock-runtime');
 
     const { system, messages } = await this.convertMessages(request.messages);
