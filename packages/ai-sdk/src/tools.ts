@@ -30,20 +30,18 @@ export function fromAISDKTool<TParams = unknown, TResult = unknown>(
 
   const name = toolName ?? aiTool.name ?? 'unnamed_tool';
   const description = aiTool.description ?? 'AI SDK tool';
+  const parameters = aiTool.parameters;
 
   return {
     name,
     description,
-    parameters: aiTool.parameters,
+    parameters,
     execute,
     toJSON(): ToolSchema {
       return {
         name: this.name,
         description: this.description,
-        parameters: {
-          type: 'object',
-          properties: {},
-        },
+        parameters: parameters as ToolSchema['parameters'],
       };
     },
   } as Tool<TParams, TResult>;
