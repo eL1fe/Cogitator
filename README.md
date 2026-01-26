@@ -272,6 +272,7 @@ Cogitator is a modular monorepo. Install only what you need:
 | [@cogitator-ai/next](https://www.npmjs.com/package/@cogitator-ai/next)                     | Next.js App Router integration                             | [![npm](https://img.shields.io/npm/v/@cogitator-ai/next.svg)](https://www.npmjs.com/package/@cogitator-ai/next)                     |
 | [@cogitator-ai/ai-sdk](https://www.npmjs.com/package/@cogitator-ai/ai-sdk)                 | Vercel AI SDK adapter (bidirectional)                      | [![npm](https://img.shields.io/npm/v/@cogitator-ai/ai-sdk.svg)](https://www.npmjs.com/package/@cogitator-ai/ai-sdk)                 |
 | [@cogitator-ai/express](https://www.npmjs.com/package/@cogitator-ai/express)               | Express.js REST API server                                 | [![npm](https://img.shields.io/npm/v/@cogitator-ai/express.svg)](https://www.npmjs.com/package/@cogitator-ai/express)               |
+| [@cogitator-ai/fastify](https://www.npmjs.com/package/@cogitator-ai/fastify)               | Fastify REST API server                                    | [![npm](https://img.shields.io/npm/v/@cogitator-ai/fastify.svg)](https://www.npmjs.com/package/@cogitator-ai/fastify)               |
 
 ---
 
@@ -447,6 +448,51 @@ WS   /api/cogitator/ws                  # WebSocket (real-time)
 - **Auth Middleware** — Custom authentication per request
 - **Rate Limiting** — Built-in rate limiting with headers
 - **Workflow/Swarm Support** — Optional endpoints for workflows and swarms
+
+---
+
+### Fastify Integration
+
+High-performance Fastify adapter with native plugin system and JSON Schema validation:
+
+```typescript
+import Fastify from 'fastify';
+import { Cogitator, Agent } from '@cogitator-ai/core';
+import { cogitatorPlugin } from '@cogitator-ai/fastify';
+
+const fastify = Fastify({ logger: true });
+const cogitator = new Cogitator();
+
+const chatAgent = new Agent({
+  name: 'assistant',
+  model: 'gpt-4o',
+  instructions: 'You are a helpful assistant.',
+});
+
+await fastify.register(cogitatorPlugin, {
+  cogitator,
+  agents: { chat: chatAgent },
+  prefix: '/api/cogitator',
+  enableSwagger: true,
+  enableWebSocket: true,
+  auth: async (request) => {
+    const token = request.headers.authorization;
+    return { userId: await validateToken(token) };
+  },
+  rateLimit: { max: 100, timeWindow: '1 minute' },
+});
+
+await fastify.listen({ port: 3000 });
+```
+
+**Same endpoints as Express**, plus Fastify-specific features:
+
+- **Native Plugin System** — Uses `fastify-plugin` for proper encapsulation
+- **JSON Schema Validation** — Built-in request/response validation
+- **Fastify Decorators** — Access `fastify.cogitator` for runtime context
+- **@fastify/swagger** — Native Swagger integration
+- **@fastify/websocket** — Native WebSocket support
+- **@fastify/rate-limit** — Native rate limiting
 
 ---
 

@@ -1,0 +1,69 @@
+{
+  "name": "@cogitator-ai/fastify",
+  "version": "0.1.0",
+  "description": "Fastify server adapter for Cogitator AI runtime",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@cogitator-ai/core": "workspace:*",
+    "@cogitator-ai/types": "workspace:*",
+    "fastify-plugin": "^5.0.0"
+  },
+  "peerDependencies": {
+    "fastify": ">=5.0.0"
+  },
+  "optionalDependencies": {
+    "@cogitator-ai/workflows": "workspace:*",
+    "@cogitator-ai/swarms": "workspace:*",
+    "@fastify/swagger": "^9.0.0",
+    "@fastify/swagger-ui": "^5.0.0",
+    "@fastify/rate-limit": "^10.0.0",
+    "@fastify/websocket": "^11.0.0"
+  },
+  "devDependencies": {
+    "@cogitator-ai/workflows": "workspace:*",
+    "@cogitator-ai/swarms": "workspace:*",
+    "@fastify/swagger": "^9.4.2",
+    "@fastify/swagger-ui": "^5.2.2",
+    "@fastify/rate-limit": "^10.2.1",
+    "@fastify/websocket": "^11.0.2",
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.0",
+    "fastify": "^5.2.1",
+    "typescript": "^5.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cogitator-ai/Cogitator-AI.git",
+    "directory": "packages/fastify"
+  },
+  "license": "MIT",
+  "keywords": [
+    "cogitator",
+    "ai",
+    "agents",
+    "fastify",
+    "server",
+    "api",
+    "streaming",
+    "sse",
+    "websocket",
+    "llm"
+  ]
+}
