@@ -28,20 +28,131 @@ type DocumentType =
   | DocumentType[]
   | { [key: string]: DocumentType };
 
-type BedrockRuntimeClientType = InstanceType<
-  typeof import('@aws-sdk/client-bedrock-runtime').BedrockRuntimeClient
->;
-type ConverseCommandInput = import('@aws-sdk/client-bedrock-runtime').ConverseCommandInput;
-type ConverseCommandOutput = import('@aws-sdk/client-bedrock-runtime').ConverseCommandOutput;
-type ConverseStreamCommandInput =
-  import('@aws-sdk/client-bedrock-runtime').ConverseStreamCommandInput;
-type ConverseStreamCommandOutput =
-  import('@aws-sdk/client-bedrock-runtime').ConverseStreamCommandOutput;
-type BedrockMessage = import('@aws-sdk/client-bedrock-runtime').Message;
-type ContentBlock = import('@aws-sdk/client-bedrock-runtime').ContentBlock;
-type BedrockTool = import('@aws-sdk/client-bedrock-runtime').Tool;
-type ToolConfiguration = import('@aws-sdk/client-bedrock-runtime').ToolConfiguration;
-type InferenceConfiguration = import('@aws-sdk/client-bedrock-runtime').InferenceConfiguration;
+interface BedrockRuntimeClientType {
+  send(command: unknown): Promise<unknown>;
+}
+
+interface SystemContentBlock {
+  text: string;
+}
+
+interface ToolResultContentBlock {
+  text: string;
+}
+
+interface ToolResultBlock {
+  toolUseId: string;
+  content: ToolResultContentBlock[];
+}
+
+interface ContentBlock {
+  text?: string;
+  image?: {
+    format: 'png' | 'jpeg' | 'gif' | 'webp';
+    source: { bytes: Uint8Array };
+  };
+  toolUse?: {
+    toolUseId: string;
+    name: string;
+    input: unknown;
+  };
+  toolResult?: ToolResultBlock;
+}
+
+interface BedrockMessage {
+  role: 'user' | 'assistant';
+  content: ContentBlock[];
+}
+
+interface InferenceConfiguration {
+  maxTokens?: number;
+  temperature?: number;
+  topP?: number;
+  stopSequences?: string[];
+}
+
+interface ToolSpec {
+  name: string;
+  description?: string;
+  inputSchema?: { json: DocumentType };
+}
+
+interface BedrockTool {
+  toolSpec?: ToolSpec;
+}
+
+interface ToolChoiceConfig {
+  auto?: Record<string, never>;
+  any?: Record<string, never>;
+  tool?: { name: string };
+}
+
+interface ToolConfiguration {
+  tools?: BedrockTool[];
+  toolChoice?: ToolChoiceConfig;
+}
+
+interface ConverseCommandInput {
+  modelId: string;
+  messages: BedrockMessage[];
+  system?: SystemContentBlock[];
+  toolConfig?: ToolConfiguration;
+  inferenceConfig?: InferenceConfiguration;
+}
+
+interface ConverseCommandOutput {
+  output?: {
+    message?: {
+      content?: ContentBlock[];
+    };
+  };
+  stopReason?: string;
+  usage?: {
+    inputTokens?: number;
+    outputTokens?: number;
+    totalTokens?: number;
+  };
+}
+
+interface ConverseStreamCommandInput extends ConverseCommandInput {}
+
+interface StreamEvent {
+  contentBlockStart?: {
+    contentBlockIndex?: number;
+    start?: {
+      toolUse?: {
+        toolUseId?: string;
+        name?: string;
+      };
+    };
+  };
+  contentBlockDelta?: {
+    contentBlockIndex?: number;
+    delta?: {
+      text?: string;
+      toolUse?: {
+        input?: string;
+      };
+    };
+  };
+  contentBlockStop?: {
+    contentBlockIndex?: number;
+  };
+  messageStop?: {
+    stopReason?: string;
+  };
+  metadata?: {
+    usage?: {
+      inputTokens?: number;
+      outputTokens?: number;
+      totalTokens?: number;
+    };
+  };
+}
+
+interface ConverseStreamCommandOutput {
+  stream?: AsyncIterable<StreamEvent>;
+}
 
 interface BedrockConfig {
   region?: string;
@@ -131,8 +242,9 @@ export class BedrockBackend extends BaseLLMBackend {
 
     let response: ConverseCommandOutput;
     try {
-      const command = new ConverseCommand(input);
-      response = await client.send(command);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const command = new ConverseCommand(input as any);
+      response = (await client.send(command)) as ConverseCommandOutput;
     } catch (e) {
       throw this.wrapBedrockError(e, ctx);
     }
@@ -180,10 +292,11 @@ export class BedrockBackend extends BaseLLMBackend {
       input.inferenceConfig = inferenceConfig;
     }
 
-    const command = new ConverseStreamCommand(input);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const command = new ConverseStreamCommand(input as any);
     let response: ConverseStreamCommandOutput;
     try {
-      response = await client.send(command);
+      response = (await client.send(command)) as ConverseStreamCommandOutput;
     } catch (e) {
       throw this.wrapBedrockError(e, ctx);
     }

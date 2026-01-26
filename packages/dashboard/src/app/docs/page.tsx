@@ -269,9 +269,15 @@ GOOGLE_AI_API_KEY=...
 # Ollama (local models)
 OLLAMA_BASE_URL=http://localhost:11434
 
-# Dashboard
-NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+# Azure OpenAI
+AZURE_OPENAI_API_KEY=...
+AZURE_OPENAI_ENDPOINT=https://xxx.openai.azure.com
+AZURE_OPENAI_DEPLOYMENT=gpt-4o
+
+# AWS Bedrock
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_REGION=us-east-1
 
 # Observability (optional)
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
@@ -287,14 +293,23 @@ export default defineConfig({
       ollama: { baseUrl: 'http://localhost:11434' },
       openai: { apiKey: process.env.OPENAI_API_KEY },
       anthropic: { apiKey: process.env.ANTHROPIC_API_KEY },
+      google: { apiKey: process.env.GOOGLE_AI_API_KEY },
+      azure: {
+        apiKey: process.env.AZURE_OPENAI_API_KEY,
+        endpoint: process.env.AZURE_OPENAI_ENDPOINT,
+      },
+      bedrock: {
+        region: process.env.AWS_REGION,
+        // Uses AWS credentials from environment
+      },
     },
   },
   memory: {
-    provider: 'postgres',
+    provider: 'postgres', // or 'sqlite', 'mongodb', 'redis', 'qdrant'
     embeddings: 'ollama/nomic-embed-text',
   },
   sandbox: {
-    executor: 'wasm', // or 'docker'
+    executor: 'wasm', // or 'docker', 'native'
     timeout: 30000,
     maxMemory: '512mb',
   },
@@ -401,16 +416,30 @@ const agent = new Agent({
   tools: [weatherTool, 'web_search', 'calculator'],
 });`}</CodeBlock>
         <h3 className="text-xl font-bold text-[#fafafa] mt-8 mb-4">Built-in Tools</h3>
-        <div className="grid grid-cols-2 gap-2 text-sm">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
           {[
             'web_search',
-            'read_url',
+            'web_scrape',
+            'http',
             'calculator',
-            'code_execute',
-            'file_read',
-            'file_write',
-            'json_parse',
-            'base64_encode',
+            'filesystem',
+            'exec',
+            'json',
+            'base64',
+            'hash',
+            'regex',
+            'datetime',
+            'uuid',
+            'random',
+            'sleep',
+            'sql_query',
+            'vector_search',
+            'email',
+            'github',
+            'image_analyze',
+            'image_generate',
+            'audio_transcribe',
+            'audio_generate',
           ].map((t) => (
             <div
               key={t}
@@ -619,9 +648,13 @@ const result = await reviewSwarm.run({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             { name: 'Parallel', desc: 'All agents work simultaneously', icon: '⚡' },
-            { name: 'Sequential', desc: 'Agents work one after another', icon: '→' },
-            { name: 'Hierarchical', desc: 'Manager delegates to workers', icon: '👑' },
-            { name: 'Debate', desc: 'Agents discuss until consensus', icon: '💬' },
+            { name: 'Round-Robin', desc: 'Rotate task assignment among agents', icon: '🔄' },
+            { name: 'Hierarchical', desc: 'Supervisor delegates to workers', icon: '👑' },
+            { name: 'Debate', desc: 'Agents argue, moderator synthesizes', icon: '💬' },
+            { name: 'Consensus', desc: 'Agents vote and reach agreement', icon: '🗳️' },
+            { name: 'Auction', desc: 'Agents bid for tasks, winner executes', icon: '🔨' },
+            { name: 'Pipeline', desc: 'Sequential stages with gates', icon: '📊' },
+            { name: 'Negotiation', desc: 'Agents negotiate to find solution', icon: '🤝' },
           ].map((pattern) => (
             <div key={pattern.name} className="p-4 bg-[#111] border border-[#222] rounded-lg">
               <div className="text-2xl mb-2">{pattern.icon}</div>
@@ -669,10 +702,10 @@ const decision = await debateSwarm.run({
             { name: 'OpenAI', desc: 'GPT-4, o1, o3', status: '✓', done: true },
             { name: 'Anthropic', desc: 'Claude 3/4', status: '✓', done: true },
             { name: 'Google', desc: 'Gemini', status: '✓', done: true },
+            { name: 'Azure', desc: 'Azure OpenAI', status: '✓', done: true },
+            { name: 'Bedrock', desc: 'AWS Bedrock', status: '✓', done: true },
             { name: 'Groq', desc: 'Fast inference', status: 'soon', done: false },
-            { name: 'Together', desc: 'Open models', status: 'soon', done: false },
             { name: 'Mistral', desc: 'Mistral/Mixtral', status: 'soon', done: false },
-            { name: 'xAI', desc: 'Grok', status: 'soon', done: false },
           ].map((p) => (
             <div
               key={p.name}
@@ -688,10 +721,12 @@ const decision = await debateSwarm.run({
         </div>
         <CodeBlock language="typescript">{`// Use any model with a simple prefix
 const agent = new Agent({
-  model: 'ollama/llama3.2',      // Local Ollama
-  // model: 'openai/gpt-4o',     // OpenAI
-  // model: 'anthropic/claude-3-opus', // Anthropic
-  // model: 'google/gemini-pro', // Google
+  model: 'ollama/llama3.2',           // Local Ollama
+  // model: 'openai/gpt-4o',          // OpenAI
+  // model: 'anthropic/claude-sonnet-4-20250514', // Anthropic
+  // model: 'google/gemini-2.0-flash', // Google
+  // model: 'azure/gpt-4o',           // Azure OpenAI
+  // model: 'bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0', // AWS Bedrock
 });`}</CodeBlock>
       </>
     ),
@@ -825,8 +860,10 @@ const agent = new Agent({
         <div className="grid grid-cols-2 gap-4 mb-6">
           {[
             { name: 'PostgreSQL + pgvector', recommended: true },
+            { name: 'SQLite', recommended: false },
+            { name: 'MongoDB', recommended: false },
+            { name: 'Redis', recommended: false },
             { name: 'Qdrant', recommended: false },
-            { name: 'Pinecone', recommended: false },
             { name: 'In-Memory', recommended: false },
           ].map((v) => (
             <div
@@ -902,12 +939,13 @@ console.log('Sum:', sum);
         <h2 className="text-3xl font-bold text-[#fafafa] mb-4">Security Model</h2>
         <div className="space-y-4">
           {[
-            { feature: 'Process Isolation', docker: '✓', wasm: '✓' },
-            { feature: 'Memory Limits', docker: '✓', wasm: '✓' },
-            { feature: 'CPU Limits', docker: '✓', wasm: '✓' },
-            { feature: 'Network Isolation', docker: '✓', wasm: '✓' },
-            { feature: 'Filesystem Access', docker: 'Configurable', wasm: 'None' },
-            { feature: 'System Calls', docker: 'Filtered', wasm: 'Blocked' },
+            { feature: 'Process Isolation', docker: '✓', wasm: '✓', native: '✗' },
+            { feature: 'Memory Limits', docker: '✓', wasm: '✓', native: '✗' },
+            { feature: 'CPU Limits', docker: '✓', wasm: '✓', native: '✗' },
+            { feature: 'Network Isolation', docker: '✓', wasm: '✓', native: '✗' },
+            { feature: 'Filesystem Access', docker: 'Configurable', wasm: 'None', native: 'Full' },
+            { feature: 'System Calls', docker: 'Filtered', wasm: 'Blocked', native: 'Full' },
+            { feature: 'Startup Speed', docker: 'Slow', wasm: 'Fast', native: 'Instant' },
           ].map((row) => (
             <div
               key={row.feature}
@@ -915,12 +953,16 @@ console.log('Sum:', sum);
             >
               <span className="text-[#fafafa]">{row.feature}</span>
               <div className="flex gap-4">
-                <span className="text-[#00ff88] w-24 text-center">Docker: {row.docker}</span>
-                <span className="text-[#00aaff] w-24 text-center">WASM: {row.wasm}</span>
+                <span className="text-[#00ff88] w-20 text-center">Docker: {row.docker}</span>
+                <span className="text-[#00aaff] w-20 text-center">WASM: {row.wasm}</span>
+                <span className="text-[#ffaa00] w-20 text-center">Native: {row.native}</span>
               </div>
             </div>
           ))}
         </div>
+        <Callout type="warning">
+          Native executor has no isolation - only use for trusted code in development.
+        </Callout>
       </>
     ),
     mcp: (
@@ -1032,11 +1074,19 @@ server.start();`}</CodeBlock>
           {[
             { method: 'GET', path: '/api/agents', desc: 'List all agents' },
             { method: 'POST', path: '/api/agents', desc: 'Create agent' },
-            { method: 'POST', path: '/api/agents/:id/run', desc: 'Run agent' },
+            { method: 'GET', path: '/api/agents/:id', desc: 'Get agent details' },
             { method: 'GET', path: '/api/runs', desc: 'List runs' },
             { method: 'GET', path: '/api/runs/:id', desc: 'Get run details' },
+            { method: 'GET', path: '/api/swarms', desc: 'List swarms' },
+            { method: 'POST', path: '/api/swarms/:id/run', desc: 'Execute swarm' },
             { method: 'GET', path: '/api/workflows', desc: 'List workflows' },
             { method: 'POST', path: '/api/workflows/:id/run', desc: 'Execute workflow' },
+            { method: 'GET', path: '/api/models', desc: 'List available models' },
+            { method: 'POST', path: '/api/models/pull', desc: 'Pull Ollama model' },
+            { method: 'GET', path: '/api/memory', desc: 'Query memory' },
+            { method: 'GET', path: '/api/health', desc: 'Health check' },
+            { method: 'POST', path: '/api/sandbox', desc: 'Execute code' },
+            { method: 'GET', path: '/api/logs', desc: 'Get logs' },
           ].map((ep) => (
             <div
               key={`${ep.method}-${ep.path}`}
