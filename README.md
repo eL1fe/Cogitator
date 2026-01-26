@@ -270,6 +270,7 @@ Cogitator is a modular monorepo. Install only what you need:
 | [@cogitator-ai/neuro-symbolic](https://www.npmjs.com/package/@cogitator-ai/neuro-symbolic) | Neuro-symbolic reasoning with SAT/SMT                      | [![npm](https://img.shields.io/npm/v/@cogitator-ai/neuro-symbolic.svg)](https://www.npmjs.com/package/@cogitator-ai/neuro-symbolic) |
 | [@cogitator-ai/dashboard](https://www.npmjs.com/package/@cogitator-ai/dashboard)           | Real-time observability dashboard                          | [![npm](https://img.shields.io/npm/v/@cogitator-ai/dashboard.svg)](https://www.npmjs.com/package/@cogitator-ai/dashboard)           |
 | [@cogitator-ai/next](https://www.npmjs.com/package/@cogitator-ai/next)                     | Next.js App Router integration                             | [![npm](https://img.shields.io/npm/v/@cogitator-ai/next.svg)](https://www.npmjs.com/package/@cogitator-ai/next)                     |
+| [@cogitator-ai/ai-sdk](https://www.npmjs.com/package/@cogitator-ai/ai-sdk)                 | Vercel AI SDK adapter (bidirectional)                      | [![npm](https://img.shields.io/npm/v/@cogitator-ai/ai-sdk.svg)](https://www.npmjs.com/package/@cogitator-ai/ai-sdk)                 |
 
 ---
 
@@ -342,6 +343,46 @@ export function Chat() {
 - **Tool Calls** — Stream tool execution in real-time (`tool-call-start/delta/end`)
 - **Error Handling** — Graceful error events with stream cleanup
 - **Auth Hooks** — `beforeRun`/`afterRun` for authentication and logging
+
+---
+
+### Vercel AI SDK Integration
+
+Use Cogitator agents with AI SDK's `generateText`/`streamText`, or use any AI SDK model in Cogitator:
+
+```typescript
+import { generateText, streamText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { Cogitator, Agent } from '@cogitator-ai/core';
+import { cogitatorModel, fromAISDK, toAISDKTool } from '@cogitator-ai/ai-sdk';
+
+// Use Cogitator agent as AI SDK model
+const cog = new Cogitator();
+const researcher = new Agent({
+  name: 'researcher',
+  model: 'gpt-4o',
+  instructions: 'You are a research assistant.',
+  tools: [webSearch],
+});
+
+const result = await generateText({
+  model: cogitatorModel(cog, researcher),
+  prompt: 'Research AI developments in 2025',
+});
+
+// Use AI SDK model in Cogitator
+const backend = fromAISDK(openai('gpt-4o'));
+
+// Convert tools between formats
+const aiTool = toAISDKTool(cogitatorTool);
+```
+
+**Features:**
+
+- **Bidirectional** — Cogitator → AI SDK and AI SDK → Cogitator
+- **Streaming** — Full streaming support with tool calls
+- **Tool Conversion** — Seamless tool format conversion
+- **useChat Compatible** — Works with `@ai-sdk/react` hooks
 
 ---
 
