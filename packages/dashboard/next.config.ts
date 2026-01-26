@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
     'mongodb',
     'nodemailer',
     'isolated-vm',
+    '@aws-sdk/client-bedrock-runtime',
+    '@qdrant/js-client-rest',
+    'better-sqlite3',
   ],
   experimental: {
     serverActions: {
