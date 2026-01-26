@@ -140,7 +140,7 @@ export function createChatHandler(
       }
     };
 
-    runStream();
+    void runStream();
 
     return new Response(readable, { headers: SSE_HEADERS });
   };

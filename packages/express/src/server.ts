@@ -1,5 +1,5 @@
 import { Router, json } from 'express';
-import type { CogitatorServerConfig, RouteContext, CorsConfig, RateLimitConfig } from './types.js';
+import type { CogitatorServerConfig, RouteContext } from './types.js';
 import {
   createAuthMiddleware,
   createRateLimitMiddleware,
@@ -39,14 +39,15 @@ export class CogitatorServer {
     this.workflows = options.workflows || {};
     this.swarms = options.swarms || {};
 
+    const cfg = options.config ?? {};
     this.config = {
       ...DEFAULT_CONFIG,
-      auth: options.config?.auth,
-      rateLimit: options.config?.rateLimit as RateLimitConfig,
-      cors: options.config?.cors as CorsConfig,
-      swagger: options.config?.swagger || {},
-      websocket: options.config?.websocket || {},
-      ...options.config,
+      ...cfg,
+      auth: cfg.auth,
+      rateLimit: cfg.rateLimit,
+      cors: cfg.cors,
+      swagger: cfg.swagger ?? {},
+      websocket: cfg.websocket ?? {},
     } as Required<NonNullable<CogitatorServerConfig['config']>>;
   }
 

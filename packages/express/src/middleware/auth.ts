@@ -17,7 +17,7 @@ export function createAuthMiddleware(authFn?: AuthFunction) {
       const auth = await authFn(req);
       req.cogitator.auth = auth;
       next();
-    } catch (error) {
+    } catch {
       res.status(401).json({
         error: {
           message: 'Unauthorized',
