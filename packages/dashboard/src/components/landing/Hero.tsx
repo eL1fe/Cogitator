@@ -51,6 +51,23 @@ export function Hero() {
           Self-hosted. <span className="text-[#fafafa]">Production-grade.</span> TypeScript-native.
         </p>
 
+        <motion.a
+          href="https://www.producthunt.com/products/cogitator?utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-cogitator"
+          target="_blank"
+          rel="noopener noreferrer"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="mb-6"
+        >
+          <img
+            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1068317&theme=dark&t=1769429113383"
+            alt="Cogitator - Self-hosted runtime for production AI agents | Product Hunt"
+            width="250"
+            height="54"
+          />
+        </motion.a>
+
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <div className="relative">
             <motion.button
