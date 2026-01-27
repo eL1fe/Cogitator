@@ -1,0 +1,67 @@
+{
+  "name": "@cogitator-ai/koa",
+  "version": "0.1.0",
+  "description": "Koa server adapter for Cogitator AI runtime",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@cogitator-ai/core": "workspace:*",
+    "@cogitator-ai/types": "workspace:*",
+    "@cogitator-ai/server-shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "koa": ">=2.15.0",
+    "@koa/router": ">=12.0.0"
+  },
+  "optionalDependencies": {
+    "@cogitator-ai/workflows": "workspace:*",
+    "@cogitator-ai/swarms": "workspace:*",
+    "ws": "^8.0.0"
+  },
+  "devDependencies": {
+    "@cogitator-ai/workflows": "workspace:*",
+    "@cogitator-ai/swarms": "workspace:*",
+    "@types/koa": "^2.15.0",
+    "@types/koa__router": "^12.0.0",
+    "@types/ws": "^8.5.0",
+    "koa": "^2.15.0",
+    "@koa/router": "^13.1.0",
+    "typescript": "^5.6.0",
+    "ws": "^8.18.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cogitator-ai/Cogitator-AI.git",
+    "directory": "packages/koa"
+  },
+  "license": "MIT",
+  "keywords": [
+    "cogitator",
+    "ai",
+    "agents",
+    "koa",
+    "server",
+    "api",
+    "streaming",
+    "sse",
+    "websocket",
+    "llm",
+    "middleware"
+  ]
+}

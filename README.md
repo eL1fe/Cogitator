@@ -274,6 +274,7 @@ Cogitator is a modular monorepo. Install only what you need:
 | [@cogitator-ai/express](https://www.npmjs.com/package/@cogitator-ai/express)               | Express.js REST API server                                 | [![npm](https://img.shields.io/npm/v/@cogitator-ai/express.svg)](https://www.npmjs.com/package/@cogitator-ai/express)               |
 | [@cogitator-ai/fastify](https://www.npmjs.com/package/@cogitator-ai/fastify)               | Fastify REST API server                                    | [![npm](https://img.shields.io/npm/v/@cogitator-ai/fastify.svg)](https://www.npmjs.com/package/@cogitator-ai/fastify)               |
 | [@cogitator-ai/hono](https://www.npmjs.com/package/@cogitator-ai/hono)                     | Hono multi-runtime server (Edge, Bun, Deno, Node.js)       | [![npm](https://img.shields.io/npm/v/@cogitator-ai/hono.svg)](https://www.npmjs.com/package/@cogitator-ai/hono)                     |
+| [@cogitator-ai/koa](https://www.npmjs.com/package/@cogitator-ai/koa)                       | Koa middleware-based server                                | [![npm](https://img.shields.io/npm/v/@cogitator-ai/koa.svg)](https://www.npmjs.com/package/@cogitator-ai/koa)                       |
 
 ---
 
@@ -538,6 +539,50 @@ export default app; // works on any runtime
 - **Typed Context** — Full type safety via Hono's `Variables` system
 - **Zero Dependencies** — No extra middleware packages needed
 - **Edge-Ready** — Deploy to Cloudflare Workers or Vercel Edge Functions
+
+---
+
+### Koa Integration
+
+Use Cogitator with Koa's middleware-first architecture:
+
+```bash
+pnpm add @cogitator-ai/koa @cogitator-ai/core koa @koa/router
+```
+
+```typescript
+import Koa from 'koa';
+import { Cogitator, Agent } from '@cogitator-ai/core';
+import { cogitatorApp } from '@cogitator-ai/koa';
+
+const cogitator = new Cogitator({
+  /* ... */
+});
+const chatAgent = new Agent({ name: 'chat', instructions: 'You are helpful.' });
+
+const app = new Koa();
+const router = cogitatorApp({
+  cogitator,
+  agents: { chat: chatAgent },
+  auth: async (ctx) => {
+    const token = ctx.get('authorization');
+    return { userId: 'user-123' };
+  },
+});
+
+app.use(router.routes());
+app.use(router.allowedMethods());
+
+app.listen(3000);
+```
+
+**Same endpoints as Express/Fastify/Hono**, plus Koa-specific features:
+
+- **Middleware-First** — Idiomatic Koa async middleware chain
+- **Context-Based** — Uses `ctx.state` for typed request state
+- **Built-in Body Parser** — No extra dependency for JSON parsing
+- **SSE Streaming** — Via `ctx.respond = false` for raw response control
+- **WebSocket** — Optional `ws` integration
 
 ---
 
