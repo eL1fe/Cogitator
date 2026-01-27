@@ -54,7 +54,7 @@
     "prettier": "^3.8.1",
     "tsx": "^4.21.0",
     "turbo": "^2.7.5",
-    "typescript-eslint": "^8.53.1",
+    "typescript-eslint": "^8.54.0",
     "vitest": "^4.0.18"
   },
   "packageManager": "pnpm@8.12.0",
